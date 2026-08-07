@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0.0",
+  "status": "READY_FOR_TRADINGVIEW_RUNS",
+  "created_at": "2026-08-06",
+  "research_script": "pine/research/ES_MES_ORB_Attribution_Strategy_v1_2.pine",
+  "governance": {
+    "no_promotion_without_holdout": true,
+    "implementation_is_not_proof": true,
+    "separate_result_types": [
+      "historical_backtest",
+      "replay",
+      "paper_forward",
+      "funded_evaluation",
+      "live"
+    ],
+    "required_run_metadata": [
+      "source_commit",
+      "symbol",
+      "contract",
+      "timeframe",
+      "timezone",
+      "date_range",
+      "commission",
+      "slippage",
+      "quantity",
+      "strategy_properties",
+      "entry_mode",
+      "orb_clock",
+      "filters",
+      "stop_method",
+      "target_r"
+    ]
+  },
+  "baseline": {
+    "name": "clean_midpoint_reference",
+    "symbol": "CME_MINI:ES1!",
+    "timeframe": "15",
+    "orb_start": "0800",
+    "orb_end": "0815",
+    "trade_start": "0930",
+    "trade_end": "1030",
+    "force_flat": "1100",
+    "entry_mode": "Midpoint",
+    "retest_timeout_bars": 60,
+    "invalidate_on_opposite_close": true,
+    "displacement_mode": "Off",
+    "use_vwap": false,
+    "use_ema": false,
+    "use_range_filter": false,
+    "stop_method": "Opposite",
+    "target_r": 2.0,
+    "maximum_stop_points": 40.0,
+    "max_trades_per_day": 1,
+    "management": "single_stop_single_target",
+    "note": "This is an attribution baseline, not the previous V6 configuration and not a production recommendation."
+  },
+  "experiments": [
+    {
+      "id": "P7-E01-ENTRY-MODE",
+      "priority": 1,
+      "question": "Does a retest requirement improve expectancy and drawdown versus immediate breakout, and does midpoint outperform boundary retest?",
+      "locked_fields": [
+        "symbol",
+        "timeframe",
+        "date_range",
+        "orb_clock",
+        "trade_window",
+        "filters",
+        "stop_method",
+        "target_r",
+        "quantity",
+        "commission",
+        "slippage"
+      ],
+      "variants": [
+        {"name": "immediate_breakout", "entry_mode": "Breakout"},
+        {"name": "boundary_retest", "entry_mode": "Boundary"},
+        {"name": "midpoint_retest", "entry_mode": "Midpoint"}
+      ],
+      "primary_metrics": [
+        "profit_factor",
+        "expectancy",
+        "max_drawdown",
+        "worst_losing_sequence",
+        "trade_count"
+      ],
+      "decision_rule": "Keep a retest variant only if expectancy or drawdown improves without relying on a dramatically smaller sample."
+    },
+    {
+      "id": "P7-E02-ORB-CLOCK",
+      "priority": 2,
+      "question": "Which ORB clock performs best under the same entry and risk model?",
+      "locked_fields": [
+        "symbol",
+        "timeframe",
+        "date_range",
+        "entry_mode",
+        "filters",
+        "stop_method",
+        "target_r",
+        "quantity",
+        "commission",
+        "slippage"
+      ],
+      "variants": [
+        {"name": "premarket_0800_0815", "orb_start": "0800", "orb_end": "0815", "trade_start": "0930"},
+        {"name": "cash_open_0930_0945", "orb_start": "0930", "orb_end": "0945", "trade_start": "0945"},
+        {"name": "cash_open_0930_1000", "orb_start": "0930", "orb_end": "1000", "trade_start": "1000"}
+      ],
+      "decision_rule": "Do not choose a clock from net profit alone; require stable expectancy, drawdown, and holdout behavior."
+    },
+    {
+      "id": "P7-E03-VWAP",
+      "priority": 3,
+      "question": "Does directional VWAP alignment add edge to the frozen baseline?",
+      "variants": [
+        {"name": "vwap_off", "use_vwap": false},
+        {"name": "vwap_on", "use_vwap": true}
+      ],
+      "decision_rule": "Keep only if expectancy or drawdown stability improves after accounting for trade-count reduction."
+    },
+    {
+      "id": "P7-E04-EMA",
+      "priority": 4,
+      "question": "Does a single fixed EMA directional rule add edge?",
+      "variants": [
+        {"name": "ema_off", "use_ema": false},
+        {"name": "ema_50_on", "use_ema": true, "ema_length": 50}
+      ],
+      "decision_rule": "No EMA length optimization until the simple off/on test is complete."
+    },
+    {
+      "id": "P7-E05-DISPLACEMENT",
+      "priority": 5,
+      "question": "Does displacement filtering improve trade quality?",
+      "variants": [
+        {"name": "displacement_off", "displacement_mode": "Off"},
+        {"name": "orb_body", "displacement_mode": "ORB Body", "minimum_body_percent": 0.35},
+        {"name": "atr_body", "displacement_mode": "ATR", "minimum_body_atr": 0.75},
+        {"name": "either_gate", "displacement_mode": "Either", "minimum_body_percent": 0.35, "minimum_body_atr": 0.75}
+      ],
+      "decision_rule": "Run off/on attribution before threshold sensitivity testing."
+    },
+    {
+      "id": "P7-E06-RANGE-FILTER",
+      "priority": 6,
+      "question": "Does the 5–50 point ORB range gate improve stability?",
+      "variants": [
+        {"name": "range_filter_off", "use_range_filter": false},
+        {"name": "range_filter_5_50", "use_range_filter": true, "minimum_range_points": 5.0, "maximum_range_points": 50.0}
+      ],
+      "decision_rule": "Reject if improvement is in-sample only or comes from deleting most trades."
+    }
+  ],
+  "required_outputs": [
+    "configuration.json",
+    "strategy_tester_overview.csv",
+    "list_of_trades.csv",
+    "performance_summary.json",
+    "equity_curve.csv",
+    "drawdown_curve.csv",
+    "monthly_results.csv",
+    "decision.md"
+  ]
+}
