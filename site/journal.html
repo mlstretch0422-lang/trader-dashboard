@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#060a11" />
   <title>Journal Intelligence — Signal Bridge</title>
-  <meta name="description" content="Signal Bridge Journal Intelligence: a private-first capture pipeline for trade notes, screenshots, results, and research review." />
+  <meta name="description" content="Signal Bridge Journal Intelligence connects Discord capture, trade records, screenshots, signals, strategy context, and review." />
   <link rel="icon" href="assets/brand/signal-bridge-favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="app.css" />
   <link rel="stylesheet" href="journal.css" />
@@ -21,10 +21,10 @@
         <a href="index.html">Home</a>
         <a href="signals.html">Signals</a>
         <a href="strategies.html">Strategies</a>
+        <a href="indicators.html">Indicators</a>
         <a class="active" href="journal.html">Journal</a>
         <a href="trade-bible.html">Trade Bible</a>
         <a href="evidence.html">Evidence</a>
-        <a href="dashboard.html">Dashboard</a>
       </nav>
       <span class="beta-pill">Premium OS · Beta</span>
     </div>
@@ -33,14 +33,14 @@
   <main>
     <section class="shell page-hero journal-hero">
       <div class="breadcrumb"><a href="index.html">Signal Bridge</a> / Journal Intelligence</div>
-      <span class="eyebrow" style="margin-top:25px">Capture → Review → Learn</span>
+      <span class="eyebrow" style="margin-top:25px">Capture → Structure → Review → Learn</span>
       <h1><span class="gradient-text">Turn every trade into usable data.</span></h1>
-      <p>Journal Intelligence is the bridge between daily execution and long-term research. Discord notes, screenshots, signal events, results, and later AI normalization can become one durable trade-learning record instead of disappearing into chat history or camera roll folders.</p>
+      <p>Journal Intelligence connects fast Discord notes, screenshots, signal events, strategy versions, results, and later normalization into one durable trade record. The goal is a journal that becomes more useful over time instead of disappearing into chat history or camera-roll folders.</p>
       <div class="hero-kicker">
         <span class="chip green">Discord capture live</span>
-        <span class="chip blue">Signal-link ready</span>
+        <span class="chip blue">Durable D1 storage</span>
         <span class="chip yellow">Private first</span>
-        <span class="chip purple">AI normalization next</span>
+        <span class="chip purple">Member workspaces next</span>
       </div>
     </section>
 
@@ -48,29 +48,42 @@
       <div class="journal-status-card"><span>Journal Storage</span><strong id="journalStorage">Checking…</strong><small>D1 durable journal ledger</small></div>
       <div class="journal-status-card"><span>Capture API</span><strong id="journalIngest">Checking…</strong><small>Authenticated direct ingestion</small></div>
       <div class="journal-status-card"><span>Discord Capture</span><strong id="discordCapture">Checking…</strong><small>Signed interaction endpoint</small></div>
-      <div class="journal-status-card"><span>Published Entries</span><strong id="journalCount">—</strong><small>Private entries never appear here</small></div>
+      <div class="journal-status-card"><span>Published Entries</span><strong id="journalCount">—</strong><small>Reviewed public entries</small></div>
       <div class="journal-status-card"><span>Last Refresh</span><strong id="journalRefresh">—</strong><small>Auto-refreshes every 45 seconds</small></div>
     </section>
 
     <section class="shell section">
       <div class="section-head">
         <div><span class="eyebrow">Capture Architecture</span><h2>Write once. Reuse everywhere.</h2></div>
-        <p>The live workflow is intentionally simple enough to fit real trading: journal in Discord, preserve the raw note privately, normalize it later, connect it to Signal Bridge events, and only publish educational material after review.</p>
+        <p>The live workflow is intentionally fast enough for an actual trading morning: journal in Discord, preserve the original note, structure it later, connect it to Signal Bridge events, and turn it into review data.</p>
       </div>
       <div class="journal-flow">
-        <div class="journal-flow-step"><span>01</span><b>Discord journal post</b><small>Fast, short-form note while the trade is fresh.</small></div>
+        <div class="journal-flow-step"><span>01</span><b>Discord journal post</b><small>Fast note while the trade and decision are still fresh.</small></div>
         <div class="journal-flow-step"><span>02</span><b>Private capture</b><small>Signed Discord interaction stores the raw note and provenance in D1.</small></div>
-        <div class="journal-flow-step"><span>03</span><b>Normalize</b><small>Symbol, direction, setup, result, tags, screenshots, and signal link become structured fields.</small></div>
-        <div class="journal-flow-step"><span>04</span><b>Review</b><small>Separate what actually happened from hindsight and research interpretation.</small></div>
-        <div class="journal-flow-step"><span>05</span><b>Publish / research</b><small>Approved lessons can feed education, strategy evidence, and future testing.</small></div>
+        <div class="journal-flow-step"><span>03</span><b>Structure</b><small>Symbol, direction, setup, result, tags, screenshot, and signal link become fields.</small></div>
+        <div class="journal-flow-step"><span>04</span><b>Review</b><small>Compare what was seen, what was done, and how the trade actually developed.</small></div>
+        <div class="journal-flow-step"><span>05</span><b>Research</b><small>Patterns across entries can become strategy questions, education, and future tests.</small></div>
       </div>
-      <div class="privacy-callout"><strong>Private-first by design.</strong> Discord captures default to <code>PRIVATE</code> + <code>RAW</code>. The current public beta page reads only entries explicitly marked <code>PUBLISHED</code>, while the Worker restricts Discord capture to the configured application, server, and trade-journal channel.</div>
+      <div class="privacy-callout"><strong>Private-first by design.</strong> Discord captures currently default to <code>PRIVATE</code> + <code>RAW</code>. Public journal entries only appear after review and an explicit publish state.</div>
+    </section>
+
+    <section class="shell section">
+      <div class="section-head">
+        <div><span class="eyebrow">Signal Bridge Premium</span><h2>Your own private trading record inside the platform.</h2></div>
+        <p>The multi-user version turns the current capture pipeline into a member workspace. A Discord identity connects to one Signal Bridge account, and that account owns its journal records, screenshots, strategy versions, and signal links.</p>
+      </div>
+      <div class="grid-4">
+        <div class="card"><span class="chip green">Foundation live</span><h3>Discord-linked capture</h3><p>Journal directly from the community surface without opening a second app during the session.</p></div>
+        <div class="card"><span class="chip purple">Next</span><h3>Private member workspace</h3><p>Each member sees only their own raw journal inbox, reviewed entries, screenshots, stats, and research tags.</p></div>
+        <div class="card"><span class="chip purple">Next</span><h3>Signal + strategy linkage</h3><p>Connect a journal entry to the exact Signal Bridge event and strategy version that existed when the decision was made.</p></div>
+        <div class="card"><span class="chip purple">Next</span><h3>Personal intelligence</h3><p>Surface recurring setups, pass reasons, execution mistakes, R outcomes, and review themes from the member’s own history.</p></div>
+      </div>
     </section>
 
     <section class="shell section journal-section">
       <div class="section-head">
         <div><span class="eyebrow">Published Journal</span><h2>Reviewed trade-learning entries.</h2></div>
-        <p>This is the member-facing layer. It is deliberately different from the private capture inbox so a quick emotional post after a trade cannot accidentally become permanent educational copy.</p>
+        <p>This public layer can hold selected reviewed examples and lessons. Private member records remain inside the member workspace unless intentionally shared.</p>
       </div>
 
       <div class="journal-toolbar">
@@ -88,42 +101,31 @@
 
     <section class="shell section">
       <div class="section-head">
-        <div><span class="eyebrow">Entry Contract</span><h2>What the database is ready to remember.</h2></div>
-        <p>The schema is intentionally broader than a P&amp;L spreadsheet because the long-term goal is to connect execution, psychology, market context, strategy version, screenshots, and research findings.</p>
+        <div><span class="eyebrow">Member Record</span><h2>More than a P&amp;L spreadsheet.</h2></div>
+        <p>A useful trading record should preserve execution, strategy context, the original thought process, and the learning layer around it.</p>
       </div>
       <div class="field-grid">
         <div class="field-card"><b>Execution</b><span>Time · symbol · side · result · P&amp;L · R multiple</span></div>
-        <div class="field-card"><b>Strategy context</b><span>Strategy · setup · tags · linked Signal Bridge event</span></div>
-        <div class="field-card"><b>Raw record</b><span>Original journal text · source · source reference · screenshot URL</span></div>
-        <div class="field-card"><b>Learning layer</b><span>Normalized summary · review status · private/published visibility</span></div>
+        <div class="field-card"><b>Strategy context</b><span>Strategy · version · setup · tags · linked Signal Bridge event</span></div>
+        <div class="field-card"><b>Raw record</b><span>Original journal text · Discord provenance · screenshot / chart reference</span></div>
+        <div class="field-card"><b>Learning layer</b><span>Normalized summary · review status · recurring themes · private/shared state</span></div>
       </div>
     </section>
 
     <section class="shell section">
       <div class="section-head">
-        <div><span class="eyebrow">Archive Context</span><h2>Old evidence becomes part of the system too.</h2></div>
-        <p>The existing project archive already contains journal summaries and chart captures. They remain qualitative source material until reconciled into trade-level records.</p>
-      </div>
-      <div class="journal-gallery">
-        <figure><img src="assets/research/Tradezella-Summary-June-26-2026.png" alt="TradeZella journal summary capture" /><figcaption>Preserved TradeZella summary capture. Useful as historical context; not a substitute for reconciled fills and trade-level attribution.</figcaption></figure>
-        <figure><img src="assets/research/SPX500_2026-07-08_10-23-12.png" alt="Trading chart research capture" /><figcaption>Preserved chart capture. Future journal entries can link screenshots directly to setups, signals, and post-trade review.</figcaption></figure>
-      </div>
-    </section>
-
-    <section class="shell section">
-      <div class="section-head">
-        <div><span class="eyebrow">Live Capture Layer</span><h2>Discord is now the journal surface.</h2></div>
-        <p>Signal Bridge has two hosted capture paths in the configured trade-journal channel. Both preserve the original record privately; neither publishes anything to the website automatically.</p>
+        <div><span class="eyebrow">Live Capture Layer</span><h2>Discord is the fastest journal input.</h2></div>
+        <p>Signal Bridge currently has two hosted capture paths in the configured trade-journal channel. Both preserve the original record privately and feed the same durable journal ledger.</p>
       </div>
       <div class="grid-3">
         <div class="card"><span class="chip green">Live</span><h3>/journal</h3><p>Structured Discord capture for note, symbol, side, result, setup, strategy/version, P&amp;L, R multiple, and an optional chart attachment.</p></div>
         <div class="card"><span class="chip green">Live</span><h3>Capture to Journal</h3><p>Use the message context command on a normal Discord journal post to preserve the original text, message provenance, and first attachment without retyping it.</p></div>
-        <div class="card"><span class="chip purple">Next</span><h3>AI normalization</h3><p>Turn private raw records into structured summaries and recurring themes while preserving observed, derived, and unknown fields separately.</p></div>
+        <div class="card"><span class="chip purple">Next</span><h3>Normalization + review</h3><p>Turn private raw records into structured summaries, member statistics, recurring themes, and strategy research while keeping the original record intact.</p></div>
       </div>
     </section>
   </main>
 
-  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Journal Intelligence</strong><span>Capture the process. Preserve the evidence. Publish only what earns review.</span></div></footer>
+  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Journal Intelligence</strong><span>Capture once. Connect the record. Learn from the history.</span></div></footer>
 
   <script>
     const API = "https://signal-bridge-webhook.airy-iris.workers.dev";
@@ -160,7 +162,7 @@
     function renderEntries(entries) {
       count.textContent = String(entries.length);
       if (!entries.length) {
-        list.innerHTML = '<div class="journal-empty"><strong>No published journal entries yet.</strong><span>Private Discord capture is active. Raw entries stay off this public beta page until they are explicitly reviewed and published.</span></div>';
+        list.innerHTML = '<div class="journal-empty"><strong>No published journal entries yet.</strong><span>Discord capture is active. Reviewed entries can be published here when they are ready to become part of the shared learning library.</span></div>';
         return;
       }
 
