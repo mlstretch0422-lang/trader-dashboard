@@ -37,9 +37,9 @@ def main() -> int:
     if not SHAREABLE.exists():
         raise FileNotFoundError(f"Shareable dashboard was not generated: {SHAREABLE}")
 
-    # The premium site shell is now the public Pages entry point. This lets us grow
-    # native Trade Bible / evidence / library pages without rewriting the large
-    # research dashboard every time.
+    # The premium site shell is the public Pages entry point. Native pages can
+    # consume hosted Signal Bridge APIs while the large research dashboard stays
+    # available as a preserved member workspace.
     if not SITE_SOURCE.exists():
         raise FileNotFoundError(f"Premium site source is missing: {SITE_SOURCE}")
     copy_if_exists(SITE_SOURCE, SITE)
@@ -58,6 +58,8 @@ def main() -> int:
         SITE / "index.html",
         SITE / "trade-bible.html",
         SITE / "evidence.html",
+        SITE / "signals.html",
+        SITE / "signals.css",
         SITE / "dashboard.html",
         SITE / "app.css",
         SITE / "report.json",

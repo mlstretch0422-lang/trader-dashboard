@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#060a11" />
+  <title>Live Signals — Signal Bridge</title>
+  <meta name="description" content="Live Signal Bridge event history from TradingView through the hosted Worker." />
+  <link rel="icon" href="assets/brand/signal-bridge-favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="app.css" />
+  <link rel="stylesheet" href="signals.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="index.html">
+        <img src="assets/brand/signal-bridge-mark-blue.svg" alt="Signal Bridge" />
+        <span class="brand-copy"><strong>SIGNAL BRIDGE</strong><span>Trading OS</span></span>
+      </a>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a class="active" href="signals.html">Signals</a>
+        <a href="trade-bible.html">Trade Bible</a>
+        <a href="evidence.html">Evidence</a>
+        <a href="dashboard.html">Dashboard</a>
+      </nav>
+      <span class="beta-pill">Premium OS · Beta</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="shell page-hero signal-hero">
+      <div class="breadcrumb"><a href="index.html">Signal Bridge</a> / Live Signals</div>
+      <span class="eyebrow">TradingView → Signal Bridge</span>
+      <h1><span class="gradient-text">Live Signal History.</span></h1>
+      <p>The durable event ledger for production Signal Bridge alerts. Events originate from TradingView, pass through the hosted Worker, route to Discord, and are stored here for review. This is event history — not trade authorization and not a claim of strategy profitability.</p>
+    </section>
+
+    <section class="shell signal-status-grid" aria-label="Signal system status">
+      <div class="status-card">
+        <span>Hosted Worker</span>
+        <strong id="workerStatus">Checking…</strong>
+        <small id="workerDetail">Connecting to Signal Bridge</small>
+      </div>
+      <div class="status-card">
+        <span>History Storage</span>
+        <strong id="storageStatus">Checking…</strong>
+        <small>D1 durable event ledger</small>
+      </div>
+      <div class="status-card">
+        <span>Visible Events</span>
+        <strong id="eventCount">—</strong>
+        <small>TEST events hidden by default</small>
+      </div>
+      <div class="status-card">
+        <span>Last Refresh</span>
+        <strong id="lastRefresh">—</strong>
+        <small>Auto-refreshes every 30 seconds</small>
+      </div>
+    </section>
+
+    <section class="shell section signal-section">
+      <div class="section-head">
+        <div><span class="eyebrow">Event Ledger</span><h2>Recent production events.</h2></div>
+        <p>Use the filters to inspect direction and event type. The default view excludes authenticated TEST events so infrastructure checks do not pollute the trading record.</p>
+      </div>
+
+      <div class="signal-toolbar">
+        <label>
+          <span>Side</span>
+          <select id="sideFilter">
+            <option value="">All sides</option>
+            <option value="LONG">Long</option>
+            <option value="SHORT">Short</option>
+            <option value="WAIT">Wait</option>
+          </select>
+        </label>
+        <label>
+          <span>Event</span>
+          <select id="eventFilter">
+            <option value="">All events</option>
+            <option value="ENTRY">Entry</option>
+            <option value="EXIT">Exit</option>
+            <option value="STOP">Stop</option>
+            <option value="TARGET">Target</option>
+            <option value="ALERT">Alert</option>
+          </select>
+        </label>
+        <button class="refresh-btn" id="refreshButton" type="button">Refresh now</button>
+      </div>
+
+      <div id="signalNotice" class="notice signal-notice" hidden></div>
+      <div id="signalList" class="signal-list" aria-live="polite">
+        <div class="signal-empty">Loading Signal Bridge history…</div>
+      </div>
+    </section>
+
+    <section class="shell section">
+      <div class="section-head">
+        <div><span class="eyebrow">Evidence Boundary</span><h2>What this page proves — and what it does not.</h2></div>
+        <p>Infrastructure evidence and strategy evidence stay separate.</p>
+      </div>
+      <div class="grid-3">
+        <div class="card"><span class="chip green">Infrastructure</span><h3>Event delivery</h3><p>A stored event shows the hosted Signal Bridge received and normalized an alert. Discord delivery is handled by the same Worker path.</p></div>
+        <div class="card"><span class="chip blue">Provenance</span><h3>Traceable history</h3><p>Each row receives a unique event ID plus Worker receive time, TradingView alert time when supplied, symbol, side, event type, strategy label, and note.</p></div>
+        <div class="card"><span class="chip yellow">Research</span><h3>Not strategy proof</h3><p>Frequency or outcome of these alerts does not by itself validate the ORB model, any confluence component, or profitability. Those claims remain inside the evidence process.</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Premium Trading OS</strong><span>Research, education, and tooling — not trade authorization.</span></div></footer>
+
+  <script>
+    const API = "https://signal-bridge-webhook.airy-iris.workers.dev";
+    const list = document.getElementById("signalList");
+    const notice = document.getElementById("signalNotice");
+    const workerStatus = document.getElementById("workerStatus");
+    const workerDetail = document.getElementById("workerDetail");
+    const storageStatus = document.getElementById("storageStatus");
+    const eventCount = document.getElementById("eventCount");
+    const lastRefresh = document.getElementById("lastRefresh");
+    const sideFilter = document.getElementById("sideFilter");
+    const eventFilter = document.getElementById("eventFilter");
+    const refreshButton = document.getElementById("refreshButton");
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatTime(value) {
+      if (!value) return "Time unavailable";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return new Intl.DateTimeFormat(undefined, {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
+      }).format(date);
+    }
+
+    function sideClass(side) {
+      if (side === "LONG") return "long";
+      if (side === "SHORT") return "short";
+      return "wait";
+    }
+
+    function renderEvents(events) {
+      eventCount.textContent = String(events.length);
+      if (!events.length) {
+        list.innerHTML = '<div class="signal-empty"><strong>No production events stored yet.</strong><span>The next real TradingView alert will appear here after history storage is connected.</span></div>';
+        return;
+      }
+
+      list.innerHTML = events.map((item) => `
+        <article class="signal-row">
+          <div class="signal-side ${sideClass(item.side)}">${escapeHtml(item.side)}</div>
+          <div class="signal-main">
+            <div class="signal-title">
+              <strong>${escapeHtml(item.symbol)}</strong>
+              <span class="chip blue">${escapeHtml(item.event)}</span>
+              <span class="signal-price">${item.price ? `@ ${escapeHtml(item.price)}` : ""}</span>
+            </div>
+            <p>${escapeHtml(item.note || "TradingView alert")}</p>
+            <div class="signal-meta">
+              <span>${escapeHtml(item.strategy)}</span>
+              <span>Received ${escapeHtml(formatTime(item.received_at))}</span>
+              ${item.alert_time ? `<span>Alert ${escapeHtml(item.alert_time)}</span>` : ""}
+            </div>
+          </div>
+          <code class="signal-id" title="Event ID">${escapeHtml(String(item.id).slice(0, 8))}</code>
+        </article>
+      `).join("");
+    }
+
+    async function checkHealth() {
+      try {
+        const response = await fetch(`${API}/health`, { cache: "no-store" });
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw new Error("health_failed");
+        workerStatus.textContent = "Online";
+        workerStatus.className = "good";
+        workerDetail.textContent = `Worker v${data.version || "—"}`;
+        storageStatus.textContent = data.history_storage ? "Connected" : "Not connected";
+        storageStatus.className = data.history_storage ? "good" : "warn";
+      } catch (error) {
+        workerStatus.textContent = "Unavailable";
+        workerStatus.className = "bad";
+        workerDetail.textContent = "Could not reach hosted Worker";
+        storageStatus.textContent = "Unknown";
+        storageStatus.className = "warn";
+      }
+    }
+
+    async function loadEvents() {
+      refreshButton.disabled = true;
+      notice.hidden = true;
+      const params = new URLSearchParams({ limit: "50" });
+      if (sideFilter.value) params.set("side", sideFilter.value);
+      if (eventFilter.value) params.set("event", eventFilter.value);
+
+      try {
+        const response = await fetch(`${API}/events?${params.toString()}`, { cache: "no-store" });
+        const data = await response.json();
+        if (!response.ok) {
+          if (data.error === "history_storage_not_configured") {
+            storageStatus.textContent = "Not connected";
+            storageStatus.className = "warn";
+            eventCount.textContent = "0";
+            list.innerHTML = '<div class="signal-empty"><strong>History backend is ready for its database binding.</strong><span>Alert delivery to Discord remains independent and can continue while D1 is being connected.</span></div>';
+            return;
+          }
+          throw new Error(data.error || "history_failed");
+        }
+        storageStatus.textContent = "Connected";
+        storageStatus.className = "good";
+        renderEvents(data.events || []);
+      } catch (error) {
+        notice.hidden = false;
+        notice.innerHTML = `<strong>History unavailable:</strong> ${escapeHtml(error.message || "Could not load events")}.`;
+        list.innerHTML = '<div class="signal-empty">Signal history could not be loaded right now.</div>';
+      } finally {
+        lastRefresh.textContent = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" }).format(new Date());
+        refreshButton.disabled = false;
+      }
+    }
+
+    async function refreshAll() {
+      await Promise.all([checkHealth(), loadEvents()]);
+    }
+
+    sideFilter.addEventListener("change", loadEvents);
+    eventFilter.addEventListener("change", loadEvents);
+    refreshButton.addEventListener("click", refreshAll);
+    refreshAll();
+    setInterval(refreshAll, 30000);
+  </script>
+</body>
+</html>

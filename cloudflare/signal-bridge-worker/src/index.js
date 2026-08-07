@@ -8,14 +8,22 @@ const TRADINGVIEW_IPS = new Set([
 const ALLOWED_SIDES = new Set(["LONG", "SHORT", "WAIT"]);
 const ALLOWED_EVENTS = new Set(["ENTRY", "EXIT", "STOP", "TARGET", "ALERT", "TEST"]);
 const MAX_BODY_BYTES = 16 * 1024;
+const MAX_HISTORY_LIMIT = 100;
 
-function responseJson(body, status = 200) {
+function responseJson(body, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
       "content-type": "application/json; charset=utf-8",
       "cache-control": "no-store",
+      ...extraHeaders,
     },
+  });
+}
+
+function publicJson(body, status = 200) {
+  return responseJson(body, status, {
+    "access-control-allow-origin": "*",
   });
 }
 
@@ -74,7 +82,7 @@ async function postDiscord(alert, env) {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        "user-agent": "SignalBridgeWorker/1.0",
+        "user-agent": "SignalBridgeWorker/1.1",
       },
       body: JSON.stringify(buildDiscordMessage(alert)),
     });
@@ -84,6 +92,95 @@ async function postDiscord(alert, env) {
     }
   } catch (error) {
     console.error(`Signal Bridge Worker: Discord delivery failed: ${error?.name || "Error"}`);
+  }
+}
+
+async function persistEvent(record, env) {
+  if (!env.DB) {
+    console.warn("Signal Bridge Worker: DB binding is not configured; event history skipped");
+    return;
+  }
+
+  try {
+    await env.DB.prepare(
+      `INSERT INTO signal_events (
+        id, received_at, alert_time, symbol, side, event, price, strategy, note, source
+      ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)`,
+    )
+      .bind(
+        record.id,
+        record.received_at,
+        record.time || null,
+        record.symbol,
+        record.side,
+        record.event,
+        record.price,
+        record.strategy,
+        record.note,
+        record.source,
+      )
+      .run();
+  } catch (error) {
+    console.error(`Signal Bridge Worker: event persistence failed: ${error?.message || "D1_ERROR"}`);
+  }
+}
+
+async function listEvents(url, env) {
+  if (!env.DB) {
+    return publicJson({ ok: false, error: "history_storage_not_configured" }, 503);
+  }
+
+  const rawLimit = Number.parseInt(url.searchParams.get("limit") || "25", 10);
+  const limit = Number.isFinite(rawLimit) ? Math.min(Math.max(rawLimit, 1), MAX_HISTORY_LIMIT) : 25;
+  const includeTests = url.searchParams.get("include_tests") === "1";
+  const requestedSide = safeText(url.searchParams.get("side"), "", 16).toUpperCase();
+  const requestedEvent = safeText(url.searchParams.get("event"), "", 24).replaceAll("_", " ").toUpperCase();
+
+  if (requestedSide && !ALLOWED_SIDES.has(requestedSide)) {
+    return publicJson({ ok: false, error: "invalid_side" }, 400);
+  }
+  if (requestedEvent && !ALLOWED_EVENTS.has(requestedEvent)) {
+    return publicJson({ ok: false, error: "invalid_event" }, 400);
+  }
+
+  const where = [];
+  const values = [];
+  if (!includeTests) {
+    where.push(`event <> ?${values.length + 1}`);
+    values.push("TEST");
+  }
+  if (requestedSide) {
+    where.push(`side = ?${values.length + 1}`);
+    values.push(requestedSide);
+  }
+  if (requestedEvent) {
+    where.push(`event = ?${values.length + 1}`);
+    values.push(requestedEvent);
+  }
+
+  values.push(limit);
+  const limitToken = `?${values.length}`;
+  const whereClause = where.length ? `WHERE ${where.join(" AND ")}` : "";
+  const query = `
+    SELECT id, received_at, alert_time, symbol, side, event, price, strategy, note, source
+    FROM signal_events
+    ${whereClause}
+    ORDER BY received_at DESC
+    LIMIT ${limitToken}
+  `;
+
+  try {
+    const result = await env.DB.prepare(query).bind(...values).run();
+    const events = Array.isArray(result.results) ? result.results : [];
+    return publicJson({
+      ok: true,
+      count: events.length,
+      include_tests: includeTests,
+      events,
+    });
+  } catch (error) {
+    console.error(`Signal Bridge Worker: history query failed: ${error?.message || "D1_ERROR"}`);
+    return publicJson({ ok: false, error: "history_query_failed" }, 500);
   }
 }
 
@@ -116,11 +213,16 @@ export default {
     const url = new URL(request.url);
 
     if (request.method === "GET" && url.pathname === "/health") {
-      return responseJson({
+      return publicJson({
         ok: true,
         service: "signal-bridge-worker",
-        version: "1.0.0",
+        version: "1.1.0",
+        history_storage: Boolean(env.DB),
       });
+    }
+
+    if (request.method === "GET" && url.pathname === "/events") {
+      return listEvents(url, env);
     }
 
     if (request.method !== "POST") {
@@ -158,12 +260,23 @@ export default {
       return responseJson({ ok: false, error: reason }, status);
     }
 
-    ctx.waitUntil(postDiscord(alert, env));
+    const record = {
+      id: crypto.randomUUID(),
+      received_at: new Date().toISOString(),
+      source: isTradingViewRoute ? "tradingview" : "authenticated-test",
+      ...alert,
+    };
+
+    ctx.waitUntil(Promise.allSettled([
+      postDiscord(alert, env),
+      persistEvent(record, env),
+    ]));
 
     return responseJson(
       {
         ok: true,
         accepted: true,
+        event_id: record.id,
         alert: {
           symbol: alert.symbol,
           side: alert.side,
