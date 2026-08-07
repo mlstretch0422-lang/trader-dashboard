@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#060a11" />
   <title>Strategy Playbook — Signal Bridge</title>
-  <meta name="description" content="Signal Bridge strategy playbook: Mason ORB, opening-range models, liquidity and price-action frameworks, confluence roles, and historical research lineage." />
+  <meta name="description" content="Signal Bridge strategy playbook: setup families, liquidity and price-action frameworks, confluence roles, entry logic, invalidation, targeting, and strategy-building structure." />
   <link rel="icon" href="assets/brand/signal-bridge-favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="app.css" />
   <link rel="stylesheet" href="strategy.css" />
@@ -14,7 +14,7 @@
 <body>
   <header class="topbar"><div class="shell topbar-inner">
     <a class="brand" href="index.html"><img src="assets/brand/signal-bridge-mark-blue.svg" alt="Signal Bridge" /><span class="brand-copy"><strong>SIGNAL BRIDGE</strong><span>Trading OS</span></span></a>
-    <nav class="nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="signals.html">Signals</a><a class="active" href="strategies.html">Strategies</a><a href="indicators.html">Indicators</a><a href="journal.html">Journal</a><a href="trade-bible.html">Trade Bible</a><a href="evidence.html">Evidence</a></nav>
+    <nav class="nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="signals.html">Signals</a><a class="active" href="strategies.html">Strategies</a><a href="indicators.html">Indicators</a><a href="journal.html">Journal</a><a href="mason.html">Mason</a></nav>
     <span class="beta-pill">Premium OS · Beta</span>
   </div></header>
 
@@ -22,78 +22,62 @@
     <section class="shell page-hero research-hero">
       <div class="breadcrumb"><a href="index.html">Signal Bridge</a> / Strategy Playbook</div>
       <span class="eyebrow" style="margin-top:25px">Setups · Frameworks · Confluences</span>
-      <h1><span class="gradient-text">What we trade, what we study, and what each piece is for.</span></h1>
-      <p>This library is the trading playbook, not a Pine file index. It starts with the current Mason ORB model, then explains the setup families and market concepts used around it in plain English, including liquidity, ICT-style price-action concepts, session structure, FVGs, displacement, VWAP/EMA context, and opening-range variants.</p>
-      <div class="hero-kicker"><span class="chip green">Current model</span><span class="chip blue">Beginner map</span><span class="chip purple">Framework research</span><span class="chip yellow">Versioned evidence</span></div>
+      <h1><span class="gradient-text">Understand the trade before you automate it.</span></h1>
+      <p>The Strategy Playbook organizes common setup families and the pieces that make them actionable: location, market context, trigger, invalidation, target, and risk. Use it as a reference library for building, comparing, or documenting your own trading model inside Signal Bridge.</p>
+      <div class="hero-kicker"><span class="chip blue">Setup families</span><span class="chip purple">Confluence roles</span><span class="chip green">Decision structure</span><span class="chip yellow">Strategy Lab ready</span></div>
     </section>
 
     <section class="shell section">
-      <div class="section-head"><div><span class="eyebrow">Start Here</span><h2>Location gives the setup. Context gives permission. Price gives the trigger.</h2></div><p>That distinction keeps a beginner from turning every indicator or confluence into a buy/sell signal.</p></div>
+      <div class="section-head"><div><span class="eyebrow">Start Here</span><h2>Location gives the setup. Context gives permission. Price gives the trigger.</h2></div><p>A clean strategy separates those jobs instead of treating every indicator, level, or candle as a standalone signal.</p></div>
       <div class="framework-grid">
-        <article class="framework-card"><span class="framework-number">01</span><h3>Location</h3><p>Where is price reacting? ORB high/low/midpoint, prior-day levels, Asia/London extremes, equal highs/lows, FVGs, or another mapped liquidity area.</p><div class="framework-foot">Question: <strong>Are we at a meaningful place?</strong></div></article>
-        <article class="framework-card"><span class="framework-number">02</span><h3>Context</h3><p>What is the market doing around that location? Higher-timeframe direction, session behavior, VWAP/EMA alignment, ES/NQ relationship, news risk, and whether price is trending or chopping.</p><div class="framework-foot">Question: <strong>Does the environment support the idea?</strong></div></article>
-        <article class="framework-card"><span class="framework-number">03</span><h3>Trigger</h3><p>What makes the trade actionable now? Reclaim, rejection, displacement, market-structure shift, engulfing body, wick rejection, or a clean retest response.</p><div class="framework-foot">Question: <strong>Did price actually confirm?</strong></div></article>
-        <article class="framework-card"><span class="framework-number">04</span><h3>Invalidation</h3><p>Where is the thesis wrong? A failed reclaim, acceptance back through the level, opposite-side structure break, or the predefined stop/risk boundary.</p><div class="framework-foot">Question: <strong>What proves the trade wrong?</strong></div></article>
+        <article class="framework-card"><span class="framework-number">01</span><h3>Location</h3><p>Where is price reacting? Opening-range levels, prior highs/lows, session extremes, equal highs/lows, VWAP, FVGs, support/resistance, or another predefined area.</p><div class="framework-foot">Question: <strong>Are we at a meaningful place?</strong></div></article>
+        <article class="framework-card"><span class="framework-number">02</span><h3>Context</h3><p>What is the market doing around that location? Higher-timeframe structure, session behavior, trend alignment, volume, volatility, correlations, and news can all change setup quality.</p><div class="framework-foot">Question: <strong>Does the environment support the idea?</strong></div></article>
+        <article class="framework-card"><span class="framework-number">03</span><h3>Trigger</h3><p>What makes the trade actionable now? Reclaim, rejection, displacement, market-structure shift, engulfing body, wick rejection, breakout, pullback, or another defined confirmation.</p><div class="framework-foot">Question: <strong>Did price actually confirm?</strong></div></article>
+        <article class="framework-card"><span class="framework-number">04</span><h3>Invalidation</h3><p>Where is the thesis wrong? Failed reclaim, acceptance through the level, opposite-side structure break, volatility stop, or another predefined risk boundary.</p><div class="framework-foot">Question: <strong>What proves the trade wrong?</strong></div></article>
       </div>
     </section>
 
-    <section class="shell section">
-      <div class="section-head"><div><span class="eyebrow">Current Flagship</span><h2>Mason ORB.</h2></div><p>The primary morning framework being turned into a cleaner, more measurable process.</p></div>
-      <article class="strategy-feature">
-        <div>
-          <div class="card-meta"><span class="chip yellow">Active research</span><span class="chip blue">MES / ES</span><span class="chip green">Signal infrastructure live</span></div>
-          <h2>Liquidity + opening-range retest framework</h2>
-          <p>Map overnight/session structure, build the 8:00–8:15 opening range, watch how price behaves before and through New York, then wait for a retest, reclaim, rejection, or acceptance pattern around a mapped level. Confluence strengthens or weakens the case; it does not replace the trigger.</p>
-          <div class="hero-actions"><a class="btn primary" href="mason-orb.html">Open Mason ORB →</a><a class="btn secondary" href="trade-bible.html">Read the Trade Bible</a><a class="btn secondary" href="evidence.html">Research archive</a></div>
-        </div>
-        <aside class="strategy-feature-side">
-          <div class="mini-spec"><span>Prep</span><strong>Sessions · prior levels · news · HTF</strong></div>
-          <div class="mini-spec"><span>Reference</span><strong>ORB H / L / midpoint</strong></div>
-          <div class="mini-spec"><span>Trigger family</span><strong>Retest · reclaim · reject</strong></div>
-          <div class="mini-spec"><span>Target family</span><strong>Next plausible liquidity objective</strong></div>
-        </aside>
-      </article>
-    </section>
-
-    <section class="shell section" id="reference-frameworks">
-      <div class="section-head"><div><span class="eyebrow">Framework Library</span><h2>Other models and concepts inside the research stack.</h2></div><p>These are studied tools and setup families, not personality-branded products. Some are used directly in the current process; others are reference models kept around because they expose useful mechanics worth testing.</p></div>
+    <section class="shell section" id="setup-families">
+      <div class="section-head"><div><span class="eyebrow">Setup Library</span><h2>Different strategies can share the same decision framework.</h2></div><p>These are setup families and research frameworks — useful starting structures that can be turned into a ruleset, backtest, or discretionary playbook.</p></div>
       <div class="playbook-grid">
-        <article class="playbook-card"><div class="card-meta"><span class="chip blue">Core</span></div><h3>Opening-Range Break &amp; Retest</h3><p>Build a defined range, wait for price to leave it, then use the boundary or midpoint response rather than blindly chasing the first breakout.</p><dl><div><dt>Best use</dt><dd>Structured morning reference</dd></div><div><dt>Trigger</dt><dd>Retest / reclaim / rejection</dd></div><div><dt>Main risk</dt><dd>False breakout / double-sided chop</dd></div></dl></article>
-        <article class="playbook-card"><div class="card-meta"><span class="chip purple">Price action</span></div><h3>Liquidity Sweep + Reclaim</h3><p>Price trades through a prior/session high or low, takes the obvious liquidity, then fails to accept beyond it and reclaims the level.</p><dl><div><dt>Best use</dt><dd>Reversal or failed-break context</dd></div><div><dt>Trigger</dt><dd>Reclaim + structure response</dd></div><div><dt>Main risk</dt><dd>Calling every wick a sweep</dd></div></dl></article>
-        <article class="playbook-card"><div class="card-meta"><span class="chip purple">ICT-style concept</span></div><h3>Imbalance / FVG Reaction</h3><p>Fair value gaps and other imbalance areas are treated as locations where price may revisit or react. In Signal Bridge they are context, not automatic entries.</p><dl><div><dt>Best use</dt><dd>Location + continuation/reversal context</dd></div><div><dt>Trigger</dt><dd>Reaction confirmed by price</dd></div><div><dt>Main risk</dt><dd>Over-marking every imbalance</dd></div></dl></article>
-        <article class="playbook-card"><div class="card-meta"><span class="chip purple">ICT-style concept</span></div><h3>MSS / Displacement Confirmation</h3><p>A decisive move or short-term market-structure shift can confirm that the side defending a level has actually taken control.</p><dl><div><dt>Best use</dt><dd>Confirmation after a sweep/retest</dd></div><div><dt>Trigger</dt><dd>Structure break + follow-through</dd></div><div><dt>Main risk</dt><dd>Using tiny noise as “structure”</dd></div></dl></article>
-        <article class="playbook-card"><div class="card-meta"><span class="chip blue">Session model</span></div><h3>Asia / London / NY Liquidity Map</h3><p>Session highs, lows, consolidations, and midpoints frame where liquidity may sit before New York and help explain whether the ORB is breaking into or away from meaningful structure.</p><dl><div><dt>Best use</dt><dd>Premarket map + targets</dd></div><div><dt>Trigger</dt><dd>None by itself</dd></div><div><dt>Main risk</dt><dd>Assuming every session level must trade</dd></div></dl></article>
-        <article class="playbook-card"><div class="card-meta"><span class="chip blue">Reference model</span></div><h3>Multi-Session ORB</h3><p>A checked-in reference strategy models separate New York, Asia, and London ORBs with configurable breakout/retest modes, targets, stops, re-arm logic, and adaptive sizing. It is useful as a mechanics library rather than a copy-paste system.</p><dl><div><dt>Best use</dt><dd>Compare session/risk mechanics</dd></div><div><dt>Source role</dt><dd>External strategy reference</dd></div><div><dt>Research job</dt><dd>Borrow testable mechanics only</dd></div></dl></article>
-        <article class="playbook-card"><div class="card-meta"><span class="chip blue">Reference model</span></div><h3>RVOL + Correlation ORB</h3><p>Another preserved reference script combines an opening-range breakout with relative volume and correlated-asset data. It gives the project a concrete example of volume/correlation filters that can be isolated later.</p><dl><div><dt>Best use</dt><dd>Filter research</dd></div><div><dt>Source role</dt><dd>External strategy reference</dd></div><div><dt>Research job</dt><dd>Test RVOL/correlation independently</dd></div></dl></article>
-        <article class="playbook-card"><div class="card-meta"><span class="chip yellow">Context lane</span></div><h3>Non-ORB Liquidity Day</h3><p>When the opening range is oversized, messy, or already exhausted, the range can stay informational while the trader watches session liquidity, HTF context, sweeps, and confirmation instead of forcing an ORB trade.</p><dl><div><dt>Best use</dt><dd>Ugly / invalid ORB days</dd></div><div><dt>Trigger</dt><dd>Liquidity + price-action confirmation</dd></div><div><dt>Status</dt><dd>Research lane</dd></div></dl></article>
+        <article class="playbook-card"><div class="card-meta"><span class="chip blue">Opening range</span></div><h3>Break &amp; Retest</h3><p>Build a defined opening range, wait for price to leave it, then evaluate the boundary or midpoint response instead of blindly chasing the first breakout.</p><dl><div><dt>Location</dt><dd>Range edge / midpoint</dd></div><div><dt>Trigger</dt><dd>Retest / reclaim / rejection</dd></div><div><dt>Main risk</dt><dd>False breakout / chop</dd></div></dl></article>
+        <article class="playbook-card"><div class="card-meta"><span class="chip purple">Liquidity</span></div><h3>Sweep + Reclaim</h3><p>Price trades through a prior or session high/low, takes the obvious liquidity, then fails to accept beyond it and reclaims the reference.</p><dl><div><dt>Location</dt><dd>Prior/session liquidity</dd></div><div><dt>Trigger</dt><dd>Failure + reclaim</dd></div><div><dt>Main risk</dt><dd>Calling every wick a sweep</dd></div></dl></article>
+        <article class="playbook-card"><div class="card-meta"><span class="chip purple">Imbalance</span></div><h3>FVG / Imbalance Reaction</h3><p>Fair value gaps and other imbalance areas can define locations where price may revisit, react, or continue. The setup still needs a defined response at the area.</p><dl><div><dt>Location</dt><dd>Imbalance / FVG</dd></div><div><dt>Trigger</dt><dd>Reaction / displacement</dd></div><div><dt>Main risk</dt><dd>Over-marking zones</dd></div></dl></article>
+        <article class="playbook-card"><div class="card-meta"><span class="chip purple">Structure</span></div><h3>MSS / Displacement</h3><p>A decisive move or short-term market-structure shift can be used as confirmation that control has changed after a sweep, pullback, or level reaction.</p><dl><div><dt>Location</dt><dd>Key level / pullback</dd></div><div><dt>Trigger</dt><dd>Structure break + follow-through</dd></div><div><dt>Main risk</dt><dd>Defining noise as structure</dd></div></dl></article>
+        <article class="playbook-card"><div class="card-meta"><span class="chip blue">Session model</span></div><h3>Session Liquidity Rotation</h3><p>Asia, London, New York, prior-day, and overnight highs/lows can frame where price is positioned and which external reference may become the next objective.</p><dl><div><dt>Location</dt><dd>Session high / low</dd></div><div><dt>Trigger</dt><dd>Sweep, hold, or continuation</dd></div><div><dt>Main risk</dt><dd>Assuming every level must trade</dd></div></dl></article>
+        <article class="playbook-card"><div class="card-meta"><span class="chip green">Trend</span></div><h3>Pullback Continuation</h3><p>Use higher-timeframe or intraday trend context, wait for a pullback into a defined area, then require renewed momentum before joining continuation.</p><dl><div><dt>Context</dt><dd>Trend / VWAP / EMA</dd></div><div><dt>Trigger</dt><dd>Hold + renewed momentum</dd></div><div><dt>Main risk</dt><dd>Buying late exhaustion</dd></div></dl></article>
+        <article class="playbook-card"><div class="card-meta"><span class="chip yellow">Filter research</span></div><h3>RVOL + Correlation Filter</h3><p>Relative volume and correlated-asset behavior can be tested as additional filters around an otherwise defined setup rather than being mixed into entry logic without attribution.</p><dl><div><dt>Role</dt><dd>Context / confirmation</dd></div><div><dt>Test</dt><dd>On/off comparison</dd></div><div><dt>Main risk</dt><dd>Redundant filters</dd></div></dl></article>
+        <article class="playbook-card"><div class="card-meta"><span class="chip yellow">No-trade model</span></div><h3>Pass / Stand Aside</h3><p>A strategy is incomplete if it only defines entries. Oversized ranges, conflicting context, double-sided chop, major news risk, or failed confirmation can all be explicit pass conditions.</p><dl><div><dt>Role</dt><dd>Protect opportunity quality</dd></div><div><dt>Output</dt><dd>WAIT / PASS</dd></div><div><dt>Value</dt><dd>Measurable no-trade data</dd></div></dl></article>
       </div>
     </section>
 
     <section class="shell section" id="confluence-stack">
-      <div class="section-head"><div><span class="eyebrow">Confluence Dictionary</span><h2>What each common confirmation is actually supposed to do.</h2></div><p>Confluence is useful when each piece has a job. Stacking five indicators that all say the same thing is not five independent reasons.</p></div>
+      <div class="section-head"><div><span class="eyebrow">Confluence Dictionary</span><h2>Give every confirmation one clear job.</h2></div><p>Stacking multiple tools only helps when they contribute different information. A useful strategy can explain whether each input is location, bias, context, trigger, risk, or target.</p></div>
       <div class="confluence-table">
-        <div class="confluence-row"><strong>4H / 1H structure</strong><span>Bias</span><p>Frames whether the larger auction is trending, reversing, or balanced. It should stop a tiny lower-timeframe signal from becoming the whole thesis.</p></div>
-        <div class="confluence-row"><strong>Session highs / lows</strong><span>Location / target</span><p>Objective references for where stops and resting orders may cluster. Useful for both setup location and plausible destination.</p></div>
-        <div class="confluence-row"><strong>VWAP</strong><span>Context</span><p>Intraday fair-value / participation reference. Used to judge whether price is accepting above or below the session’s volume-weighted mean.</p></div>
-        <div class="confluence-row"><strong>EMA stack</strong><span>Momentum context</span><p>Shorter/longer moving averages help describe trend alignment. They are not an entry without price confirming at a meaningful location.</p></div>
-        <div class="confluence-row"><strong>FVG / imbalance</strong><span>Location</span><p>Marks an area of fast one-sided movement that may later be revisited. Its role is to create a place to watch, not a mandatory reversal.</p></div>
-        <div class="confluence-row"><strong>Liquidity sweep</strong><span>Setup condition</span><p>Shows price has traded through an obvious high/low. A sweep matters more when price then fails to accept beyond it.</p></div>
-        <div class="confluence-row"><strong>MSS / displacement</strong><span>Confirmation</span><p>Evidence that short-term control may have shifted. Stronger when it appears after the intended liquidity event or retest.</p></div>
-        <div class="confluence-row"><strong>Reclaim / rejection candle</strong><span>Trigger</span><p>The final price response at the level: close back through, defend, engulf, or reject. This is closer to the actual “click” than the context layers above it.</p></div>
+        <div class="confluence-row"><strong>4H / 1H structure</strong><span>Bias</span><p>Frames whether the larger auction is trending, reversing, or balanced.</p></div>
+        <div class="confluence-row"><strong>Session highs / lows</strong><span>Location / target</span><p>Objective references for where price is positioned and where liquidity may cluster.</p></div>
+        <div class="confluence-row"><strong>VWAP</strong><span>Context</span><p>Intraday volume-weighted reference for judging acceptance above or below the session mean.</p></div>
+        <div class="confluence-row"><strong>EMA stack</strong><span>Momentum context</span><p>Moving-average alignment can describe trend direction and pullback structure.</p></div>
+        <div class="confluence-row"><strong>FVG / imbalance</strong><span>Location</span><p>Marks an area of fast one-sided movement that may later be revisited.</p></div>
+        <div class="confluence-row"><strong>Liquidity sweep</strong><span>Setup condition</span><p>Shows price traded through an obvious high or low and may now be testing acceptance.</p></div>
+        <div class="confluence-row"><strong>MSS / displacement</strong><span>Confirmation</span><p>Evidence that short-term control may have shifted or continuation has reasserted.</p></div>
+        <div class="confluence-row"><strong>Reclaim / rejection candle</strong><span>Trigger</span><p>The immediate price response that can turn a watched location into an actionable setup.</p></div>
+        <div class="confluence-row"><strong>Relative volume</strong><span>Participation</span><p>Measures whether current activity is elevated or muted relative to a chosen baseline.</p></div>
+        <div class="confluence-row"><strong>Correlated market</strong><span>Context</span><p>ES/NQ or another related market can be tracked for confirmation, divergence, or conflicting behavior.</p></div>
       </div>
     </section>
 
     <section class="shell section">
-      <div class="section-head"><div><span class="eyebrow">Historical Strategy Lineage</span><h2>The experiments that changed the model.</h2></div><p>Performance stays in the research record, but it is not the first thing a beginner needs to understand.</p></div>
-      <div class="lineage-grid">
-        <article class="lineage-card"><div class="lineage-top"><span class="chip blue">Reconstructed V1</span><span>38 trades</span></div><h3>Simple ORB baseline</h3><p>PF 1.78, +$2,381.25 net, +$62.66 expectancy/trade. The sample was strong enough to justify further work and small enough that later validation still matters.</p></article>
-        <article class="lineage-card"><div class="lineage-top"><span class="chip red">R1.2</span><span>82 trades</span></div><h3>Adaptive second-trade model</h3><p>43.9% win rate, PF 0.949, -$203.75. More flexibility and a higher win rate did not produce a better system.</p></article>
-        <article class="lineage-card"><div class="lineage-top"><span class="chip yellow">R1.3</span><span>74 reported</span></div><h3>Retest + confluence</h3><p>PF 1.284, +$546.25. Returned positive historically, while leaving a trade-count reconciliation problem to clean up.</p></article>
-        <article class="lineage-card"><div class="lineage-top"><span class="chip green">V6</span><span>156 trades</span></div><h3>Midpoint continuation</h3><p>PF 1.431, +$32,750, 39.1% win rate in the checked-in ES historical export — the largest and strongest configuration in that comparison file.</p></article>
+      <div class="section-head"><div><span class="eyebrow">Strategy Lab</span><h2>Turn a setup into a system you can actually compare.</h2></div><p>Signal Bridge Premium is being structured so a member can keep the strategy definition and the evidence around it in the same place.</p></div>
+      <div class="grid-4">
+        <div class="card"><span class="chip blue">01</span><h3>Define</h3><p>Market, session, setup, trigger, invalidation, target, risk, filters, and pass conditions.</p></div>
+        <div class="card"><span class="chip purple">02</span><h3>Version</h3><p>Save changes as a new version so the current rules never overwrite the history that produced earlier results.</p></div>
+        <div class="card"><span class="chip yellow">03</span><h3>Test</h3><p>Attach backtests, replay notes, screenshots, and component comparisons to the exact version they belong to.</p></div>
+        <div class="card"><span class="chip green">04</span><h3>Forward review</h3><p>Link live or paper journal entries back to the strategy version and compare what happened after the change.</p></div>
       </div>
-      <div class="hero-actions"><a class="btn secondary" href="evidence.html">Open full Research &amp; Evidence →</a></div>
+      <div class="hero-actions"><a class="btn secondary" href="mason.html">See the flagship strategy &amp; research desk →</a></div>
     </section>
   </main>
-  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Strategy Playbook</strong><span>Setups, frameworks, confluences, and versioned research.</span></div></footer>
+  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Strategy Playbook</strong><span>Setups · confluences · decision structure · strategy development.</span></div></footer>
 </body>
 </html>
