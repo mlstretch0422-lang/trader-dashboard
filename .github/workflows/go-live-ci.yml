@@ -93,30 +93,38 @@ jobs:
           test -s _site/journal.html
           test -s _site/journal.css
           test -s _site/indicators.html
+          test -s _site/evidence.html
           test -s _site/reports.html
           test -s _site/dashboard.html
-          test -s _site/research-dashboard.html
+          test -s _site/research.css
           test -s _site/polish.css
-          test -s _site/assets/research/SPX500_2026-07-08_10-23-12.png
-          test -s _site/assets/research/Tradezella-Summary-June-26-2026.png
+          test -s _site/assets/research/mes-study-01.png
+          test -s _site/assets/research/mes-study-02.png
+          test -s _site/assets/research/mes-study-03.png
+          test -s _site/assets/research/mes-study-04.png
+          test -s _site/assets/research/helper-panel-01.png
+          test -s _site/assets/research/helper-panel-02.png
           test -s _site/report.json
           grep -q "Research it. Trade it. Record it. Improve it." _site/index.html
           grep -q "Built around Mason" _site/index.html
+          grep -q "Research & Evidence" _site/evidence.html
+          grep -q "PF 1.78" _site/evidence.html
+          grep -q "V6 ORB Midpoint Continuation" _site/evidence.html
+          grep -q "Strategy Library" _site/strategies.html
+          grep -q "Adaptive Second-Trade Model" _site/strategies.html
           grep -q "Indicator Library" _site/indicators.html
-          grep -q "Validated live edge" _site/indicators.html
-          grep -q "Reports & Research" _site/reports.html
-          grep -q "research-dashboard.html" _site/dashboard.html
-          grep -q "OS Home" _site/dashboard.html
+          grep -q "ORB V2 Decision Dashboard" _site/indicators.html
+          grep -q "Mechanical Attribution Harness" _site/indicators.html
+          grep -q "Current Strategy Framework" _site/mason-orb.html
+          grep -q "156 trades" _site/mason-orb.html
+          grep -q "url=evidence.html" _site/reports.html
+          grep -q "url=evidence.html" _site/dashboard.html
           grep -q "polish.css" _site/trade-bible.html
           grep -q "Live Signal History" _site/signals.html
           grep -q "/events" _site/signals.html
           grep -q "href=\"journal.html\"" _site/signals.html
           grep -q "href=\"strategies.html\"" _site/trade-bible.html
           grep -q "href=\"journal.html\"" _site/evidence.html
-          grep -q "Strategy Library" _site/strategies.html
-          grep -q "Opening-range variants" _site/strategies.html
-          grep -q "The ORB clock is not settled" _site/mason-orb.html
-          grep -q "PF 1.431" _site/mason-orb.html
           grep -q "Journal Intelligence" _site/journal.html
           grep -q "/journal" _site/journal.html
           grep -q "Private-first by design" _site/journal.html
