@@ -2,13 +2,11 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
-
-import requests
+from typing import Any, Dict
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
-from src.integrations.alert_bridge import send_signal
+from src.integrations.alert_bridge import post_discord_message
 from src.integrations.live_market_brief import build_market_brief
 
 
@@ -16,13 +14,13 @@ def build_daily_brief() -> Dict[str, Any]:
     market_payload = build_market_brief()
     mode = (os.getenv("RUN_MODE") or "daily").lower()
     if mode == "pre":
-        reason = "Pre-market bias based on live price and structure; monitor for the first breakout.",
+        reason = "Pre-market price/structure context; monitor the opening sequence."
     elif mode == "open":
-        reason = "Opening drive is being evaluated for continuation or fade around the opening range.",
+        reason = "Opening drive context is being monitored around the opening range."
     elif mode == "midday":
-        reason = "Midday session check: watch for trend continuation or reversal into the NY AM close.",
+        reason = "Midday context check into the NY AM close."
     else:
-        reason = "Momentum and live price are holding above the prior close; monitor breakout continuation.",
+        reason = "Market context snapshot generated from the configured live-price provider."
 
     payload = {
         "type": "daily_brief",
@@ -34,14 +32,14 @@ def build_daily_brief() -> Dict[str, Any]:
             "note": market_payload["note"],
         },
         "market_snapshot": market_payload["market_snapshot"],
-        "trade_idea": {
-            "bias": "long" if market_payload["market_snapshot"]["live_price"] >= market_payload["market_snapshot"]["latest_close"] else "short",
+        "context": {
+            "direction": "long"
+            if market_payload["market_snapshot"]["live_price"]
+            >= market_payload["market_snapshot"]["latest_close"]
+            else "short",
             "reason": reason,
         },
-        "economic_context": {
-            "source": "Yahoo Finance live quote",
-            "note": "Economic calendar and news can be layered in next once live calendar access is available.",
-        },
+        "disclaimer": "Research market brief only. Not trade authorization.",
     }
     return payload
 
@@ -54,22 +52,16 @@ def main():
 
     message = {
         "content": (
-            f"Daily Brief [{payload['mode'].upper()}]\n"
-            f"Bias: {payload['trade_idea']['bias'].upper()}\n"
-            f"Entry: {payload['summary']['entry_price']}\n"
-            f"Confidence: {payload['summary']['confidence']}\n"
+            f"SIGNAL BRIDGE MARKET BRIEF [{payload['mode'].upper()}]\n"
+            "RESEARCH CONTEXT — NOT A TRADE ALERT\n"
+            f"Context: {payload['context']['direction'].upper()}\n"
             f"Live price: {payload['market_snapshot']['live_price']}\n"
-            f"Reason: {payload['trade_idea']['reason']}"
+            f"Reference close: {payload['market_snapshot']['latest_close']}\n"
+            f"Reason: {payload['context']['reason']}"
         )
     }
-    webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
-    if webhook_url:
-        try:
-            requests.post(webhook_url, json=message, timeout=10)
-        except Exception as exc:
-            print(f"Discord post failed: {exc}")
-    else:
-        print("No webhook configured; daily brief saved locally only")
+    result = post_discord_message(message)
+    print(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":

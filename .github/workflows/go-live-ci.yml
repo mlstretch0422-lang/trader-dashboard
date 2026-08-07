@@ -1,0 +1,50 @@
+name: Go-Live Safety Checks
+
+on:
+  pull_request:
+  push:
+    branches: ["fix/go-live-discord"]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install focused test dependencies
+        run: python -m pip install --disable-pip-version-check pandas pytest
+
+      - name: Scan for committed Discord webhook credentials
+        run: python scripts/check_public_secrets.py
+
+      - name: Compile integration modules
+        run: |
+          python -m py_compile \
+            trading_os/src/integrations/alert_bridge.py \
+            trading_os/src/integrations/run_signal_bridge.py \
+            trading_os/src/integrations/serve_signal_bridge.py \
+            trading_os/src/integrations/daily_brief.py \
+            trading_os/src/integrations/news_calendar_brief.py \
+            trading_os/src/integrations/cron_runner.py
+
+      - name: Test Discord bridge
+        env:
+          PYTHONPATH: trading_os
+        run: pytest -q trading_os/tests/test_alert_bridge.py
+
+      - name: Build website artifact
+        run: python scripts/build_pages_site.py
+
+      - name: Verify website output
+        run: |
+          test -s _site/index.html
+          test -s _site/report.json

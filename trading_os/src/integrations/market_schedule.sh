@@ -1,24 +1,24 @@
 #!/bin/zsh
-set -e
-ROOT="/Users/masonstretch/Desktop/Trader Dashboard/trading_os"
-cd "$ROOT"
-export PYTHONPATH="$ROOT"
-export DISCORD_WEBHOOK_URL='https://discord.com/api/webhooks/1534967748784947211/O5FynKL_WWDKLTt2PW4OwMGE96qkuFYsz-bPgiqa1ypzMVlDWKpWDsVRZIhThU7Mk6Ez'
+set -euo pipefail
 
-case "$1" in
-  pre)
-    RUN_MODE=pre /Users/masonstretch/Desktop/Trader\ Dashboard/.venv/bin/python src/integrations/cron_runner.py
-    ;;
-  open)
-    RUN_MODE=open /Users/masonstretch/Desktop/Trader\ Dashboard/.venv/bin/python src/integrations/cron_runner.py
-    ;;
-  midday)
-    RUN_MODE=midday /Users/masonstretch/Desktop/Trader\ Dashboard/.venv/bin/python src/integrations/cron_runner.py
-    ;;
-  news)
-    RUN_MODE=news /Users/masonstretch/Desktop/Trader\ Dashboard/.venv/bin/python src/integrations/cron_runner.py
+SCRIPT_DIR="${0:A:h}"
+TRADING_OS_ROOT="${SCRIPT_DIR:h:h}"
+REPO_ROOT="${TRADING_OS_ROOT:h}"
+
+if [[ -f "$REPO_ROOT/.env.local" ]]; then
+  set -a
+  source "$REPO_ROOT/.env.local"
+  set +a
+fi
+
+case "${1:-full}" in
+  pre|open|midday|news|full)
+    export RUN_MODE="${1:-full}"
     ;;
   *)
-    RUN_MODE=full /Users/masonstretch/Desktop/Trader\ Dashboard/.venv/bin/python src/integrations/cron_runner.py
+    echo "Usage: market_schedule.sh [pre|open|midday|news|full]" >&2
+    exit 2
     ;;
 esac
+
+exec /bin/zsh "$SCRIPT_DIR/run_launchd.sh"

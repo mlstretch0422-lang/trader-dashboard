@@ -8,6 +8,12 @@ __pycache__/
 .pytest_cache/
 *.pyc
 
+# Local secrets / runtime config
+.env
+.env.*
+!.env.example
+*.local.env
+
 # Local archives and bulky raw datasets (keep local, not in git)
 *.zip
 *.zst
