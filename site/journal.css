@@ -30,11 +30,11 @@
 .refresh-btn:disabled { opacity:.55; cursor:wait; }
 .journal-notice { margin-bottom:14px; }
 
-.journal-list { display:grid; gap:10px; }
+.journal-list { display:grid; gap:12px; }
 .journal-empty { min-height:150px; border:1px dashed rgba(136,166,211,.18); border-radius:17px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:30px; color:#70849b; background:rgba(255,255,255,.014); }
 .journal-empty strong { color:#bac9db; font-size:16px; margin-bottom:7px; }
 .journal-empty span { max-width:650px; font-size:11px; line-height:1.6; }
-.journal-entry { border:1px solid var(--line); border-radius:17px; padding:18px; background:linear-gradient(180deg,rgba(15,23,36,.82),rgba(9,14,23,.78)); }
+.journal-entry { border:1px solid var(--line); border-radius:17px; padding:18px; background:linear-gradient(180deg,rgba(15,23,36,.82),rgba(9,14,23,.78)); overflow:hidden; }
 .journal-entry-head { display:flex; justify-content:space-between; gap:18px; align-items:start; }
 .journal-title-line { display:flex; align-items:center; flex-wrap:wrap; gap:9px; }
 .journal-title-line strong { font-size:16px; letter-spacing:-.02em; }
@@ -45,18 +45,22 @@
 .result-pill.be { color:#f0ce78; border:1px solid rgba(255,213,107,.22); background:rgba(255,213,107,.06); }
 .result-pill.neutral { color:#9eb4cc; border:1px solid var(--line); background:rgba(255,255,255,.025); }
 .journal-entry-meta { display:flex; flex-wrap:wrap; gap:8px 14px; margin-top:8px; color:#72859d; font-size:10px; text-transform:uppercase; letter-spacing:.04em; }
+.journal-entry-media { display:block; position:relative; margin:16px 0 4px; border:1px solid rgba(89,164,255,.2); border-radius:14px; overflow:hidden; background:#050a11; text-decoration:none; }
+.journal-entry-media img { display:block; width:100%; max-height:680px; object-fit:contain; background:#05080d; }
+.journal-entry-media span { position:absolute; right:10px; bottom:10px; padding:7px 9px; border-radius:9px; color:#dbeaff; background:rgba(5,10,17,.82); border:1px solid rgba(255,255,255,.11); backdrop-filter:blur(8px); font-size:9px; font-weight:850; letter-spacing:.04em; }
+.journal-entry-media:hover { border-color:rgba(89,164,255,.5); }
 .journal-entry > p { color:#a7b8cb; line-height:1.65; font-size:13px; margin:16px 0 12px; white-space:pre-wrap; }
 .journal-tags { display:flex; flex-wrap:wrap; gap:6px; }
 .journal-tags span { border:1px solid rgba(74,156,255,.19); background:rgba(74,156,255,.055); color:#8fbced; border-radius:999px; padding:4px 7px; font-size:9px; }
 .journal-foot { display:flex; flex-wrap:wrap; gap:8px 14px; border-top:1px solid var(--line); padding-top:12px; margin-top:13px; color:#667a92; font-size:9px; text-transform:uppercase; letter-spacing:.07em; }
+.journal-media-note { margin-top:14px; }
 
 .field-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:11px; }
 .field-card { border:1px solid var(--line); border-radius:15px; padding:17px; background:rgba(255,255,255,.02); }
 .field-card b { display:block; font-size:12px; margin-bottom:8px; }
 .field-card span { color:var(--muted); font-size:10px; line-height:1.6; }
 
-/* The old archive screenshots were visually noisy and did not teach the journal workflow.
-   Keep the historical captions, but turn the visual area into polished review-state cards. */
+/* Legacy review-state visual cards retained for older content blocks. */
 .journal-gallery { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
 .journal-gallery figure { position:relative; margin:0; border:1px solid var(--line); border-radius:18px; overflow:hidden; background:linear-gradient(155deg,rgba(15,24,38,.96),rgba(8,13,22,.98)); }
 .journal-gallery img { display:none; }
@@ -81,4 +85,6 @@
   .journal-toolbar { align-items:stretch; }
   .journal-toolbar label, .journal-toolbar input, .journal-toolbar select, .refresh-btn { width:100%; min-width:0; }
   .journal-entry-head { flex-direction:column; }
+  .journal-entry-media { margin-left:-8px; margin-right:-8px; border-radius:12px; }
+  .journal-entry-media img { max-height:520px; }
 }
