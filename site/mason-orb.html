@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#060a11" />
   <title>Mason ORB — Signal Bridge</title>
-  <meta name="description" content="Mason ORB: current trading framework, research lineage, historical results, chart studies, implementation state, and next attribution tests." />
+  <meta name="description" content="Mason ORB: current MES/ES morning framework, setup anatomy, confluence stack, historical research, Signal Bridge lifecycle, and next tests." />
   <link rel="icon" href="assets/brand/signal-bridge-favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="app.css" />
   <link rel="stylesheet" href="strategy.css" />
@@ -23,70 +23,103 @@
       <div class="breadcrumb"><a href="index.html">Signal Bridge</a> / <a href="strategies.html">Strategies</a> / Mason ORB</div>
       <span class="eyebrow" style="margin-top:25px">Current Strategy Framework</span>
       <h1><span class="gradient-text">Mason ORB.</span></h1>
-      <p>An evolving MES / ES New-York-morning framework built from session liquidity, a local opening range, acceptance / rejection, retest behavior, price-action confirmation, and the next plausible liquidity objective. The current goal is not to add more concepts — it is to identify which parts of the process actually carry edge.</p>
-      <div class="hero-kicker"><span class="chip yellow">Testing</span><span class="chip blue">MES / ES</span><span class="chip green">Alert path live</span><span class="chip purple">Attribution next</span></div>
+      <p>A MES / ES New-York-morning framework built around session liquidity, the 8:00–8:15 opening range, acceptance / rejection, retest behavior, price-action confirmation, and the next plausible liquidity objective. The ORB creates structure; the trade only appears when price proves something at that structure.</p>
+      <div class="hero-kicker"><span class="chip yellow">Active research</span><span class="chip blue">MES / ES</span><span class="chip green">Alert path live</span><span class="chip purple">Attribution next</span></div>
       <div class="research-kpis">
-        <div class="research-kpi"><span>Largest related config</span><strong>156 trades</strong><small>V6 midpoint continuation historical export</small></div>
-        <div class="research-kpi"><span>Best reconstructed sample PF</span><strong>1.78</strong><small>38-trade V1 study · separate evidence class</small></div>
-        <div class="research-kpi"><span>Current live source</span><strong>ORB v1.1</strong><small>TradingView alerts → Signal Bridge</small></div>
-        <div class="research-kpi"><span>Primary research question</span><strong>What matters?</strong><small>Clock, entry, filters, risk, target behavior</small></div>
+        <div class="research-kpi"><span>Opening range</span><strong>8:00–8:15</strong><small>Current process / integration clock</small></div>
+        <div class="research-kpi"><span>Execution focus</span><strong>NY morning</strong><small>Wait for market participation and retest</small></div>
+        <div class="research-kpi"><span>Trade frequency</span><strong>Selective</strong><small>No setup = no trade</small></div>
+        <div class="research-kpi"><span>Primary question</span><strong>What matters?</strong><small>Location · context · trigger · risk · target</small></div>
       </div>
     </section>
 
     <section class="shell section">
-      <div class="section-head"><div><span class="eyebrow">The Process</span><h2>How the morning is actually read.</h2></div><p>The ORB is a reference inside a larger map. The model starts with where liquidity sits and how price behaves around those references.</p></div>
+      <div class="section-head"><div><span class="eyebrow">The Process</span><h2>How the morning is actually read.</h2></div><p>The ORB is a reference inside a larger market map. The model starts with overnight structure and finishes with a confirmed response at a level — not with “box broke, click buy.”</p></div>
       <div class="model-flow">
-        <div class="model-node"><span>01</span><b>Map Asia, London, and previous-day liquidity</b></div>
-        <div class="model-node"><span>02</span><b>Build ORB high, low, midpoint, and range</b></div>
-        <div class="model-node"><span>03</span><b>Read pre-New-York breaks, sweeps, and acceptance</b></div>
-        <div class="model-node"><span>04</span><b>Wait for the NY-open participation shift</b></div>
-        <div class="model-node"><span>05</span><b>Use retest / reclaim / rejection instead of chasing</b></div>
-        <div class="model-node"><span>06</span><b>Stack the evidence that is actually present</b></div>
-        <div class="model-node"><span>07</span><b>Target the next plausible liquidity objective</b></div>
+        <div class="model-node"><span>01</span><b>Map Asia, London, previous-day liquidity</b></div>
+        <div class="model-node"><span>02</span><b>Build ORB high, low, midpoint, range</b></div>
+        <div class="model-node"><span>03</span><b>Read 8:15–9:30 sweeps, breaks, acceptance</b></div>
+        <div class="model-node"><span>04</span><b>Watch the NY-open participation shift</b></div>
+        <div class="model-node"><span>05</span><b>Wait for retest / reclaim / rejection</b></div>
+        <div class="model-node"><span>06</span><b>Confirm context without replacing the trigger</b></div>
+        <div class="model-node"><span>07</span><b>Rotate toward the next liquidity objective</b></div>
       </div>
     </section>
 
     <section class="shell section">
-      <div class="section-head"><div><span class="eyebrow">What We Have Tested</span><h2>The framework has a real history.</h2></div><p>These are not all the same strategy, which is exactly why they are useful: each version changed the question and exposed a different weakness or strength.</p></div>
+      <div class="section-head"><div><span class="eyebrow">Setup Anatomy</span><h2>Three pictures that actually teach the model.</h2></div><p>These diagrams replace the old random archive screenshots. They show the repeatable shapes the strategy is trying to recognize; real chart captures can later be paired beside them as reviewed case studies.</p></div>
+      <div class="setup-visual-grid">
+        <article class="setup-visual-card">
+          <div class="setup-visual-head"><span class="chip green">Long idea</span><strong>Break → retest → reclaim</strong></div>
+          <svg class="setup-svg" viewBox="0 0 640 300" role="img" aria-label="Bullish ORB retest diagram">
+            <rect x="55" y="85" width="235" height="125" rx="10" class="svg-range"/><line x1="55" y1="85" x2="590" y2="85" class="svg-orh"/><line x1="55" y1="148" x2="590" y2="148" class="svg-mid"/><line x1="55" y1="210" x2="590" y2="210" class="svg-orl"/>
+            <path d="M70 175 C120 150 160 185 205 135 S275 120 305 72 S350 48 380 74 S420 103 448 84 S500 58 565 30" class="svg-price bullish"/>
+            <circle cx="448" cy="84" r="7" class="svg-trigger"/><text x="63" y="77">ORH</text><text x="63" y="142">ORM</text><text x="63" y="229">ORL</text><text x="365" y="123">RETEST</text><text x="455" y="72">RECLAIM</text><text x="510" y="24">LIQUIDITY</text>
+          </svg>
+          <p>Price proves it can hold beyond the range, returns to a mapped level, then reclaims/defends it. Context can strengthen permission, but the retest response is the trigger family.</p>
+        </article>
+        <article class="setup-visual-card">
+          <div class="setup-visual-head"><span class="chip purple">Reversal idea</span><strong>Sweep → fail → reclaim</strong></div>
+          <svg class="setup-svg" viewBox="0 0 640 300" role="img" aria-label="Liquidity sweep reclaim diagram">
+            <line x1="45" y1="75" x2="595" y2="75" class="svg-liq"/><line x1="45" y1="205" x2="595" y2="205" class="svg-base"/><path d="M60 210 C130 190 170 160 220 140 S300 95 340 70 S378 28 402 75 S430 128 470 128 S520 110 575 90" class="svg-price reversal"/>
+            <circle cx="385" cy="43" r="8" class="svg-sweep"/><circle cx="470" cy="128" r="7" class="svg-trigger"/><text x="50" y="66">PRIOR HIGH / BSL</text><text x="354" y="28">SWEEP</text><text x="423" y="152">FAILURE + RECLAIM</text><text x="50" y="226">STRUCTURE / ORB</text>
+          </svg>
+          <p>Price runs an obvious high/low, cannot accept beyond it, and reclaims back through the reference. The sweep is not enough by itself — failure and confirmation are what make it interesting.</p>
+        </article>
+        <article class="setup-visual-card">
+          <div class="setup-visual-head"><span class="chip red">Pass</span><strong>Double-sided mess / no confirmation</strong></div>
+          <svg class="setup-svg" viewBox="0 0 640 300" role="img" aria-label="No trade chop diagram">
+            <rect x="65" y="82" width="475" height="135" rx="10" class="svg-range bad"/><line x1="65" y1="82" x2="575" y2="82" class="svg-orh"/><line x1="65" y1="150" x2="575" y2="150" class="svg-mid"/><line x1="65" y1="217" x2="575" y2="217" class="svg-orl"/>
+            <path d="M78 165 C110 120 140 236 180 112 S245 233 290 110 S350 240 398 118 S465 225 520 128 S550 165 570 145" class="svg-price chop"/><text x="80" y="60">BOTH SIDES TRADED</text><text x="225" y="270">NO CLEAN ACCEPTANCE · NO TRADE</text>
+          </svg>
+          <p>If price keeps crossing midpoint, breaking both sides, or never confirms after the intended location, there is no reason to manufacture a trade. The no-trade outcome is useful session data too.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="shell section">
+      <div class="section-head"><div><span class="eyebrow">Confluence Stack</span><h2>Permission versus trigger.</h2></div><p>The beginner-friendly rule from the project source is simple: confluences give permission; the actual trigger is still price reacting at the intended level.</p></div>
+      <div class="permission-stack">
+        <div class="permission-row"><span>1 · Location</span><strong>ORB edge / midpoint · session high/low · prior level · FVG / liquidity area</strong><p>Start with a meaningful place, not an indicator crossing in the middle of nowhere.</p></div>
+        <div class="permission-row"><span>2 · Bias</span><strong>4H / 1H context · session structure · ES/NQ relationship</strong><p>Decide whether the larger market is helping, fighting, or neutral toward the idea.</p></div>
+        <div class="permission-row"><span>3 · Context</span><strong>VWAP · EMA · volume / participation · news risk</strong><p>These help judge environment quality; none replaces price confirmation.</p></div>
+        <div class="permission-row active"><span>4 · Trigger</span><strong>Reclaim · reject · engulf · wick rejection · displacement / MSS</strong><p>This is the actual price response that turns a watched level into an actionable setup.</p></div>
+        <div class="permission-row"><span>5 · Invalidation</span><strong>Acceptance through the level / stop boundary</strong><p>If the thesis fails, the trade is wrong. No narrative rescue.</p></div>
+      </div>
+      <div class="hero-actions"><a class="btn secondary" href="strategies.html#confluence-stack">Open full confluence guide →</a></div>
+    </section>
+
+    <section class="shell section">
+      <div class="section-head"><div><span class="eyebrow">Historical Research</span><h2>The model has changed because the tests changed it.</h2></div><p>Historical versions answer different questions. They are research lineage, not one continuous performance curve.</p></div>
       <div class="lineage-grid">
-        <article class="lineage-card"><div class="lineage-top"><span class="chip blue">V1 study</span><span>38 trades</span></div><h3>Simple baseline looked promising enough to continue</h3><p>Reconstructed sample: PF 1.78, +$2,381.25 net, +$62.66 expectancy/trade, 31.6% win rate. Good enough for forward-testing research, not large enough for production confidence.</p></article>
-        <article class="lineage-card"><div class="lineage-top"><span class="chip red">R1.2</span><span>82 trades</span></div><h3>More trades did not automatically improve the system</h3><p>The adaptive second-trade branch reached 43.9% win rate but finished at PF 0.949 and -$203.75. That version is useful negative evidence against equating activity or win rate with edge.</p></article>
-        <article class="lineage-card"><div class="lineage-top"><span class="chip yellow">R1.3</span><span>74 reported</span></div><h3>Retest + confluence moved back positive</h3><p>MES 5-minute export: PF 1.284 and +$546.25. It remains research-grade because the total-trade count does not reconcile with the listed wins and losses.</p></article>
-        <article class="lineage-card"><div class="lineage-top"><span class="chip green">V6</span><span>156 trades</span></div><h3>Midpoint continuation became the strongest historical export</h3><p>ES 15-minute export: PF 1.431, +$32,750, 39.1% win rate, 17.75% max drawdown. It is the best current large-sample historical result in the comparison file, not a live track record.</p></article>
+        <article class="lineage-card"><div class="lineage-top"><span class="chip blue">V1</span><span>38 reconstructed</span></div><h3>Simple baseline</h3><p>PF 1.78, +$2,381.25 net, +$62.66 expectancy/trade. Strong enough to keep working; limited enough to require more data.</p></article>
+        <article class="lineage-card"><div class="lineage-top"><span class="chip red">R1.2</span><span>82 trades</span></div><h3>Adaptive second trade</h3><p>43.9% win rate but PF 0.949 and -$203.75. More activity did not improve edge.</p></article>
+        <article class="lineage-card"><div class="lineage-top"><span class="chip yellow">R1.3</span><span>74 reported</span></div><h3>Retest + confluence</h3><p>PF 1.284 and +$546.25. Positive again, while leaving a trade-count mismatch to reconcile.</p></article>
+        <article class="lineage-card"><div class="lineage-top"><span class="chip green">V6</span><span>156 trades</span></div><h3>Midpoint continuation</h3><p>PF 1.431, +$32,750, 39.1% win rate in the checked-in ES historical export.</p></article>
       </div>
-      <div class="hero-actions"><a class="btn secondary" href="evidence.html">Open the full research archive →</a></div>
+      <div class="hero-actions"><a class="btn secondary" href="evidence.html">Open Research &amp; Evidence →</a></div>
     </section>
 
     <section class="shell section">
-      <div class="section-head"><div><span class="eyebrow">Chart Studies</span><h2>Visual research from the original build.</h2></div><p>The current site now uses more of the actual archive instead of one random chart and one journal summary.</p></div>
-      <div class="archive-grid">
-        <figure class="archive-shot"><img src="assets/research/mes-study-01.png" alt="Mason ORB archived MES chart study 1" /><figcaption>Archived MES study 01 · visual process research from the early strategy build.</figcaption></figure>
-        <figure class="archive-shot"><img src="assets/research/mes-study-02.png" alt="Mason ORB archived MES chart study 2" /><figcaption>Archived MES study 02 · preserved to compare levels, structure, and trade behavior across versions.</figcaption></figure>
-        <figure class="archive-shot"><img src="assets/research/mes-study-03.png" alt="Mason ORB archived MES chart study 3" /><figcaption>Archived MES study 03 · qualitative chart evidence, not a standalone performance claim.</figcaption></figure>
-        <figure class="archive-shot"><img src="assets/research/mes-study-04.png" alt="Mason ORB archived MES chart study 4" /><figcaption>Archived MES study 04 · part of the original research set that led into later mechanical work.</figcaption></figure>
-      </div>
-    </section>
-
-    <section class="shell section">
-      <div class="section-head"><div><span class="eyebrow">Current Research Stack</span><h2>What is solid enough to use, and what still needs proof.</h2></div></div>
+      <div class="section-head"><div><span class="eyebrow">Current Research Stack</span><h2>What is measurable versus what still needs attribution.</h2></div></div>
       <div class="matrix">
-        <div class="matrix-row"><strong>Session highs / lows</strong><span class="chip green">Objective</span><p>Asia, London, and previous-day references can be measured cleanly and stored as session state.</p></div>
-        <div class="matrix-row"><strong>ORB high / low / midpoint</strong><span class="chip yellow">Testing</span><p>The levels are objective; the preferred clock remains a controlled research question because 8:00–8:15 and cash-open variants represent different market regimes.</p></div>
-        <div class="matrix-row"><strong>Retest / acceptance / rejection</strong><span class="chip yellow">Testing</span><p>Central to the human process and historical variants. The next strategy harness needs matched comparisons against immediate breakout entries.</p></div>
-        <div class="matrix-row"><strong>VWAP / EMA / displacement</strong><span class="chip purple">Attribution pending</span><p>Implemented or historically used, but not independently proven as required filters.</p></div>
-        <div class="matrix-row"><strong>FVG / imbalance context</strong><span class="chip purple">Discretionary</span><p>Useful chart context in the current process; not yet a locked mechanical requirement.</p></div>
-        <div class="matrix-row"><strong>Liquidity target selection</strong><span class="chip purple">Discretionary</span><p>Candidate levels can be measured; deciding which objective price is seeking still needs structured labels and outcome data.</p></div>
+        <div class="matrix-row"><strong>Session highs / lows</strong><span class="chip green">Objective</span><p>Asia, London, previous-day, and overnight references can be measured and stored cleanly.</p></div>
+        <div class="matrix-row"><strong>ORB high / low / midpoint</strong><span class="chip yellow">Testing</span><p>The levels are objective; preferred clock/range-quality rules still need controlled comparison.</p></div>
+        <div class="matrix-row"><strong>Retest / reclaim / rejection</strong><span class="chip yellow">Testing</span><p>Central to the human process and historical variants. Immediate breakout versus retest still needs matched attribution.</p></div>
+        <div class="matrix-row"><strong>VWAP / EMA / displacement</strong><span class="chip purple">Attribution pending</span><p>Used or implemented, but not independently established as mandatory filters.</p></div>
+        <div class="matrix-row"><strong>FVG / imbalance context</strong><span class="chip purple">Context</span><p>Useful location information in the process; not a required automatic entry rule.</p></div>
+        <div class="matrix-row"><strong>Liquidity target selection</strong><span class="chip purple">Discretionary</span><p>Candidate levels are objective. Choosing which one price is actually seeking still needs structured forward labels.</p></div>
       </div>
     </section>
 
     <section class="shell section">
-      <div class="section-head"><div><span class="eyebrow">Signal Bridge Layer</span><h2>The strategy is becoming a data source, not just an alert.</h2></div><p>The end-state is a session lifecycle that records what the ORB did even on no-trade days.</p></div>
+      <div class="section-head"><div><span class="eyebrow">Signal Bridge Layer</span><h2>The strategy is becoming a session data source.</h2></div><p>The end-state records what the market did even when no trade is taken.</p></div>
       <div class="flow">
-        <div class="flow-step"><b>Pre-market context</b><span>Sessions, prior levels, scheduled risk</span></div>
-        <div class="flow-step"><b>ORB formed</b><span>High, low, midpoint, range</span></div>
-        <div class="flow-step"><b>NY-open state</b><span>Location, sweep, acceptance / rejection</span></div>
+        <div class="flow-step"><b>Pre-market</b><span>Sessions · levels · news · HTF</span></div>
+        <div class="flow-step"><b>ORB formed</b><span>High · low · midpoint · range</span></div>
+        <div class="flow-step"><b>NY-open</b><span>Location · sweep · acceptance</span></div>
         <div class="flow-step"><b>Setup / wait / entry</b><span>Durable strategy events</span></div>
-        <div class="flow-step"><b>Post-session outcome</b><span>Which side broke, target travel, no-trade reason</span></div>
+        <div class="flow-step"><b>Post-session</b><span>Side broken · target travel · pass reason</span></div>
       </div>
       <div class="hero-actions"><a class="btn secondary" href="signals.html">Live signal ledger →</a><a class="btn secondary" href="journal.html">Journal Intelligence →</a></div>
     </section>
@@ -94,14 +127,14 @@
     <section class="shell section">
       <div class="section-head"><div><span class="eyebrow">Next Tests</span><h2>What gets answered when Pine research resumes.</h2></div></div>
       <div class="roadmap-list">
-        <div class="roadmap-item"><div><b>ORB clock isolation</b><p>8:00–8:15 versus cash-open variants on matched dates, timeframe, risk, costs, and exits.</p></div></div>
+        <div class="roadmap-item"><div><b>ORB clock / range isolation</b><p>Compare opening-range definitions on matched dates, costs, timeframe, position size, and exits.</p></div></div>
         <div class="roadmap-item"><div><b>Entry-mode attribution</b><p>Immediate breakout versus boundary retest versus midpoint retest.</p></div></div>
-        <div class="roadmap-item"><div><b>Filter attribution</b><p>VWAP, EMA, displacement, range, volume, and other filters measured one change at a time.</p></div></div>
-        <div class="roadmap-item"><div><b>Risk / exit reconciliation</b><p>Lock costs, position sizing, stop logic, target model, break-even behavior, and forced-flat timing before comparisons.</p></div></div>
-        <div class="roadmap-item"><div><b>Forward evidence</b><p>Replay, paper-forward, and eventually funded/live evidence stored separately from backtests.</p></div></div>
+        <div class="roadmap-item"><div><b>Confluence attribution</b><p>HTF, VWAP, EMA, displacement, range, volume, liquidity, and other filters measured with defined jobs.</p></div></div>
+        <div class="roadmap-item"><div><b>Risk / exit reconciliation</b><p>Lock costs, sizing, stop logic, target model, break-even behavior, and forced-flat timing.</p></div></div>
+        <div class="roadmap-item"><div><b>Forward session evidence</b><p>Replay, paper-forward, funded/live, and no-trade session outcomes stored separately from historical backtests.</p></div></div>
       </div>
     </section>
   </main>
-  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Mason ORB</strong><span>Current framework · historical evidence · next tests.</span></div></footer>
+  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Mason ORB</strong><span>Current framework · setup anatomy · research lineage · next tests.</span></div></footer>
 </body>
 </html>
