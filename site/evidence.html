@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#060a11" />
+  <title>Evidence Desk — Signal Bridge</title>
+  <link rel="icon" href="assets/brand/signal-bridge-favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+  <header class="topbar"><div class="shell topbar-inner">
+    <a class="brand" href="index.html"><img src="assets/brand/signal-bridge-mark-blue.svg" alt="Signal Bridge" /><span class="brand-copy"><strong>SIGNAL BRIDGE</strong><span>Trading OS</span></span></a>
+    <nav class="nav"><a href="index.html">Home</a><a href="trade-bible.html">Trade Bible</a><a class="active" href="evidence.html">Evidence</a><a href="dashboard.html">Dashboard</a></nav>
+    <span class="beta-pill">Premium OS · Beta</span>
+  </div></header>
+
+  <main class="shell">
+    <section class="page-hero">
+      <div class="breadcrumb"><a href="index.html">Signal Bridge</a> / Research / Evidence Desk</div>
+      <span class="eyebrow" style="margin-top:25px">Historical Configurations</span>
+      <h1><span class="gradient-text">Show the receipts — and the limitations.</span></h1>
+      <p>This page is the beginning of the member-facing evidence layer. Historical exports are preserved with their instrument, timeframe, date range, sample size, profit factor, drawdown, and known comparability problems instead of being flattened into a single “best strategy” claim.</p>
+    </section>
+
+    <section class="section" style="padding-top:10px">
+      <div class="kpi-row">
+        <div class="kpi"><span>Configurations shown</span><strong>4</strong><small>Two V6 rows are near-duplicate exports</small></div>
+        <div class="kpi"><span>Largest sample</span><strong>156</strong><small>Trades in each V6 export</small></div>
+        <div class="kpi"><span>Best PF in table</span><strong>1.431</strong><small>V6 historical export</small></div>
+        <div class="kpi"><span>Negative PF preserved</span><strong>0.949</strong><small>R1.2 negative evidence</small></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><div><span class="eyebrow">Backtest Comparison</span><h2>Current source table.</h2></div><p>These rows come from the checked-in backtest comparison export. They are not apples-to-apples because instruments, timeframes, date ranges, and logic differ.</p></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Configuration</th><th>Instrument / TF</th><th>Date Range</th><th>Trades</th><th>Win Rate</th><th>Net</th><th>Profit Factor</th><th>Max DD</th><th>Evidence Note</th></tr></thead>
+          <tbody>
+            <tr><td>V6 ORB Midpoint Continuation</td><td>ES · 15m</td><td>Apr 2025 – Feb 2026</td><td>156</td><td>39.1%</td><td>$32,750</td><td>1.431</td><td>$8,875 / 17.75%</td><td><span class="chip yellow">Backtested</span></td></tr>
+            <tr><td>V6 ORB Midpoint Continuation (1)</td><td>ES · 15m</td><td>Apr 2025 – Feb 2026</td><td>156</td><td>39.1%</td><td>$32,600</td><td>1.428</td><td>$9,075 / 18.15%</td><td><span class="chip yellow">Near-duplicate</span></td></tr>
+            <tr><td>ML R1.3 Retest + Confluence</td><td>MES · 5m</td><td>Dec 2025 – Mar 2026</td><td>74</td><td>40.54%</td><td>$546.25</td><td>1.284</td><td>$368.75 / 0.74%</td><td><span class="chip yellow">Backtested</span></td></tr>
+            <tr><td>ML R1.2 Adaptive 2nd Trade</td><td>MES · 15m</td><td>May 2025 – Mar 2026</td><td>82</td><td>43.9%</td><td>-$203.75</td><td>0.949</td><td>$1,481.25 / 2.96%</td><td><span class="chip red">Negative evidence</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="notice" style="margin-top:14px"><strong>Data-quality note:</strong> the R1.3 row reports 74 total trades while the source lists 30 winners + 41 losers = 71 classified outcomes. The unexplained difference must remain visible rather than being silently repaired.</div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><div><span class="eyebrow">How to read this</span><h2>Evidence stage matters more than a green number.</h2></div><p>A configuration can make money in a historical export while individual components inside it remain unproven. Signal Bridge will keep those layers separate.</p></div>
+      <div class="grid-3">
+        <div class="card"><span class="chip blue">Implemented</span><h3>The code can do it.</h3><p>This only establishes that a rule or filter exists in code. It does not establish edge.</p></div>
+        <div class="card"><span class="chip yellow">Backtested</span><h3>A full configuration was tested.</h3><p>Useful historical evidence, but still vulnerable to configuration bias, regime dependence, costs, and interactions among components.</p></div>
+        <div class="card"><span class="chip purple">Isolated attribution</span><h3>The component itself was tested.</h3><p>This is the stronger answer to “does this filter help?” because the comparison controls the rest of the system.</p></div>
+        <div class="card"><span class="chip">Walk-forward</span><h3>Out-of-sample durability.</h3><p>Reserved for evidence that survives a properly separated validation window rather than the same development sample.</p></div>
+        <div class="card"><span class="chip">Paper forward</span><h3>Observed in live market sequence.</h3><p>Forward evidence is tracked separately from backtests so hindsight does not quietly leak into results.</p></div>
+        <div class="card"><span class="chip green">Live</span><h3>Real execution evidence.</h3><p>Eventually reserved for actual live execution records — never inferred from paper trading or alerts firing.</p></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><div><span class="eyebrow">Current conclusions</span><h2>What the table does and does not tell us.</h2></div></div>
+      <div class="article-block">
+        <ul>
+          <li><strong>Win rate alone is not enough:</strong> R1.2 has the highest win rate in this table but negative net profit and PF below 1.</li>
+          <li><strong>V6 is the strongest historical configuration in this specific export set:</strong> it has the largest net profit and highest PF here, but its duplicate row is not independent confirmation.</li>
+          <li><strong>R1.3 is a different instrument/timeframe/sample:</strong> its lower drawdown cannot be attributed to “confluence” alone without controlled attribution.</li>
+          <li><strong>Midpoint, VWAP, EMA, displacement, range filters, and retest logic must be tested component-by-component:</strong> profitable system-level results do not prove each one.</li>
+          <li><strong>Negative results are product content too:</strong> R1.2 stays in the record because learning what failed is part of the research journey.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Evidence Desk</strong><span>Historical research only. No performance guarantee or trade authorization.</span></div></footer>
+</body>
+</html>

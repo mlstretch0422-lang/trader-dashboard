@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#060a11" />
+  <title>Trade Bible — Signal Bridge</title>
+  <link rel="icon" href="assets/brand/signal-bridge-favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+  <header class="topbar"><div class="shell topbar-inner">
+    <a class="brand" href="index.html"><img src="assets/brand/signal-bridge-mark-blue.svg" alt="Signal Bridge" /><span class="brand-copy"><strong>SIGNAL BRIDGE</strong><span>Trading OS</span></span></a>
+    <nav class="nav"><a href="index.html">Home</a><a class="active" href="trade-bible.html">Trade Bible</a><a href="evidence.html">Evidence</a><a href="dashboard.html">Dashboard</a></nav>
+    <span class="beta-pill">Premium OS · Beta</span>
+  </div></header>
+
+  <main class="shell">
+    <section class="page-hero">
+      <div class="breadcrumb"><a href="index.html">Signal Bridge</a> / Knowledge / Trade Bible</div>
+      <span class="eyebrow" style="margin-top:25px">Native Strategy Document</span>
+      <h1><span class="gradient-text">Mason’s actual decision process.</span></h1>
+      <p>This page translates the raw decision-process source into a readable desk document without pretending every discretionary observation is a tested mechanical rule. It describes the current framework: map structure first, use the 8:00–8:15 ORB as local context, evaluate pre-New York behavior, wait for retest/acceptance, stack confluence, and think in terms of liquidity targets.</p>
+      <div class="card-meta"><span class="chip blue">Source-derived</span><span class="chip yellow">Framework developing</span><span class="chip purple">Discretion remains</span></div>
+    </section>
+
+    <div class="notice" style="margin-bottom:25px"><strong>Evidence note:</strong> this is a trading-process document, not a claim that every item below has isolated statistical edge. VWAP, EMA, FVGs, volume interpretation, liquidity selection, and retest nuance must remain separated from controlled backtest evidence until tested.</div>
+
+    <div class="article-layout">
+      <aside class="toc">
+        <strong>On this page</strong>
+        <a href="#map">1. Map structure</a><a href="#orb">2. Build ORB</a><a href="#premarket">3. Read pre-NY behavior</a><a href="#retest">4. Retest / acceptance</a><a href="#confluence">5. Build confluence</a><a href="#liquidity">6. Liquidity framework</a><a href="#decision">7. Decision sequence</a><a href="#objective">8. Objective vs discretionary</a><a href="#risk">9. Execution & risk</a>
+      </aside>
+
+      <article class="article">
+        <section class="article-block" id="map">
+          <span class="chip blue">Step 1</span><h2>Map the market before looking for a trade.</h2>
+          <p>The process starts with structure, not with an automatic ORB breakout. Before New York, map the overnight references that can explain where price is positioned and where liquidity may sit.</p>
+          <div class="rule-grid">
+            <div class="rule"><b>Asia session</b><span>High, low, and consolidation zones.</span></div>
+            <div class="rule"><b>London session</b><span>High, low, and consolidation zones.</span></div>
+            <div class="rule"><b>Previous day</b><span>High, low, close, and useful reference points.</span></div>
+            <div class="rule"><b>Relative position</b><span>Where current price begins compared with overnight structure.</span></div>
+          </div>
+          <div class="callout"><strong>Core question:</strong> What structure did the overnight sessions create, and where might price be drawn next?</div>
+        </section>
+
+        <section class="article-block" id="orb">
+          <span class="chip blue">Step 2</span><h2>Build the 8:00–8:15 ET opening range.</h2>
+          <p>The current raw process uses the 8:00–8:15 ET high, low, and midpoint as a local reference. The range is information — not automatic permission to buy a break or sell a breakdown.</p>
+          <ul><li>Record ORB high and low.</li><li>Calculate the midpoint.</li><li>Observe initial participation and direction.</li><li>Keep the ORB inside the larger Asia/London/previous-day map.</li></ul>
+          <div class="notice"><strong>Research conflict to preserve:</strong> some historical source-of-truth material elsewhere in the project references a different ORB clock. The 8:00–8:15 clock is strongly represented in the current Pine/backtest material, but clock attribution still belongs in controlled research rather than being silently rewritten as settled statistical proof.</div>
+        </section>
+
+        <section class="article-block" id="premarket">
+          <span class="chip yellow">Context</span><h2>Read what price reveals between 8:15 and 9:30.</h2>
+          <p>Once the range is formed, the process watches how price behaves before the New York cash open. A first break, failure, consolidation, or directional move can change the thesis before an entry is considered.</p>
+          <div class="rule-grid">
+            <div class="rule"><b>Holding above / below</b><span>Is price accepting outside the range or immediately returning?</span></div>
+            <div class="rule"><b>First breakout</b><span>Which side was tested first, and did it hold?</span></div>
+            <div class="rule"><b>Consolidation</b><span>Is price compressing near a reference or remaining directionless?</span></div>
+            <div class="rule"><b>Liquidity travel</b><span>Is price already moving toward Asia, London, or prior-day references?</span></div>
+          </div>
+        </section>
+
+        <section class="article-block" id="retest">
+          <span class="chip yellow">Entry preference</span><h2>Prefer retest and acceptance over blind breakout.</h2>
+          <p>The raw process repeatedly distinguishes a valid retest from a complete failure of structure. The preference is to see price violate an important level, return toward it, then show acceptance and continuation rather than chasing the initial move.</p>
+          <h3>What a constructive retest is trying to show</h3>
+          <ul><li>Price moved beyond a reference level.</li><li>The pullback revisits that location without fully destroying the structure.</li><li>Price holds/reclaims and continuation reasserts.</li><li>The level behaves like an acceptance test, not simply a one-candle breakout.</li></ul>
+          <h3>What should make the setup suspect</h3>
+          <ul><li>Price fully reverses through the level.</li><li>The breakout lacks participation and immediately collapses.</li><li>Price closes back into the range and fails to reclaim.</li><li>The pullback invalidates the structure the trade thesis depended on.</li></ul>
+          <div class="callout">This is one of the largest automation challenges: “retest happened” is measurable; “healthy acceptance versus meaningful rejection” still contains visual/contextual judgment unless a precise mechanical definition is validated.</div>
+        </section>
+
+        <section class="article-block" id="confluence">
+          <span class="chip purple">Modules</span><h2>Build a case instead of relying on one confirmation.</h2>
+          <p>At an area of interest, the discretionary process stacks context. These modules are currently useful descriptors and implementation candidates; they should not be marketed as individually proven filters without isolated testing.</p>
+          <div class="rule-grid">
+            <div class="rule"><b>VWAP</b><span>Directional permission/filter. The raw process generally prefers longs above and shorts below, but allows contextual exceptions.</span></div>
+            <div class="rule"><b>EMA</b><span>Secondary trend alignment rather than the primary reason for entry.</span></div>
+            <div class="rule"><b>FVG / IFVG</b><span>Potential imbalance locations on 5m and 1m used as contextual areas, not standalone signals.</span></div>
+            <div class="rule"><b>Volume</b><span>Participation, expansion, drying up, and reaction at key levels.</span></div>
+          </div>
+        </section>
+
+        <section class="article-block" id="liquidity">
+          <span class="chip blue">Core mental model</span><h2>Ask where price is trying to go.</h2>
+          <p>The framework does not treat the ORB as the whole map. ORB levels can be waypoints inside a larger move toward overnight or previous-day liquidity.</p>
+          <div class="rule-grid">
+            <div class="rule"><b>Upper targets</b><span>Asia high, London high, previous-day high, equal highs, other mapped buy-side liquidity.</span></div>
+            <div class="rule"><b>Lower targets</b><span>Asia low, London low, previous-day low, equal lows, other mapped sell-side liquidity.</span></div>
+            <div class="rule"><b>Sweep + rejection</b><span>Price takes a reference, fails to accept beyond it, then rotates away.</span></div>
+            <div class="rule"><b>Acceptance + continuation</b><span>Price takes a reference, holds beyond it, and continues toward the next target.</span></div>
+          </div>
+          <div class="callout">Repeated question: Did the ORB break because the ORB itself matters, or because price is traveling through it toward a larger liquidity objective?</div>
+        </section>
+
+        <section class="article-block" id="decision">
+          <span class="chip green">Desk sequence</span><h2>The working decision sequence.</h2>
+          <ol>
+            <li><strong>Establish structure:</strong> map Asia, London, previous day, gaps, and relative location.</li>
+            <li><strong>Build the 8:00–8:15 ORB:</strong> high, low, midpoint, initial participation.</li>
+            <li><strong>Observe 8:15–9:30:</strong> acceptance, failed break, consolidation, liquidity travel.</li>
+            <li><strong>Evaluate 9:30:</strong> opening aggression, volume, continuation versus reversal.</li>
+            <li><strong>Wait for location/retest:</strong> do not chase a move simply because the range broke.</li>
+            <li><strong>Stack confluence:</strong> VWAP, trend context, imbalance, volume, next liquidity target.</li>
+            <li><strong>Enter or pass:</strong> weak/contradictory context is permission to do nothing.</li>
+            <li><strong>Manage to structure:</strong> invalidation and targets should relate to the thesis, not arbitrary noise.</li>
+          </ol>
+        </section>
+
+        <section class="article-block" id="objective">
+          <span class="chip purple">Mechanical boundary</span><h2>What can be measured vs. what still needs judgment.</h2>
+          <h3>Objective / codable candidates</h3>
+          <ul><li>Session highs/lows and previous-day levels.</li><li>ORB high, low, midpoint, range size, and clock.</li><li>Price above/below a reference.</li><li>VWAP / EMA relationship.</li><li>Algorithmic FVG definitions.</li><li>Volume relative to an average or threshold.</li><li>Distance to mapped liquidity targets.</li><li>Entry time, price, direction, exit, duration, and target hit.</li></ul>
+          <h3>Currently discretionary / definition-sensitive</h3>
+          <ul><li>Acceptance versus rejection nuance.</li><li>Healthy versus weak consolidation.</li><li>Whether a move has conviction.</li><li>Which liquidity target is most likely.</li><li>When conflicting confluences should be overridden.</li><li>Context around volatility, broader markets, and news.</li><li>Scaling, stop movement, and discretionary trade management.</li></ul>
+        </section>
+
+        <section class="article-block" id="risk">
+          <span class="chip yellow">Execution governance</span><h2>Execution and risk stay downstream of the thesis.</h2>
+          <p>The raw process describes structure-aware invalidation, scaling as confidence develops, breakeven after progress, and holding toward liquidity targets. Those concepts are useful documentation, but position sizing, stop placement, partial exits, and trailing logic must be versioned separately because historical code and discretionary practice have not always used the same implementation.</p>
+          <div class="notice"><strong>Current project rule:</strong> keep historical backtest metrics, paper-forward observations, funded results, and eventual live results separate. “Implemented” is not the same thing as “validated,” and profitable full-configuration results do not prove each internal component.</div>
+        </section>
+      </article>
+    </div>
+  </main>
+
+  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Trade Bible</strong><span>Source basis: MASON_DECISION_PROCESS.md + project evidence governance.</span></div></footer>
+</body>
+</html>
