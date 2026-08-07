@@ -70,6 +70,8 @@ def main() -> int:
         SITE / "strategies.html",
         SITE / "mason-orb.html",
         SITE / "strategy.css",
+        SITE / "journal.html",
+        SITE / "journal.css",
         SITE / "assets" / "research" / "SPX500_2026-07-08_10-23-12.png",
         SITE / "assets" / "research" / "Tradezella-Summary-June-26-2026.png",
         SITE / "dashboard.html",

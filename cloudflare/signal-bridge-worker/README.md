@@ -1,10 +1,12 @@
 # Signal Bridge hosted webhook worker
 
-This Worker removes the Mac/quick-tunnel dependency from production alert delivery.
+This Worker removes the Mac/quick-tunnel dependency from production alert delivery and now hosts the first durable data APIs used by the Premium OS.
 
-Production path:
+Current paths:
 
-`TradingView -> Cloudflare Worker -> Discord`
+`TradingView -> Cloudflare Worker -> Discord + D1 signal ledger`
+
+`Discord / future capture tools -> authenticated journal ingest -> D1 private journal ledger -> reviewed Premium OS entries`
 
 The existing local Signal Bridge server remains useful for local dashboard/testing, but Discord alert delivery no longer depends on the Mac staying awake once this Worker is deployed.
 
@@ -14,8 +16,10 @@ The existing local Signal Bridge server remains useful for local dashboard/testi
 - TradingView `/tv-alert` requests are accepted only from TradingView's published webhook source IP addresses.
 - TradingView alert JSON contains no password or webhook credential.
 - `/test` is separate and requires the `SIGNAL_BRIDGE_TEST_TOKEN` bearer token.
+- Journal `POST /journal` requires a separate `JOURNAL_INGEST_TOKEN` bearer token.
+- Journal entries default to `PRIVATE`; public `GET /journal` returns only rows explicitly marked `PUBLISHED`.
 - Request bodies are JSON-only and capped at 16 KiB.
-- Side/event values are validated and text fields are length-limited.
+- Side/event/result values are validated and text fields are length-limited.
 - Discord delivery runs asynchronously so TradingView receives a response quickly.
 
 Published TradingView webhook IPs used by the Worker:
@@ -29,7 +33,7 @@ Re-check TradingView's current webhook documentation before changing this allowl
 
 ## Deploy from the repository
 
-From the repository root, after Cloudflare authentication:
+From the repository root, after Cloudflare authentication and after loading `.env.local`:
 
 ```bash
 set -a
@@ -37,11 +41,14 @@ source .env.local
 set +a
 TMP_SECRETS="$(mktemp)"
 chmod 600 "$TMP_SECRETS"
-printf 'DISCORD_WEBHOOK_URL=%s\nSIGNAL_BRIDGE_TEST_TOKEN=%s\n' \
-  "$DISCORD_WEBHOOK_URL" "$TV_WEBHOOK_SECRET" > "$TMP_SECRETS"
+printf 'DISCORD_WEBHOOK_URL=%s\nSIGNAL_BRIDGE_TEST_TOKEN=%s\nJOURNAL_INGEST_TOKEN=%s\n' \
+  "$DISCORD_WEBHOOK_URL" "$TV_WEBHOOK_SECRET" "$JOURNAL_INGEST_TOKEN" > "$TMP_SECRETS"
 npx wrangler deploy \
   --config cloudflare/signal-bridge-worker/wrangler.toml \
   --secrets-file "$TMP_SECRETS"
+npx wrangler d1 migrations apply DB \
+  --remote \
+  --config cloudflare/signal-bridge-worker/wrangler.toml
 rm -f "$TMP_SECRETS"
 ```
 
@@ -53,25 +60,42 @@ The initial deployment uses the stable Cloudflare `workers.dev` route assigned t
 GET https://<worker-host>/health
 ```
 
-Expected response:
+Worker v1.2 reports the alert-history binding plus journal storage and whether the private ingest token is configured.
 
-```json
-{"ok":true,"service":"signal-bridge-worker","version":"1.0.0"}
-```
+## Signal endpoints
 
-## Authenticated manual test
+- `POST /tv-alert` — TradingView-only production alert receiver.
+- `POST /test` — authenticated infrastructure test.
+- `GET /events` — public normalized production event history; TEST events hidden by default.
 
-Use the local `TV_WEBHOOK_SECRET` only as the private `/test` bearer token. It is not placed in a TradingView message.
+## Journal endpoints
+
+- `GET /journal?limit=25` — public published journal entries only.
+- `GET /journal?symbol=MES` — filter published entries by symbol.
+- `GET /journal?result=WIN` — filter published entries by result.
+- `GET /journal?setup=ORB%20retest` — filter published entries by exact normalized setup label.
+- `POST /journal` — authenticated journal ingestion. Defaults to `visibility=PRIVATE` and `review_status=RAW`.
+
+Example private journal ingest:
 
 ```bash
-set -a
-source .env.local
-set +a
-curl -sS -X POST "https://<worker-host>/test" \
-  -H "Authorization: Bearer $TV_WEBHOOK_SECRET" \
+curl -sS -X POST "https://<worker-host>/journal" \
+  -H "Authorization: Bearer $JOURNAL_INGEST_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"symbol":"MES","side":"LONG","event":"TEST","price":"6000","strategy":"Signal Bridge","note":"Hosted Worker test"}'
+  -d '{
+    "source":"discord",
+    "symbol":"MES",
+    "side":"LONG",
+    "strategy":"Mason ORB",
+    "setup":"ORB retest",
+    "result":"OPEN",
+    "raw_text":"Short-form journal note preserved exactly as written.",
+    "tags":["retest","morning"],
+    "visibility":"PRIVATE"
+  }'
 ```
+
+The API intentionally keeps `source_ref` private. Public journal responses expose only published normalized content, not Discord message links or private source references.
 
 ## TradingView payload
 

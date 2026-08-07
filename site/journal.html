@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#060a11" />
+  <title>Journal Intelligence — Signal Bridge</title>
+  <meta name="description" content="Signal Bridge Journal Intelligence: a private-first capture pipeline for trade notes, screenshots, results, and research review." />
+  <link rel="icon" href="assets/brand/signal-bridge-favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="app.css" />
+  <link rel="stylesheet" href="journal.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="index.html">
+        <img src="assets/brand/signal-bridge-mark-blue.svg" alt="Signal Bridge" />
+        <span class="brand-copy"><strong>SIGNAL BRIDGE</strong><span>Trading OS</span></span>
+      </a>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="signals.html">Signals</a>
+        <a href="strategies.html">Strategies</a>
+        <a class="active" href="journal.html">Journal</a>
+        <a href="trade-bible.html">Trade Bible</a>
+        <a href="evidence.html">Evidence</a>
+        <a href="dashboard.html">Dashboard</a>
+      </nav>
+      <span class="beta-pill">Premium OS · Beta</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="shell page-hero journal-hero">
+      <div class="breadcrumb"><a href="index.html">Signal Bridge</a> / Journal Intelligence</div>
+      <span class="eyebrow" style="margin-top:25px">Capture → Review → Learn</span>
+      <h1><span class="gradient-text">Turn every trade into usable data.</span></h1>
+      <p>Journal Intelligence is the bridge between daily execution and long-term research. Short Discord notes, screenshots, signal events, results, and later AI normalization can become one durable trade-learning record instead of disappearing into chat history or camera roll folders.</p>
+      <div class="hero-kicker">
+        <span class="chip green">D1 schema ready</span>
+        <span class="chip blue">Signal-link ready</span>
+        <span class="chip yellow">Private first</span>
+        <span class="chip purple">AI normalization next</span>
+      </div>
+    </section>
+
+    <section class="shell journal-status-grid" aria-label="Journal system status">
+      <div class="journal-status-card"><span>Journal Storage</span><strong id="journalStorage">Checking…</strong><small>D1 durable journal ledger</small></div>
+      <div class="journal-status-card"><span>Capture API</span><strong id="journalIngest">Checking…</strong><small>Authenticated ingestion only</small></div>
+      <div class="journal-status-card"><span>Published Entries</span><strong id="journalCount">—</strong><small>Private entries never appear here</small></div>
+      <div class="journal-status-card"><span>Last Refresh</span><strong id="journalRefresh">—</strong><small>Auto-refreshes every 45 seconds</small></div>
+    </section>
+
+    <section class="shell section">
+      <div class="section-head">
+        <div><span class="eyebrow">Capture Architecture</span><h2>Write once. Reuse everywhere.</h2></div>
+        <p>The target workflow is intentionally simple enough to fit real trading: journal the trade in Discord, preserve the raw note, normalize it later, connect it to Signal Bridge events, and only publish educational material after review.</p>
+      </div>
+      <div class="journal-flow">
+        <div class="journal-flow-step"><span>01</span><b>Discord journal post</b><small>Fast, short-form note while the trade is fresh.</small></div>
+        <div class="journal-flow-step"><span>02</span><b>Private capture</b><small>Raw text and source reference are stored without public exposure.</small></div>
+        <div class="journal-flow-step"><span>03</span><b>Normalize</b><small>Symbol, direction, setup, result, tags, screenshots, and signal link become structured fields.</small></div>
+        <div class="journal-flow-step"><span>04</span><b>Review</b><small>Separate what actually happened from hindsight and research interpretation.</small></div>
+        <div class="journal-flow-step"><span>05</span><b>Publish / research</b><small>Approved lessons can feed education, strategy evidence, and future testing.</small></div>
+      </div>
+      <div class="privacy-callout"><strong>Private-first by design.</strong> The current beta website is publicly reachable, so raw Discord journal posts should not automatically become public website content. The journal API stores entries as <code>PRIVATE</code> by default; the public page only reads entries explicitly marked <code>PUBLISHED</code>.</div>
+    </section>
+
+    <section class="shell section journal-section">
+      <div class="section-head">
+        <div><span class="eyebrow">Published Journal</span><h2>Reviewed trade-learning entries.</h2></div>
+        <p>This is the member-facing layer. It is deliberately different from the private capture inbox so a quick emotional post after a trade cannot accidentally become permanent educational copy.</p>
+      </div>
+
+      <div class="journal-toolbar">
+        <label><span>Symbol</span><input id="symbolFilter" type="text" maxlength="12" placeholder="MES" /></label>
+        <label><span>Result</span><select id="resultFilter"><option value="">All results</option><option>WIN</option><option>LOSS</option><option>BE</option><option>OPEN</option><option>PASS</option><option>NA</option></select></label>
+        <label><span>Setup</span><input id="setupFilter" type="text" maxlength="40" placeholder="ORB retest" /></label>
+        <button id="journalRefreshButton" class="refresh-btn" type="button">Refresh now</button>
+      </div>
+
+      <div id="journalNotice" class="notice journal-notice" hidden></div>
+      <div id="journalList" class="journal-list" aria-live="polite">
+        <div class="journal-empty">Loading published journal entries…</div>
+      </div>
+    </section>
+
+    <section class="shell section">
+      <div class="section-head">
+        <div><span class="eyebrow">Entry Contract</span><h2>What the database is ready to remember.</h2></div>
+        <p>The schema is intentionally broader than a P&amp;L spreadsheet because the long-term goal is to connect execution, psychology, market context, strategy version, screenshots, and research findings.</p>
+      </div>
+      <div class="field-grid">
+        <div class="field-card"><b>Execution</b><span>Time · symbol · side · result · P&amp;L · R multiple</span></div>
+        <div class="field-card"><b>Strategy context</b><span>Strategy · setup · tags · linked Signal Bridge event</span></div>
+        <div class="field-card"><b>Raw record</b><span>Original journal text · source · source reference · screenshot URL</span></div>
+        <div class="field-card"><b>Learning layer</b><span>Normalized summary · review status · private/published visibility</span></div>
+      </div>
+    </section>
+
+    <section class="shell section">
+      <div class="section-head">
+        <div><span class="eyebrow">Archive Context</span><h2>Old evidence becomes part of the system too.</h2></div>
+        <p>The existing project archive already contains journal summaries and chart captures. They remain qualitative source material until reconciled into trade-level records.</p>
+      </div>
+      <div class="journal-gallery">
+        <figure><img src="assets/research/Tradezella-Summary-June-26-2026.png" alt="TradeZella journal summary capture" /><figcaption>Preserved TradeZella summary capture. Useful as historical context; not a substitute for reconciled fills and trade-level attribution.</figcaption></figure>
+        <figure><img src="assets/research/SPX500_2026-07-08_10-23-12.png" alt="Trading chart research capture" /><figcaption>Preserved chart capture. Future journal entries can link screenshots directly to setups, signals, and post-trade review.</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="shell section">
+      <div class="section-head">
+        <div><span class="eyebrow">Next Automation Layer</span><h2>Discord can become the capture surface.</h2></div>
+        <p>The storage and API contract are being built so a future Signal Bridge Discord bot can watch the trade-journal channel, send each journal post into the private ledger, and hand it to an AI normalization step without changing how the trader journals in the moment.</p>
+      </div>
+      <div class="grid-3">
+        <div class="card"><span class="chip blue">Source</span><h3>Discord</h3><p>Short trade journaling stays conversational and accountable instead of forcing a second form during the session.</p></div>
+        <div class="card"><span class="chip purple">Processor</span><h3>AI normalization</h3><p>Extract structured fields and recurring themes while keeping the untouched raw note as provenance.</p></div>
+        <div class="card"><span class="chip green">Destination</span><h3>Signal Bridge</h3><p>Connect approved journal records to signals, strategy versions, screenshots, evidence work, and educational pages.</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Journal Intelligence</strong><span>Capture the process. Preserve the evidence. Publish only what earns review.</span></div></footer>
+
+  <script>
+    const API = "https://signal-bridge-webhook.airy-iris.workers.dev";
+    const storage = document.getElementById("journalStorage");
+    const ingest = document.getElementById("journalIngest");
+    const count = document.getElementById("journalCount");
+    const refreshTime = document.getElementById("journalRefresh");
+    const list = document.getElementById("journalList");
+    const notice = document.getElementById("journalNotice");
+    const symbolFilter = document.getElementById("symbolFilter");
+    const resultFilter = document.getElementById("resultFilter");
+    const setupFilter = document.getElementById("setupFilter");
+    const refreshButton = document.getElementById("journalRefreshButton");
+
+    function escapeHtml(value) {
+      return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+    }
+
+    function formatTime(value) {
+      if (!value) return "Time unavailable";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(date);
+    }
+
+    function resultClass(result) {
+      if (result === "WIN") return "win";
+      if (result === "LOSS") return "loss";
+      if (result === "BE") return "be";
+      return "neutral";
+    }
+
+    function renderEntries(entries) {
+      count.textContent = String(entries.length);
+      if (!entries.length) {
+        list.innerHTML = '<div class="journal-empty"><strong>No published journal entries yet.</strong><span>That is expected while the private capture pipeline is being connected. Raw journal notes stay private until explicitly reviewed and published.</span></div>';
+        return;
+      }
+
+      list.innerHTML = entries.map((entry) => {
+        const tags = Array.isArray(entry.tags) ? entry.tags : [];
+        const pnl = entry.pnl === null || entry.pnl === undefined ? "" : `<span>P&amp;L ${Number(entry.pnl) >= 0 ? "+" : ""}${escapeHtml(entry.pnl)}</span>`;
+        const rr = entry.rr === null || entry.rr === undefined ? "" : `<span>${escapeHtml(entry.rr)}R</span>`;
+        return `
+          <article class="journal-entry">
+            <div class="journal-entry-head">
+              <div>
+                <div class="journal-title-line"><strong>${escapeHtml(entry.title || entry.setup || "Trade journal")}</strong><span class="result-pill ${resultClass(entry.result)}">${escapeHtml(entry.result)}</span></div>
+                <div class="journal-entry-meta"><span>${escapeHtml(entry.symbol || "—")}${entry.side ? ` · ${escapeHtml(entry.side)}` : ""}</span><span>${escapeHtml(formatTime(entry.journal_time || entry.created_at))}</span>${pnl}${rr}</div>
+              </div>
+              <code>${escapeHtml(String(entry.id).slice(0, 8))}</code>
+            </div>
+            <p>${escapeHtml(entry.summary || entry.raw_text)}</p>
+            <div class="journal-tags">${tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>
+            <div class="journal-foot"><span>${escapeHtml(entry.strategy || "Unassigned strategy")}</span><span>${escapeHtml(entry.setup || "Setup not normalized")}</span><span>${escapeHtml(entry.review_status || "RAW")}</span></div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    async function checkHealth() {
+      try {
+        const response = await fetch(`${API}/health`, { cache: "no-store" });
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw new Error("health_failed");
+        storage.textContent = data.journal_storage ? "Connected" : "Not connected";
+        storage.className = data.journal_storage ? "good" : "warn";
+        ingest.textContent = data.journal_ingest_configured ? "Configured" : "Token pending";
+        ingest.className = data.journal_ingest_configured ? "good" : "warn";
+      } catch {
+        storage.textContent = "Unavailable";
+        storage.className = "bad";
+        ingest.textContent = "Unknown";
+        ingest.className = "warn";
+      }
+    }
+
+    async function loadJournal() {
+      refreshButton.disabled = true;
+      notice.hidden = true;
+      const params = new URLSearchParams({ limit: "50" });
+      if (symbolFilter.value.trim()) params.set("symbol", symbolFilter.value.trim().toUpperCase());
+      if (resultFilter.value) params.set("result", resultFilter.value);
+      if (setupFilter.value.trim()) params.set("setup", setupFilter.value.trim());
+
+      try {
+        const response = await fetch(`${API}/journal?${params.toString()}`, { cache: "no-store" });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "journal_failed");
+        renderEntries(data.entries || []);
+      } catch (error) {
+        count.textContent = "—";
+        notice.hidden = false;
+        notice.innerHTML = `<strong>Journal unavailable:</strong> ${escapeHtml(error.message || "Could not load journal")}.`;
+        list.innerHTML = '<div class="journal-empty">The journal API is not available on the deployed Worker yet.</div>';
+      } finally {
+        refreshTime.textContent = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" }).format(new Date());
+        refreshButton.disabled = false;
+      }
+    }
+
+    async function refreshAll() {
+      await Promise.all([checkHealth(), loadJournal()]);
+    }
+
+    symbolFilter.addEventListener("change", loadJournal);
+    resultFilter.addEventListener("change", loadJournal);
+    setupFilter.addEventListener("change", loadJournal);
+    refreshButton.addEventListener("click", refreshAll);
+    refreshAll();
+    setInterval(refreshAll, 45000);
+  </script>
+</body>
+</html>
