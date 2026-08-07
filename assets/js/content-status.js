@@ -16,6 +16,20 @@ function escapeHtml(value = "") {
     .replaceAll("'", "&#039;");
 }
 
+function formatMoney(value) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return "--";
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 2,
+  }).format(Number(value));
+}
+
+function formatNumber(value, digits = 2) {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return "--";
+  return Number(value).toFixed(digits);
+}
+
 function countByStatus(items) {
   return STATUS_ORDER.reduce((acc, status) => {
     acc[status] = items.filter((item) => item.status === status).length;
@@ -103,6 +117,43 @@ function renderRegistry() {
   `).join("");
 }
 
+function renderMetrics(metrics = []) {
+  const body = document.getElementById("metricRows");
+  const note = document.getElementById("metricCount");
+  note.textContent = `${metrics.length} historical configuration records`;
+
+  if (!metrics.length) {
+    body.innerHTML = '<tr><td colspan="10">No metric records loaded.</td></tr>';
+    return;
+  }
+
+  body.innerHTML = metrics.map((metric) => {
+    const value = metric.value || {};
+    const pfClass = Number(value.profit_factor) < 1 ? "metricNegative" : "";
+    const expectancyClass = Number(value.expectancy_usd) < 0 ? "metricNegative" : "";
+    return `
+      <tr>
+        <td>
+          <strong>${escapeHtml(metric.name)}</strong>
+          <small>${escapeHtml(metric.decision)}</small>
+        </td>
+        <td>${escapeHtml(metric.instrument || "--")}</td>
+        <td>${escapeHtml(metric.timeframe || "--")}</td>
+        <td>${escapeHtml(metric.orb_build || "--")}</td>
+        <td>${escapeHtml(metric.sample_size)}</td>
+        <td>${escapeHtml(formatNumber(value.win_rate_pct, 2))}%</td>
+        <td class="${pfClass}">${escapeHtml(formatNumber(value.profit_factor, 3))}</td>
+        <td class="${expectancyClass}">${escapeHtml(formatMoney(value.expectancy_usd))}</td>
+        <td>${escapeHtml(formatMoney(value.max_drawdown_usd))}<small>${escapeHtml(formatNumber(value.max_drawdown_pct, 2))}%</small></td>
+        <td>
+          ${escapeHtml(metric.date_range)}
+          <small>${escapeHtml(metric.cost_model)}</small>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
 function bindControls() {
   document.getElementById("searchInput").addEventListener("input", (event) => {
     state.search = event.target.value.trim().toLowerCase();
@@ -134,9 +185,11 @@ async function loadRegistry() {
 
     renderCounts(state.data.items || []);
     renderCategories(state.data.items || []);
+    renderMetrics(state.data.metrics || []);
     renderRegistry();
   } catch (error) {
     registry.innerHTML = `<div class="error">Unable to load the evidence registry: ${escapeHtml(error.message)}</div>`;
+    document.getElementById("metricRows").innerHTML = `<tr><td colspan="10">Unable to load metrics: ${escapeHtml(error.message)}</td></tr>`;
   }
 }
 
