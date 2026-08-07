@@ -29,9 +29,10 @@ NAV_ITEMS = [
     ("strategies.html", "Strategies"),
     ("indicators.html", "Indicators"),
     ("journal.html", "Journal"),
-    ("trade-bible.html", "Trade Bible"),
-    ("evidence.html", "Evidence"),
+    ("mason.html", "Mason"),
 ]
+
+MASON_SECTION_PAGES = {"mason.html", "mason-orb.html", "trade-bible.html", "evidence.html"}
 
 LEGAL_NOTE = (
     '<div class="legal-disclaimer"><div class="shell">'
@@ -61,7 +62,11 @@ def apply_native_shell(path: Path) -> None:
 
     links = []
     for href, label in NAV_ITEMS:
-        active = ' class="active"' if path.name == href else ""
+        if href == "mason.html":
+            is_active = path.name in MASON_SECTION_PAGES
+        else:
+            is_active = path.name == href
+        active = ' class="active"' if is_active else ""
         links.append(f'        <a{active} href="{href}">{label}</a>')
     nav_html = '<nav class="nav" aria-label="Main navigation">\n' + "\n".join(links) + "\n      </nav>"
 
@@ -103,6 +108,7 @@ def main() -> int:
 
     required = [
         SITE / "index.html",
+        SITE / "mason.html",
         SITE / "trade-bible.html",
         SITE / "evidence.html",
         SITE / "signals.html",
