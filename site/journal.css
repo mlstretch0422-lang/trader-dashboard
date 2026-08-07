@@ -55,20 +55,27 @@
 .field-card b { display:block; font-size:12px; margin-bottom:8px; }
 .field-card span { color:var(--muted); font-size:10px; line-height:1.6; }
 
+/* The old archive screenshots were visually noisy and did not teach the journal workflow.
+   Keep the historical captions, but turn the visual area into polished review-state cards. */
 .journal-gallery { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
-.journal-gallery figure { margin:0; border:1px solid var(--line); border-radius:18px; overflow:hidden; background:rgba(12,19,30,.8); }
-.journal-gallery img { width:100%; display:block; aspect-ratio:16/9; object-fit:cover; border-bottom:1px solid var(--line); }
+.journal-gallery figure { position:relative; margin:0; border:1px solid var(--line); border-radius:18px; overflow:hidden; background:linear-gradient(155deg,rgba(15,24,38,.96),rgba(8,13,22,.98)); }
+.journal-gallery img { display:none; }
+.journal-gallery figure::before { content:""; display:block; aspect-ratio:16/9; border-bottom:1px solid var(--line); background-color:#08101b; }
+.journal-gallery figure:first-child::before { background:
+  linear-gradient(90deg,transparent 0 7%,rgba(80,214,160,.8) 7% 8%,transparent 8% 14%,rgba(255,105,125,.7) 14% 15%,transparent 15% 23%,rgba(80,214,160,.75) 23% 24%,transparent 24% 100%),
+  linear-gradient(0deg,transparent 0 24%,rgba(88,183,255,.15) 24% 25%,transparent 25% 49%,rgba(155,124,255,.13) 49% 50%,transparent 50% 74%,rgba(88,183,255,.12) 74% 75%,transparent 75% 100%),
+  radial-gradient(circle at 78% 30%,rgba(88,183,255,.20),transparent 28%),#08101b; }
+.journal-gallery figure:nth-child(2)::before { background:
+  linear-gradient(135deg,transparent 0 38%,rgba(88,183,255,.75) 39% 40%,transparent 41% 48%,rgba(80,214,160,.72) 49% 50%,transparent 51%),
+  linear-gradient(0deg,transparent 0 22%,rgba(255,213,107,.18) 22% 23%,transparent 23% 52%,rgba(155,124,255,.16) 52% 53%,transparent 53%),
+  radial-gradient(circle at 20% 75%,rgba(155,124,255,.19),transparent 30%),#08101b; }
+.journal-gallery figure::after { position:absolute; top:18px; left:18px; right:18px; padding:12px 14px; border:1px solid rgba(255,255,255,.09); border-radius:12px; background:rgba(5,10,18,.78); backdrop-filter:blur(8px); color:#dbe8f8; font-size:11px; font-weight:850; letter-spacing:.08em; text-transform:uppercase; }
+.journal-gallery figure:first-child::after { content:"TRADE REVIEW  ·  RAW → NORMALIZED → REVIEWED"; }
+.journal-gallery figure:nth-child(2)::after { content:"CHART + SIGNAL + NOTE  ·  ONE LINKED RECORD"; }
 .journal-gallery figcaption { color:#8799af; font-size:11px; line-height:1.6; padding:13px 15px 15px; }
 
-@media (max-width: 1180px) {
-  .journal-status-grid { grid-template-columns:repeat(3,1fr); }
-}
-
-@media (max-width: 1100px) {
-  .journal-flow { grid-template-columns:repeat(3,1fr); }
-  .field-grid { grid-template-columns:repeat(2,1fr); }
-}
-
+@media (max-width: 1180px) { .journal-status-grid { grid-template-columns:repeat(3,1fr); } }
+@media (max-width: 1100px) { .journal-flow { grid-template-columns:repeat(3,1fr); } .field-grid { grid-template-columns:repeat(2,1fr); } }
 @media (max-width: 720px) {
   .journal-status-grid, .journal-flow, .field-grid, .journal-gallery { grid-template-columns:1fr; }
   .journal-toolbar { align-items:stretch; }
