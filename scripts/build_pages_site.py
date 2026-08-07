@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import re
 import shutil
 import subprocess
 import sys
@@ -19,6 +20,16 @@ RESEARCH_IMAGES = [
     ROOT / "Tradezella-Summary-June-26-2026.png",
 ]
 
+NAV_ITEMS = [
+    ("index.html", "Home"),
+    ("signals.html", "Signals"),
+    ("strategies.html", "Strategies"),
+    ("indicators.html", "Indicators"),
+    ("journal.html", "Journal"),
+    ("reports.html", "Reports"),
+    ("dashboard.html", "Workspace"),
+]
+
 
 def copy_if_exists(source: Path, destination: Path) -> None:
     if not source.exists():
@@ -30,14 +41,31 @@ def copy_if_exists(source: Path, destination: Path) -> None:
         shutil.copy2(source, destination)
 
 
-def ensure_polish_link(path: Path) -> None:
+def apply_native_shell(path: Path) -> None:
     text = path.read_text(encoding="utf-8")
-    if "polish.css" in text:
-        return
-    marker = "</head>"
-    if marker not in text:
-        raise RuntimeError(f"Could not inject polish.css into {path}")
-    text = text.replace(marker, '  <link rel="stylesheet" href="polish.css" />\n</head>', 1)
+
+    if "polish.css" not in text:
+        marker = "</head>"
+        if marker not in text:
+            raise RuntimeError(f"Could not inject polish.css into {path}")
+        text = text.replace(marker, '  <link rel="stylesheet" href="polish.css" />\n</head>', 1)
+
+    links = []
+    for href, label in NAV_ITEMS:
+        active = ' class="active"' if path.name == href else ""
+        links.append(f'        <a{active} href="{href}">{label}</a>')
+    nav_html = '<nav class="nav" aria-label="Main navigation">\n' + "\n".join(links) + "\n      </nav>"
+
+    text, count = re.subn(
+        r'<nav class="nav"(?:\s+aria-label="[^"]*")?>.*?</nav>',
+        nav_html,
+        text,
+        count=1,
+        flags=re.DOTALL,
+    )
+    if count != 1:
+        raise RuntimeError(f"Could not normalize navigation in {path}")
+
     path.write_text(text, encoding="utf-8")
 
 
@@ -56,11 +84,12 @@ def main() -> int:
         raise FileNotFoundError(f"Premium site source is missing: {SITE_SOURCE}")
     copy_if_exists(SITE_SOURCE, SITE)
 
-    # Apply the shared product-polish/mobile layer to every native site page.
+    # Apply one shared navigation and mobile/product-polish layer to every native
+    # page so the published beta cannot drift into disconnected mini-sites.
     for source_html in SITE_SOURCE.glob("*.html"):
         built_html = SITE / source_html.name
         if built_html.exists():
-            ensure_polish_link(built_html)
+            apply_native_shell(built_html)
 
     # Keep the legacy console accessible under a separate internal filename so the
     # native dashboard.html can provide Signal Bridge navigation and mobile escape.
