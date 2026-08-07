@@ -18,14 +18,14 @@ const commands = [
   {
     name: "status",
     type: 1,
-    description: "Show Signal Bridge service status",
+    description: "Check hosted Signal Bridge services and live data state",
     integration_types: [0],
     contexts: [0],
   },
   {
     name: "orb",
     type: 1,
-    description: "Show the latest recorded opening range",
+    description: "Read the latest stored opening range and session lifecycle",
     integration_types: [0],
     contexts: [0],
     options: [symbolOption],
@@ -33,7 +33,7 @@ const commands = [
   {
     name: "brief",
     type: 1,
-    description: "Summarize the latest recorded session lifecycle",
+    description: "Get the current Session Story and setup readiness",
     integration_types: [0],
     contexts: [0],
     options: [symbolOption],
@@ -41,7 +41,7 @@ const commands = [
   {
     name: "news",
     type: 1,
-    description: "Show high-impact calendar context and recent market headlines",
+    description: "Get high-impact calendar state and recent market headlines",
     integration_types: [0],
     contexts: [0],
     options: [
@@ -56,7 +56,7 @@ const commands = [
   {
     name: "journal",
     type: 1,
-    description: "Save a trade journal entry to Signal Bridge",
+    description: "Save a trade or no-trade journal record to Signal Bridge",
     integration_types: [0],
     contexts: [0],
     options: [

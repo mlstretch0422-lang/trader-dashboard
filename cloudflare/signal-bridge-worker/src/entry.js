@@ -1,4 +1,5 @@
 import coreWorker from "./index.js";
+import { dispatchScheduledDesk } from "./bot_scheduler.js";
 import { handleDiscordInteraction } from "./discord_interactions.js";
 import { handleDiscordIntelligenceInteraction, INTELLIGENCE_COMMANDS } from "./discord_intelligence_interactions.js";
 import { handleDiscordMemberInteraction, MEMBER_COMMANDS } from "./discord_member_interactions.js";
@@ -58,6 +59,7 @@ async function extendHealth(response, env) {
       intelRuns,
       calendarTable,
       headlinesTable,
+      botDispatchTable,
     ] = await Promise.all([
       tableReady(env, "journal_entries"),
       tableReady(env, "session_events"),
@@ -66,10 +68,11 @@ async function extendHealth(response, env) {
       tableReady(env, "market_intelligence_runs"),
       tableReady(env, "economic_calendar_events"),
       tableReady(env, "market_headlines"),
+      tableReady(env, "bot_dispatch_log"),
     ]);
     return new Response(JSON.stringify({
       ...data,
-      worker_release: "bot-intelligence-news-v1",
+      worker_release: "desk-assistant-v2",
       discord_capture_configured: Boolean(
         env.DISCORD_PUBLIC_KEY &&
         env.DISCORD_APPLICATION_ID &&
@@ -84,6 +87,8 @@ async function extendHealth(response, env) {
       session_intelligence_storage: Boolean(env.DB) && sessionTable,
       market_intelligence_ready: intelRuns && calendarTable && headlinesTable,
       economic_calendar_provider_configured: Boolean(env.TRADING_ECONOMICS_API_KEY),
+      scheduled_desk_ready: botDispatchTable && Boolean(env.DISCORD_INTELLIGENCE_WEBHOOK_URL || env.DISCORD_WEBHOOK_URL),
+      scheduled_desk_storage_ready: botDispatchTable,
     }), {
       status: response.status,
       headers: response.headers,
@@ -99,12 +104,8 @@ export default {
 
     if (url.pathname === "/discord-interactions") {
       const command = await discordCommandName(request);
-      if (MEMBER_COMMANDS.has(command)) {
-        return handleDiscordMemberInteraction(request, env, ctx);
-      }
-      if (INTELLIGENCE_COMMANDS.has(command)) {
-        return handleDiscordIntelligenceInteraction(request, env, ctx);
-      }
+      if (MEMBER_COMMANDS.has(command)) return handleDiscordMemberInteraction(request, env, ctx);
+      if (INTELLIGENCE_COMMANDS.has(command)) return handleDiscordIntelligenceInteraction(request, env, ctx);
       return handleDiscordInteraction(request, env, ctx);
     }
 
@@ -116,25 +117,11 @@ export default {
       return handleMemberRequest(request, env);
     }
 
-    if (url.pathname === "/tv-session") {
-      return handleTradingViewSessionEvent(request, env, ctx);
-    }
-
-    if (url.pathname === "/session-test") {
-      return handleTestSessionEvent(request, env, ctx);
-    }
-
-    if (request.method === "GET" && url.pathname === "/session-events") {
-      return listSessionEvents(url, env);
-    }
-
-    if (request.method === "GET" && url.pathname === "/session-summary") {
-      return getSessionSummary(url, env);
-    }
-
-    if (request.method === "GET" && url.pathname === "/market-intelligence") {
-      return getMarketIntelligenceResponse(env);
-    }
+    if (url.pathname === "/tv-session") return handleTradingViewSessionEvent(request, env, ctx);
+    if (url.pathname === "/session-test") return handleTestSessionEvent(request, env, ctx);
+    if (request.method === "GET" && url.pathname === "/session-events") return listSessionEvents(url, env);
+    if (request.method === "GET" && url.pathname === "/session-summary") return getSessionSummary(url, env);
+    if (request.method === "GET" && url.pathname === "/market-intelligence") return getMarketIntelligenceResponse(env);
 
     if (request.method === "POST" && url.pathname === "/market-intelligence/refresh") {
       if (!env.SIGNAL_BRIDGE_TEST_TOKEN || bearerToken(request) !== env.SIGNAL_BRIDGE_TEST_TOKEN) {
@@ -145,13 +132,23 @@ export default {
     }
 
     const response = await coreWorker.fetch(request, env, ctx);
-    if (request.method === "GET" && url.pathname === "/health") {
-      return extendHealth(response, env);
-    }
+    if (request.method === "GET" && url.pathname === "/health") return extendHealth(response, env);
     return response;
   },
 
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(refreshMarketIntelligence(env));
+    const cron = String(event.cron || "");
+    if (cron === "*/15 * * * *") {
+      ctx.waitUntil(refreshMarketIntelligence(env));
+      return;
+    }
+    if (cron === "*/5 12-17 * * 1-5") {
+      ctx.waitUntil(dispatchScheduledDesk(event, env));
+      return;
+    }
+    ctx.waitUntil(Promise.all([
+      refreshMarketIntelligence(env),
+      dispatchScheduledDesk(event, env),
+    ]));
   },
 };
