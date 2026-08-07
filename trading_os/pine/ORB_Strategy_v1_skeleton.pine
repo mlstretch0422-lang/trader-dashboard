@@ -1,0 +1,10 @@
+// Skeleton Pine strategy for ORB Retest Strategy v1.0
+//@version=6
+strategy("ORB Retest Strategy v1.0 (skeleton)", overlay=true)
+
+// Inputs
+orbStart = input.string("0800", "ORB Start (HHMM)")
+orbEnd = input.string("0815", "ORB End (HHMM)")
+retestMode = input.string("Midpoint", "Retest Mode", options=["Breakout","Boundary","Midpoint"])
+
+// TODO: Implement clean entry/exit logic ported from trading_os/src/strategies/clean_orb.py

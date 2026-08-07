@@ -1,0 +1,34 @@
+# OS / editor
+.DS_Store
+.vscode/
+
+# Python env/cache
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# Local archives and bulky raw datasets (keep local, not in git)
+*.zip
+*.zst
+ES_5years_1m.csv
+ES_backtest_data.csv
+ES_backtest_data.market_hours_only.backup.csv
+paper-trading-order-history-all-*.csv
+paper-trading-positions-*.csv
+
+# Large local media/reference captures
+strat/Sc:notes/
+strat/Trade Bible/*.pdf
+strat/Trade Bible/*.docx
+strat/Trade Stratagey/*.docx
+
+# Big generated/redundant bundles
+share/review_bundle/
+
+# Large local datasets not required for app structure handoff
+trading_os/frd_sample_futures_ES/
+strat/frd_sample_futures_ES/
+strat/data/
+strat/notebooks/
+trading_os/experiments/outputs/_archive_candidates/

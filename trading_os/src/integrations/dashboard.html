@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Trader Dashboard</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 2rem; background: #020617; color: #e2e8f0; }
+      .hero { background: linear-gradient(135deg, #111827, #1e293b); padding: 1.25rem 1.5rem; border-radius: 16px; margin-bottom: 1rem; border: 1px solid #334155; }
+      .card { background: #111827; padding: 1rem 1.25rem; border-radius: 12px; margin-bottom: 1rem; border: 1px solid #334155; }
+      .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+      .pill { display: inline-block; padding: 0.25rem 0.6rem; border-radius: 999px; background: #1d4ed8; color: white; font-size: 0.8rem; margin-right: 0.4rem; margin-bottom: 0.4rem; }
+      pre { background: #020617; padding: 1rem; border-radius: 8px; overflow: auto; }
+      ul { margin: 0.4rem 0 0 0; padding-left: 1rem; }
+      h1, h2, h3 { margin-top: 0; }
+    </style>
+  </head>
+  <body>
+    <div class="hero">
+      <h1>Trader Dashboard</h1>
+      <p>Premium-style operating view for the regime-aware ORB workflow, strategy stack, and local research output.</p>
+      <div id="statusPills"></div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Strategy stack</h3>
+        <div id="strategyBlock">Loading...</div>
+      </div>
+      <div class="card">
+        <h3>Indicators</h3>
+        <div id="indicatorBlock">Loading...</div>
+      </div>
+      <div class="card">
+        <h3>Tools & data</h3>
+        <div id="toolsBlock">Loading...</div>
+      </div>
+    </div>
+
+    <div class="card" id="summary">Loading summary...</div>
+
+    <div class="card">
+      <h3>Current research output</h3>
+      <pre id="report">Loading...</pre>
+    </div>
+
+    <script>
+      const report = document.getElementById('report');
+      const summary = document.getElementById('summary');
+      const statusPills = document.getElementById('statusPills');
+      const strategyBlock = document.getElementById('strategyBlock');
+      const indicatorBlock = document.getElementById('indicatorBlock');
+      const toolsBlock = document.getElementById('toolsBlock');
+
+      async function loadReport() {
+        try {
+          const res = await fetch('./report.json', { cache: 'no-store' });
+          if (!res.ok) throw new Error('report not found');
+          const data = await res.json();
+          const stack = data.stack || {};
+          const research = data.research_output || {};
+
+          statusPills.innerHTML = `
+            <span class="pill">${data.status?.overall || 'Status'}</span>
+            <span class="pill">${data.status?.mode || 'Mode'}</span>
+          `;
+          strategyBlock.innerHTML = `
+            <strong>${stack.strategy?.name || 'Strategy'}</strong>
+            <ul>${(stack.strategy?.details || []).map(item => `<li>${item}</li>`).join('')}</ul>
+          `;
+          indicatorBlock.innerHTML = `
+            <strong>${stack.indicators?.name || 'Indicators'}</strong>
+            <ul>${(stack.indicators?.items || []).map(item => `<li>${item.name} — ${item.status}</li>`).join('')}</ul>
+          `;
+          toolsBlock.innerHTML = `
+            <strong>${stack.tools_data?.name || 'Tools & data'}</strong>
+            <ul>${(stack.tools_data?.items || []).map(item => `<li>${item.name} — ${item.status}</li>`).join('')}</ul>
+          `;
+
+          summary.innerHTML = `
+            <h3>Snapshot</h3>
+            <p><strong>Trades:</strong> ${research.trades ?? 0}</p>
+            <p><strong>Net:</strong> ${research.net ?? 0}</p>
+            <p><strong>Win rate:</strong> ${((research.win_rate ?? 0) * 100).toFixed(1)}%</p>
+            <p><strong>Dominant phase:</strong> ${research.dominant_phase ?? 'n/a'}</p>
+            <p><strong>Phase counts:</strong> ${JSON.stringify(research.phase_counts || {})}</p>
+          `;
+          report.textContent = JSON.stringify(data, null, 2);
+        } catch (error) {
+          summary.innerHTML = '<h3>Snapshot</h3><p>Run the analysis script first to produce report.json.</p>';
+          report.textContent = 'Run the local analysis script first to produce report.json';
+        }
+      }
+
+      loadReport();
+    </script>
+  </body>
+</html>

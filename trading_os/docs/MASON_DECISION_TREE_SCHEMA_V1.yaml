@@ -1,0 +1,169 @@
+version: 1.0
+status: draft
+owner: Mason
+as_of: 2026-07-08
+
+meta:
+  objective: Encode discretionary ES logic into testable if_then modules
+  instrument_scope: [ES, MES]
+  session_scope: [Asia, London, NewYork]
+  market_phase_model:
+    phases: [manipulation, consolidation, continuation]
+    ordering: any
+    note: Phase order is not fixed by session; classify observed state first
+
+constraints:
+  entry_window_et:
+    start: "09:30"
+    end: "10:30"
+  no_new_trade_after_et: "11:00"
+  max_trades_per_day: 1
+  strategy_daily_loss_stop_usd: 200
+  promoted_candidate_min_trades: 20
+  promoted_candidate_min_monthly_pass_rate: 0.01
+
+context_mapping:
+  top_down_order:
+    - htf_structure_4h_1h
+    - agreement_30m_15m
+    - session_liquidity_map
+  session_liquidity_map:
+    downside_pools: [asia_low, london_low, prior_day_low, orb_low]
+    upside_pools: [asia_high, london_high, prior_day_high, orb_high]
+
+bias_engine:
+  long_candidate:
+    all:
+      - htf_context in [bullish, bullish_continuation_after_retrace]
+      - downside_liquidity_near_or_swept == true
+      - reclaim_above_key_level == true
+  short_candidate:
+    all:
+      - htf_context in [bearish, bearish_continuation_after_retrace]
+      - upside_liquidity_near_or_swept == true
+      - reclaim_below_key_level == true
+  neutral_default:
+    condition: long_candidate == false and short_candidate == false
+    action: wait
+
+sweep_logic:
+  sweep_long_context:
+    definition: Price trades into mapped downside liquidity pool not recently revisited
+  sweep_short_context:
+    definition: Price trades into mapped upside liquidity pool not recently revisited
+  fake_sweep:
+    definition: Follow-through beyond swept level persists without timely reclaim
+  calibrate:
+    sweep_follow_through_pts_threshold: [4.0, 8.0]
+    reclaim_time_limit_bars_5m: [1, 3]
+
+expectation_engine:
+  rule: Separate expectation from observation for every setup
+
+  long:
+    expectation:
+      - htf_context == bullish
+      - retrace_into_downside_liquidity == expected
+      - bearish_continuation_should_fail == true
+      - reclaim_swept_level_then_rotate_up == expected
+    observation_checks:
+      - swept_downside_pool == true
+      - bearish_follow_through_failed == true
+      - reclaim_within_tested_window == true
+      - bullish_structure_reasserted == true
+    decision:
+      proceed_to_execution_if_all_checks_true: true
+      invalidate_if:
+        - accepted_below_swept_level == true
+        - strong_continuation_lower == true
+
+  short:
+    expectation:
+      - htf_context == bearish
+      - retrace_into_upside_liquidity == expected
+      - bullish_continuation_should_fail == true
+      - reclaim_down_then_rotate_lower == expected
+    observation_checks:
+      - swept_upside_pool == true
+      - bullish_follow_through_failed == true
+      - reclaim_down_within_tested_window == true
+      - bearish_structure_reasserted == true
+    decision:
+      proceed_to_execution_if_all_checks_true: true
+      invalidate_if:
+        - accepted_above_swept_level == true
+        - strong_continuation_higher == true
+
+regime_engine:
+  chop_definition:
+    cues:
+      - fails_to_leave_orb_with_intent
+      - repeated_orb_back_and_forth
+      - low_displacement_after_open
+    hard_proxy:
+      midpoint_crosses_1h_gte: 6
+    calibrate:
+      minimum_orb_escape_pts: [4.0, 6.0]
+      maximum_chop_flips_5m_in_20_30m: 3
+  no_trade_if:
+    - regime == chop and no_narrative_reset
+    - time_et > "11:00"
+
+abnormal_action_invalidation:
+  invalidate_bias_if_any:
+    - abnormal_body_multiple_gte_range: [2.5, 3.5]
+    - abnormal_range_multiple_gte_range: [2.5, 3.5]
+    - event_like_behavior_detected: true
+
+mss_definition:
+  bull_mss:
+    prior_pattern: lower_highs_and_lower_lows
+    shift_condition: previous_low_not_broken_higher_low_forms
+    confirmation_candidate: break_swing_high_after_higher_low
+  bear_mss:
+    prior_pattern: higher_highs_and_higher_lows
+    shift_condition: previous_high_not_broken_lower_high_forms
+    confirmation_candidate: break_swing_low_after_lower_high
+  integration:
+    if_orb_break_aligns_with_mss: quality_up
+    if_orb_break_conflicts_with_mss: quality_down_or_filter
+
+execution_filters:
+  role: confirmation_only_not_primary_thesis
+  filters:
+    - vwap_alignment
+    - ema_alignment
+  guardrail:
+    - if narrative_state != confirmed then indicators_cannot_force_entry
+
+setup_grading:
+  A_plus_all_required:
+    - htf_alignment_present_or_resolved
+    - clear_liquidity_interaction
+    - expectation_path_confirmed
+    - high_time_quality
+    - regime_not_chop
+  B_grade:
+    - most_A_plus_criteria_true
+    - one_moderate_conflict_no_hard_invalidation
+  no_trade:
+    - hard_risk_or_time_lockout
+    - narrative_invalidated
+    - chop_without_reset
+    - abnormal_action
+
+research_protocol:
+  reclaim_speed_policy:
+    do_not_assume_fixed_definition: true
+    test_hypotheses:
+      - one_bar_reclaim
+      - three_bar_reclaim
+      - atr_scaled_window
+      - time_based_window
+    promotion_metric_priority:
+      - sample_quality
+      - walk_forward_consistency
+      - funded_survival
+
+canonical_statement:
+  sentence: A liquidity sweep is not the trade; the trade is the market response to the sweep aligned with higher_timeframe auction direction.

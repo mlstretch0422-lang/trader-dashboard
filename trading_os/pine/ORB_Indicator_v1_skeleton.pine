@@ -1,0 +1,19 @@
+// Skeleton Pine indicator for ORB Retest Strategy v1.0
+//@version=6
+indicator("ORB Retest Indicator v1.0 (skeleton)", overlay=true)
+
+// Inputs (canonical)
+orbStart = input.string("0800", "ORB Start (HHMM)")
+orbEnd = input.string("0815", "ORB End (HHMM)")
+useVWAP = input.bool(true, "Use VWAP")
+useEMA = input.bool(false, "Use EMA")
+emaLen = input.int(50, "EMA Length")
+
+// ORB build (placeholder)
+// TODO: implement ORB build and visuals
+
+plot(nan, "ORB High")
+plot(nan, "ORB Low")
+plot(nan, "ORB Mid")
+
+// This skeleton is intentionally minimal — replace with the clean Python logic ported to Pine.

@@ -1,0 +1,51 @@
+Time,Text
+2026-03-26 10:05:24,Order 2906866701 for symbol CME_MINI:MES1! has been executed at price 6608.25 for 2 units
+2026-03-26 10:05:24,Order 2906850602 successfully cancelled
+2026-03-26 10:00:51,Order 2906850602 modification confirmed
+2026-03-26 10:00:51,Order 2906866701 modification confirmed
+2026-03-26 10:00:51,Modify position for symbol CME_MINI:MES1! with SL 6608.75 and TP 6624.75
+2026-03-26 10:00:34,Order 2906850602 modification confirmed
+2026-03-26 10:00:34,Order 2906866701 successfully placed
+2026-03-26 10:00:34,Modify position for symbol CME_MINI:MES1! with SL 6607.50 and TP 6624.75
+2026-03-26 09:59:28,Order 2906850602 successfully placed
+2026-03-26 09:59:28,Modify position for symbol CME_MINI:MES1! with TP 6624.75
+2026-03-26 09:59:19,Order 2906848637 for symbol CME_MINI:MES1! has been executed at price 6608.75 for 2 units
+2026-03-26 09:59:19,Order 2906848637 successfully placed
+2026-03-26 09:59:19,Call to place market order to buy 2 units of symbol CME_MINI:MES1! 
+2026-03-26 09:58:58,Order 2906582048 for symbol CME_MINI:MES1! has been executed at price 6604.25 for 2 units
+2026-03-26 09:58:58,Order 2906588237 successfully cancelled
+2026-03-26 09:56:00,Order 2906588237 modification confirmed
+2026-03-26 09:56:00,Order 2906582048 modification confirmed
+2026-03-26 09:55:59,Modify position for symbol CME_MINI:MES1! with SL 6605.00 and TP 6624.75
+2026-03-26 09:35:06,Order 2906588237 modification confirmed
+2026-03-26 09:35:06,Order 2906582048 modification confirmed
+2026-03-26 09:35:06,Modify position for symbol CME_MINI:MES1! with SL 6574.75 and TP 6624.75
+2026-03-26 09:34:51,Order 2906588237 modification confirmed
+2026-03-26 09:34:51,Order 2906582048 modification confirmed
+2026-03-26 09:34:51,Modify position for symbol CME_MINI:MES1! with SL 6579.00 and TP 6624.75
+2026-03-26 09:34:43,Order 2906588237 successfully placed
+2026-03-26 09:34:43,Order 2906582048 modification confirmed
+2026-03-26 09:34:43,Modify position for symbol CME_MINI:MES1! with SL 6580.25 and TP 6624.75
+2026-03-26 09:34:05,Order 2906582048 successfully placed
+2026-03-26 09:34:05,Modify position for symbol CME_MINI:MES1! with SL 6580.25
+2026-03-26 09:33:20,Order 2906574134 for symbol CME_MINI:MES1! has been executed at price 6584.75 for 2 units
+2026-03-26 09:33:20,Order 2906574134 successfully placed
+2026-03-26 09:33:20,Call to place market order to buy 2 units of symbol CME_MINI:MES1! 
+2026-03-25 10:00:32,Order 2902018843 for symbol CME_MINI:MES1! has been executed at price 6635.25 for 2 units
+2026-03-25 10:00:32,Order 2902052274 successfully cancelled
+2026-03-25 09:51:55,Order 2902018843 modification confirmed
+2026-03-25 09:51:55,Order 2902052274 modification confirmed
+2026-03-25 09:51:55,Modify position for symbol CME_MINI:MES1! with SL 6685.50 and TP 6635.25
+2026-03-25 09:51:41,Order 2902018843 modification confirmed
+2026-03-25 09:51:41,Order 2902052274 modification confirmed
+2026-03-25 09:51:41,Modify position for symbol CME_MINI:MES1! with SL 6682.50 and TP 6635.25
+2026-03-25 09:43:12,Order 2902018843 modification confirmed
+2026-03-25 09:43:12,Order 2902052274 successfully placed
+2026-03-25 09:43:12,Modify position for symbol CME_MINI:MES1! with SL 6680.75 and TP 6635.25
+2026-03-25 09:39:48,Order 2902018843 successfully placed
+2026-03-25 09:39:48,Modify position for symbol CME_MINI:MES1! with TP 6635.25
+2026-03-25 09:39:39,Order 2902017434 for symbol CME_MINI:MES1! has been executed at price 6675.50 for 2 units
+2026-03-25 09:39:39,Order 2902017434 successfully placed
+2026-03-25 09:39:39,Call to place market order to sell 2 units of symbol CME_MINI:MES1! 
+2026-03-25 09:36:27,Order 2901984170 for symbol CME_MINI:MES1! has been executed at price 6679.00 for 2 units
+2026-03-25 09:36:27,Order 2901969414 successfully cancelled

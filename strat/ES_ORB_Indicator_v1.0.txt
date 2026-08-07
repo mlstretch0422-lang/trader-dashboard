@@ -1,0 +1,325 @@
+//@version=6
+
+// ╔════════════════════════════════════════════════════════════════════════════════╗
+// ║  ES/MES OPENING RANGE BREAKOUT INDICATOR V1.0                                 ║
+// ║                                                                                ║
+// ║  Live chart guidance for ES ORB strategy                                       ║
+// ║  - Real-time ORB display                                                      ║
+// ║  - Entry/SL/TP levels                                                         ║
+// ║  - Filter status dashboard                                                    ║
+// ║  - Breakout + setup alerts                                                    ║
+// ║                                                                                ║
+// ║  Use alongside backtest strategy for position guidance                         ║
+// ╚════════════════════════════════════════════════════════════════════════════════╝
+
+indicator(
+    title    = "ES ORB Indicator v1.0",
+    shorttitle = "ES_ORB_Ind",
+    overlay  = true,
+    max_labels_count = 500,
+    max_lines_count = 500
+)
+
+// ════════════════════════════════════════════════════════════════════════════════
+// 1. INPUTS (Match strategy for consistency)
+// ════════════════════════════════════════════════════════════════════════════════
+
+grpTime = "Time Settings"
+i_timezone    = input.string("America/New_York", "Timezone", 
+                            options=["America/New_York", "America/Chicago", "UTC"], 
+                            group=grpTime)
+i_orbStart    = input.string("0930", "ORB Start (HHMM)",   group=grpTime)
+i_orbEnd      = input.string("0945", "ORB End (HHMM)",     group=grpTime)
+i_tradeStart  = input.string("0945", "Trade Start (HHMM)", group=grpTime)
+i_tradeEnd    = input.string("1100", "Trade End (HHMM)",   group=grpTime)
+
+grpEntry = "Entry Settings"
+i_bodyMinPct  = input.float(0.35, "Min Body % of ORB Range", minval=0.0, maxval=1.0, step=0.05, group=grpEntry)
+i_bodyMinAtr  = input.float(0.75, "Min Body × ATR(14)", minval=0.0, maxval=2.0, step=0.05, group=grpEntry)
+i_atrLen      = input.int(14, "ATR Length", minval=1, group=grpEntry)
+i_retestMode  = input.string("Boundary", "Retest Mode", options=["Breakout", "Boundary", "Midpoint"], group=grpEntry)
+
+grpFilters = "Filters"
+i_useVWAP     = input.bool(true, "Use VWAP Filter", group=grpFilters)
+i_minRange    = input.float(5.0, "Min ORB Range (pts)", minval=1.0, step=0.5, group=grpFilters)
+i_maxRange    = input.float(50.0, "Max ORB Range (pts)", minval=10.0, step=1.0, group=grpFilters)
+
+grpStop = "Stop Loss"
+i_slMethod    = input.string("Opposite", "SL Method", options=["Opposite", "Midpoint"], group=grpStop)
+
+grpTP = "Take Profit"
+i_tp1Rr       = input.float(1.0, "TP1 R:R", minval=0.1, maxval=5.0, step=0.1, group=grpTP)
+i_tp2Rr       = input.float(2.0, "TP2 R:R", minval=0.1, maxval=5.0, step=0.1, group=grpTP)
+i_tp3Rr       = input.float(3.0, "TP3 R:R", minval=0.1, maxval=5.0, step=0.1, group=grpTP)
+
+grpDisplay = "Display"
+i_showOrbLines = input.bool(true, "Show ORB Lines", group=grpDisplay)
+i_showSlTp    = input.bool(true, "Show SL/TP Guide", group=grpDisplay)
+i_showDash    = input.bool(true, "Show Dashboard", group=grpDisplay)
+i_showAlerts  = input.bool(true, "Show Alert Labels", group=grpDisplay)
+
+// ════════════════════════════════════════════════════════════════════════════════
+// 2. HELPER FUNCTIONS (Match strategy exactly)
+// ════════════════════════════════════════════════════════════════════════════════
+
+f_timeToMins(string hhmm) =>
+    h = str.tonumber(str.substring(hhmm, 0, 2))
+    m = str.tonumber(str.substring(hhmm, 2, 4))
+    h * 60 + m
+
+f_inWindow(string startHHMM, string endHHMM) =>
+    curH = hour(time, i_timezone)
+    curM = minute(time, i_timezone)
+    curMins = curH * 60 + curM
+    startMins = f_timeToMins(startHHMM)
+    endMins = f_timeToMins(endHHMM)
+    
+    if startMins < endMins
+        curMins >= startMins and curMins < endMins
+    else
+        curMins >= startMins or curMins < endMins
+
+f_newDay() =>
+    d = dayofmonth(time, i_timezone)
+    ta.change(d) != 0
+
+// ════════════════════════════════════════════════════════════════════════════════
+// 3. ORB BUILD (Same logic as strategy)
+// ════════════════════════════════════════════════════════════════════════════════
+
+var float orbHigh = na
+var float orbLow = na
+var float orbMid = na
+var bool orbDone = false
+var int orbStartBar = na
+
+newDay = f_newDay()
+
+if newDay
+    orbHigh := na
+    orbLow := na
+    orbMid := na
+    orbDone := false
+    orbStartBar := na
+
+inOrbWindow = f_inWindow(i_orbStart, i_orbEnd)
+
+if inOrbWindow and not orbDone
+    if na(orbHigh)
+        orbStartBar := bar_index
+    orbHigh := na(orbHigh) ? high : math.max(orbHigh, high)
+    orbLow := na(orbLow) ? low : math.min(orbLow, low)
+
+if not inOrbWindow and not orbDone and not na(orbHigh) and not na(orbLow)
+    orbDone := true
+    orbMid := (orbHigh + orbLow) / 2.0
+
+orbRange = orbDone ? orbHigh - orbLow : 0.0
+orbRangeOk = orbDone and orbRange >= i_minRange and orbRange <= i_maxRange
+
+// ════════════════════════════════════════════════════════════════════════════════
+// 4. BREAKOUT & DISPLACEMENT (Same logic as strategy)
+// ════════════════════════════════════════════════════════════════════════════════
+
+var bool breakoutLong = false
+var bool breakoutShort = false
+
+if newDay
+    breakoutLong := false
+    breakoutShort := false
+
+atrVal = ta.atr(i_atrLen)
+barBody = math.abs(close - open)
+bodyPctOfRange = orbRange > 0 ? barBody / orbRange : 0.0
+bodyVsAtr = atrVal > 0 ? barBody / atrVal : 0.0
+
+displacementOk = (bodyPctOfRange >= i_bodyMinPct) or (bodyVsAtr >= i_bodyMinAtr)
+
+if orbDone and orbRangeOk and not (breakoutLong or breakoutShort)
+    if close > orbHigh and displacementOk
+        breakoutLong := true
+    else if close < orbLow and displacementOk
+        breakoutShort := true
+
+// ════════════════════════════════════════════════════════════════════════════════
+// 5. ENTRY SIGNAL GENERATION (Same logic as strategy)
+// ════════════════════════════════════════════════════════════════════════════════
+
+inTradeWindow = f_inWindow(i_tradeStart, i_tradeEnd)
+vwapVal = ta.vwap(close)
+vwapFilterLong = not i_useVWAP or (close > vwapVal)
+vwapFilterShort = not i_useVWAP or (close < vwapVal)
+
+var bool entryPending = false
+var int entryPendingDir = 0
+var int entryPendingBar = na
+var bool retestSeen = false
+
+if newDay or not inTradeWindow
+    entryPending := false
+    entryPendingDir := 0
+    entryPendingBar := na
+    retestSeen := false
+
+bool longSig = false
+bool shortSig = false
+
+// LONG signal logic (simplified for indicator)
+if orbDone and orbRangeOk and inTradeWindow and vwapFilterLong
+    if i_retestMode == "Breakout"
+        if breakoutLong and not entryPending
+            longSig := true
+    else if i_retestMode == "Boundary"
+        if breakoutLong and not entryPending
+            entryPending := true
+            entryPendingDir := 1
+            entryPendingBar := bar_index
+            retestSeen := false
+        
+        if entryPending and entryPendingDir == 1
+            if not retestSeen and low <= orbHigh
+                retestSeen := true
+            if retestSeen and close > orbHigh and displacementOk
+                longSig := true
+                entryPending := false
+                retestSeen := false
+
+// SHORT signal logic
+if orbDone and orbRangeOk and inTradeWindow and vwapFilterShort
+    if i_retestMode == "Breakout"
+        if breakoutShort and not entryPending
+            shortSig := true
+    else if i_retestMode == "Boundary"
+        if breakoutShort and not entryPending
+            entryPending := true
+            entryPendingDir := -1
+            entryPendingBar := bar_index
+            retestSeen := false
+        
+        if entryPending and entryPendingDir == -1
+            if not retestSeen and high >= orbLow
+                retestSeen := true
+            if retestSeen and close < orbLow and displacementOk
+                shortSig := true
+                entryPending := false
+                retestSeen := false
+
+// ════════════════════════════════════════════════════════════════════════════════
+// 6. LEVEL CALCULATIONS FOR DISPLAY
+// ════════════════════════════════════════════════════════════════════════════════
+
+// Calculate SL/TP levels for reference (not executed)
+entryRef = if longSig then close else if shortSig then close else na
+slRef = if not na(entryRef)
+    i_slMethod == "Opposite" ? (breakoutLong ? orbLow : orbHigh) : orbMid
+else
+    na
+
+tp1Ref = if not na(slRef) and not na(entryRef)
+    breakoutLong ? entryRef + (entryRef - slRef) * i_tp1Rr : entryRef - (slRef - entryRef) * i_tp1Rr
+else
+    na
+
+tp2Ref = if not na(slRef) and not na(entryRef)
+    breakoutLong ? entryRef + (entryRef - slRef) * i_tp2Rr : entryRef - (slRef - entryRef) * i_tp2Rr
+else
+    na
+
+tp3Ref = if not na(slRef) and not na(entryRef)
+    breakoutLong ? entryRef + (entryRef - slRef) * i_tp3Rr : entryRef - (slRef - entryRef) * i_tp3Rr
+else
+    na
+
+// ════════════════════════════════════════════════════════════════════════════════
+// 7. VISUAL DISPLAY
+// ════════════════════════════════════════════════════════════════════════════════
+
+// ORB Lines
+if orbDone and i_showOrbLines
+    hColor = breakoutLong ? color.new(color.green, 30) : breakoutShort ? color.new(color.red, 30) : color.new(color.gray, 50)
+    line.new(orbStartBar, orbHigh, bar_index, orbHigh, xloc=xloc.bar_index, color=color.green, width=2, extend=extend.right)
+    line.new(orbStartBar, orbLow, bar_index, orbLow, xloc=xloc.bar_index, color=color.red, width=2, extend=extend.right)
+    if orbRange > 0
+        line.new(orbStartBar, orbMid, bar_index, orbMid, xloc=xloc.bar_index, color=color.orange, width=1, style=line.style_dotted, extend=extend.right)
+
+// VWAP
+plot(i_useVWAP ? vwapVal : na, "VWAP", color=color.new(color.blue, 30), linewidth=1)
+
+// SL/TP Guide (educational, not orders)
+if i_showSlTp and (longSig or shortSig)
+    if not na(slRef)
+        line.new(bar_index, slRef, bar_index + 50, slRef, xloc=xloc.bar_index, color=color.red, width=1, style=line.style_dashed, extend=extend.right)
+    if not na(tp1Ref)
+        line.new(bar_index, tp1Ref, bar_index + 50, tp1Ref, xloc=xloc.bar_index, color=color.green, width=1, style=line.style_dashed, extend=extend.right)
+    if not na(tp2Ref)
+        line.new(bar_index, tp2Ref, bar_index + 50, tp2Ref, xloc=xloc.bar_index, color=color.lime, width=1, style=line.style_dotted, extend=extend.right)
+    if not na(tp3Ref)
+        line.new(bar_index, tp3Ref, bar_index + 50, tp3Ref, xloc=xloc.bar_index, color=color.lime, width=1, style=line.style_dotted, extend=extend.right)
+
+// Signal markers
+plotshape(breakoutLong and orbRangeOk, title="Breakout Long", style=shape.triangleup, location=location.belowbar, color=color.green, size=size.small, text="↑BRK")
+plotshape(breakoutShort and orbRangeOk, title="Breakout Short", style=shape.triangledown, location=location.abovebar, color=color.red, size=size.small, text="↓BRK")
+plotshape(longSig, title="Long Setup", style=shape.triangleup, location=location.belowbar, color=color.lime, size=size.large, text="✓LONG")
+plotshape(shortSig, title="Short Setup", style=shape.triangledown, location=location.abovebar, color=color.orange, size=size.large, text="✓SHORT")
+
+// ════════════════════════════════════════════════════════════════════════════════
+// 8. ALERT LABELS
+// ════════════════════════════════════════════════════════════════════════════════
+
+if i_showAlerts
+    if longSig
+        label.new(bar_index, high + atrVal, "LONG SETUP\nSL: " + str.tostring(slRef, "0.00") + "\nTP1: " + str.tostring(tp1Ref, "0.00"),
+                 xloc=xloc.bar_index, style=label.style_label_down, color=color.green, textcolor=color.white, size=size.small)
+    
+    if shortSig
+        label.new(bar_index, low - atrVal, "SHORT SETUP\nSL: " + str.tostring(slRef, "0.00") + "\nTP1: " + str.tostring(tp1Ref, "0.00"),
+                 xloc=xloc.bar_index, style=label.style_label_up, color=color.red, textcolor=color.white, size=size.small)
+
+// ════════════════════════════════════════════════════════════════════════════════
+// 9. STATUS DASHBOARD
+// ════════════════════════════════════════════════════════════════════════════════
+
+if i_showDash and barstate.islast
+    dashText = ""
+    dashText += "═ ES ORB DASHBOARD ═\n"
+    dashText += "Time: " + str.tostring(hour(time, i_timezone)) + ":" + str.tostring(minute(time, i_timezone), "00") + " ET\n"
+    dashText += "\n"
+    dashText += "ORB WINDOW: " + (inOrbWindow ? "BUILDING" : orbDone ? "COMPLETE" : "—") + "\n"
+    dashText += "ORB Range: " + (orbDone ? str.tostring(orbRange, "0.0") + " pts" : "N/A") + "\n"
+    dashText += "ORB OK: " + (orbRangeOk ? "✓ YES" : "✗ NO") + "\n"
+    dashText += "\n"
+    dashText += "BREAKOUT: " + (breakoutLong ? "LONG ✓" : breakoutShort ? "SHORT ✓" : "—") + "\n"
+    dashText += "Displacement: " + (displacementOk ? "✓ OK" : "✗ FAIL") + "\n"
+    dashText += "VWAP Filter: " + (i_useVWAP ? (vwapFilterLong ? "✓ OK (Above)" : vwapFilterShort ? "✓ OK (Below)" : "✗ FAIL") : "OFF") + "\n"
+    dashText += "\n"
+    dashText += "TRADE WINDOW: " + (inTradeWindow ? "OPEN ✓" : "CLOSED") + "\n"
+    dashText += "Entry Pending: " + (entryPending ? "YES (" + str.tostring(i_retestMode) + ")" : "NO") + "\n"
+    dashText += "\n"
+    dashText += "SIGNAL: " + (longSig ? "→ LONG READY" : shortSig ? "→ SHORT READY" : "—") + "\n"
+    
+    label.new(bar_index, high, dashText,
+             xloc=xloc.bar_index, style=label.style_label_left,
+             bgcolor=color.new(color.black, 50), textcolor=color.white,
+             size=size.tiny, textalign=text.align_left)
+
+// ════════════════════════════════════════════════════════════════════════════════
+// 10. ALERTS (Tradingview native + Webhook compatible)
+// ════════════════════════════════════════════════════════════════════════════════
+
+// Alert on breakout
+if breakoutLong
+    alert("ES: LONG BREAKOUT - ORB Range: " + str.tostring(orbRange, "0.0") + " pts", alert.freq_once_per_bar)
+
+if breakoutShort
+    alert("ES: SHORT BREAKOUT - ORB Range: " + str.tostring(orbRange, "0.0") + " pts", alert.freq_once_per_bar)
+
+// Alert on setup ready
+if longSig
+    alert("ES: LONG SETUP READY\nEntry: " + str.tostring(entryRef, "0.00") + "\nSL: " + str.tostring(slRef, "0.00") + "\nTP1: " + str.tostring(tp1Ref, "0.00"), alert.freq_once_per_bar)
+
+if shortSig
+    alert("ES: SHORT SETUP READY\nEntry: " + str.tostring(entryRef, "0.00") + "\nSL: " + str.tostring(slRef, "0.00") + "\nTP1: " + str.tostring(tp1Ref, "0.00"), alert.freq_once_per_bar)
+
+// ════════════════════════════════════════════════════════════════════════════════
+// END INDICATOR
+// ════════════════════════════════════════════════════════════════════════════════

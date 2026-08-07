@@ -1,0 +1,4417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Signal Bridge Platform</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/brand/signal-bridge-favicon.svg" />
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Space+Grotesk:wght@500;600;700&display=swap");
+
+    :root {
+      --bg: #080a0d;
+      --surface: #101318;
+      --surface-hi: #151922;
+      --line: rgba(178, 188, 204, 0.18);
+      --line-strong: rgba(178, 188, 204, 0.33);
+      --text: #f2f2ef;
+      --muted: #9ca7b8;
+      --accent: #3f7cff;
+      --green: #28c88a;
+      --red: #ef6262;
+      --amber: #e2b24a;
+      --lift: 0 14px 34px rgba(0, 0, 0, 0.34);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      color: var(--text);
+      font-family: "Inter", sans-serif;
+      background:
+        radial-gradient(800px 420px at 95% -5%, rgba(63, 124, 255, 0.08), transparent 72%),
+        linear-gradient(180deg, #080a0d 0%, #0b0e13 100%);
+      letter-spacing: 0.01em;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 224px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--line);
+      padding: 18px 12px;
+      background: linear-gradient(180deg, #0a0d12, #0c1016);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      transition: transform 220ms ease;
+    }
+
+    .brand {
+      padding: 8px 8px 16px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 14px;
+    }
+
+    .brand h1 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .brandLogo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .brandMark {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      border: 1px solid rgba(178, 188, 204, 0.22);
+      background: #0f141c;
+      padding: 3px;
+      object-fit: contain;
+    }
+
+    .brandWord {
+      width: 130px;
+      max-width: 100%;
+      object-fit: contain;
+    }
+
+    .brand p {
+      color: var(--muted);
+      margin-top: 6px;
+      font-size: 0.76rem;
+    }
+
+    .liveChip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 10px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .liveDot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--amber);
+      box-shadow: 0 0 0 0 rgba(226, 178, 74, 0.5);
+      animation: pulse 2.3s ease-out infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(226, 178, 74, 0.45); }
+      100% { box-shadow: 0 0 0 10px rgba(226, 178, 74, 0); }
+    }
+
+    .navGroup {
+      margin-top: 12px;
+    }
+
+    .navTitle {
+      color: #8f99a8;
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin: 0 8px 7px;
+    }
+
+    .navList {
+      list-style: none;
+      display: grid;
+      gap: 1px;
+    }
+
+    .navBtn {
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      color: #cfd6e3;
+      border: 0;
+      border-left: 2px solid transparent;
+      padding: 8px 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
+    }
+
+    .navBtn:hover {
+      color: #ebeff6;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .navBtn.active {
+      color: #f4f7fc;
+      border-left-color: var(--accent);
+      background: rgba(63, 124, 255, 0.12);
+    }
+
+    .navIcon {
+      width: 1rem;
+      height: 1rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #a7b2c3;
+    }
+
+    .navIcon svg {
+      width: 1rem;
+      height: 1rem;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.75;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .main {
+      padding: 18px 22px 22px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 16px;
+    }
+
+    .topbar {
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 11px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(8px);
+      background: rgba(8, 10, 13, 0.84);
+    }
+
+    .topbarLeft {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .menuBtn {
+      display: none;
+      border: 1px solid var(--line);
+      background: #11151d;
+      color: #d8deea;
+      border-radius: 6px;
+      width: 34px;
+      height: 34px;
+      cursor: pointer;
+    }
+
+    .headerBlock h2 {
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      font-size: 1.24rem;
+      white-space: nowrap;
+    }
+
+    .headerMeta {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .headerMeta .dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 999px;
+      background: var(--line-strong);
+    }
+
+    .marketStatus {
+      color: #e4e8f0;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+    }
+
+    .iconBtn {
+      width: 34px;
+      height: 34px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: #11151d;
+      color: #ced6e4;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .iconBtn:hover {
+      transform: translateY(-1px);
+      border-color: var(--line-strong);
+    }
+
+    .iconBtn.active {
+      border-color: rgba(63, 124, 255, 0.62);
+      background: rgba(63, 124, 255, 0.16);
+    }
+
+    .iconBtn svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .iconBtn[data-tooltip]:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: 40px;
+      right: 0;
+      background: #10151d;
+      border: 1px solid rgba(178, 188, 204, 0.25);
+      color: #d3dceb;
+      padding: 4px 7px;
+      border-radius: 6px;
+      white-space: nowrap;
+      font-size: 0.7rem;
+      letter-spacing: 0.02em;
+      z-index: 20;
+    }
+
+    .badge {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      min-width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: rgba(63, 124, 255, 0.2);
+      border: 1px solid rgba(63, 124, 255, 0.5);
+      color: #dbe7ff;
+      font-size: 0.62rem;
+      font-family: "JetBrains Mono", monospace;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 3px;
+    }
+
+    .utilityPanel {
+      position: absolute;
+      top: 48px;
+      right: 0;
+      width: 300px;
+      background: #11161f;
+      border: 1px solid rgba(178, 188, 204, 0.24);
+      border-radius: 8px;
+      box-shadow: var(--lift);
+      padding: 10px;
+      display: none;
+      z-index: 25;
+    }
+
+    .utilityPanel.open {
+      display: block;
+      animation: fadeIn 180ms ease;
+    }
+
+    .utilityPanel h4 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #cad3e2;
+      margin-bottom: 8px;
+    }
+
+    .utilityPanel p,
+    .utilityPanel li {
+      color: #afb9ca;
+      font-size: 0.79rem;
+      line-height: 1.5;
+    }
+
+    .utilityPanel ul {
+      list-style: none;
+      display: grid;
+      gap: 6px;
+    }
+
+    .utilityInput {
+      width: 100%;
+      border: 1px solid rgba(178, 188, 204, 0.24);
+      border-radius: 6px;
+      background: #0d131b;
+      color: #dde5f1;
+      padding: 8px;
+      font-size: 0.79rem;
+      margin-bottom: 8px;
+    }
+
+    .section {
+      display: none;
+      animation: fadeIn 260ms ease;
+    }
+
+    .section.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .dashboard {
+      display: grid;
+      gap: 14px;
+    }
+
+    .missionHero {
+      background: linear-gradient(180deg, #131722 0%, #11151d 100%);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow: var(--lift);
+      padding: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .missionHero::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 240px;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(63, 124, 255, 0.08));
+      pointer-events: none;
+    }
+
+    .heroTop {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 200px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .eyebrow {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.13em;
+      color: #8f99a8;
+      margin-bottom: 8px;
+    }
+
+    .heroSymbol {
+      text-align: left;
+      color: #d8dfec;
+      font-size: 0.78rem;
+      line-height: 1.45;
+      font-family: "JetBrains Mono", monospace;
+      letter-spacing: 0.04em;
+    }
+
+    .heroLeft {
+      display: grid;
+      gap: 8px;
+    }
+
+    .heroRight {
+      border-left: 1px solid rgba(178, 188, 204, 0.2);
+      padding-left: 14px;
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .heroAction {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(2.2rem, 4vw, 3.2rem);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: 0.06em;
+      margin: 6px 0 10px;
+      text-transform: uppercase;
+    }
+
+    .long { color: var(--green); }
+    .short { color: var(--red); }
+    .wait { color: var(--amber); }
+
+    .heroThesis {
+      color: #d4dae7;
+      line-height: 1.55;
+      max-width: 760px;
+      font-size: 0.92rem;
+    }
+
+    .heroChecklist {
+      list-style: none;
+      display: grid;
+      gap: 5px;
+      margin-top: 3px;
+      color: #bec8d8;
+      font-size: 0.8rem;
+    }
+
+    .heroChecklist li {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .heroBullet {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #79859a;
+      flex: 0 0 auto;
+    }
+
+    .heroBullet.done { background: var(--green); }
+    .heroBullet.pending { background: var(--amber); }
+
+    .readiness {
+      display: grid;
+      gap: 8px;
+      justify-items: start;
+    }
+
+    .readinessRing {
+      width: 90px;
+      height: 90px;
+      border-radius: 999px;
+      background: conic-gradient(var(--accent) 0deg, rgba(148, 162, 183, 0.2) 0deg);
+      display: grid;
+      place-items: center;
+    }
+
+    .readinessInner {
+      width: 70px;
+      height: 70px;
+      border-radius: 999px;
+      background: #0f141c;
+      border: 1px solid rgba(178, 188, 204, 0.22);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      font-family: "JetBrains Mono", monospace;
+      color: #dbe5f6;
+      font-size: 0.75rem;
+      line-height: 1.2;
+    }
+
+    .readinessMeta {
+      width: 100%;
+      display: grid;
+      gap: 4px;
+      color: #b6c1d1;
+      font-size: 0.74rem;
+      font-family: "JetBrains Mono", monospace;
+    }
+
+    .readinessMeta strong {
+      color: #eaf0fa;
+      font-weight: 600;
+      font-size: 0.77rem;
+    }
+
+    .heroMeta {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      border-top: 1px solid var(--line);
+      padding-top: 9px;
+    }
+
+    .metaLabel {
+      font-size: 0.67rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #8e99aa;
+    }
+
+    .metaValue {
+      margin-top: 5px;
+      font-family: "JetBrains Mono", monospace;
+      color: #edf1f8;
+      font-size: 0.86rem;
+    }
+
+    .metaValue.pending { color: #bec8d8; }
+
+    .heroBottom {
+      margin-top: 9px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 20px;
+      border-top: 1px solid var(--line);
+      padding-top: 8px;
+    }
+
+    .noTrade {
+      color: #b4bece;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      max-width: 760px;
+    }
+
+    .moduleState {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #8a95a6;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .rowTwo {
+      display: grid;
+      grid-template-columns: minmax(0, 2.9fr) minmax(250px, 0.72fr);
+      gap: 14px;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .panel h3 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 0.86rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #bcc6d6;
+      margin-bottom: 8px;
+    }
+
+    .panelSubtle {
+      color: #8f9aad;
+      font-size: 0.74rem;
+    }
+
+    .chartWrap {
+      margin-top: 8px;
+      min-height: 500px;
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+    }
+
+    #tvChart {
+      min-height: 460px;
+    }
+
+    .replayShell {
+      margin-top: 10px;
+      border-top: 1px solid rgba(178, 188, 204, 0.22);
+      padding-top: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .replayTop {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .replayControls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .replayBtn,
+    .replaySelect {
+      border: 1px solid rgba(178, 188, 204, 0.24);
+      border-radius: 6px;
+      background: #10161f;
+      color: #d7dfed;
+      font-size: 0.74rem;
+      padding: 6px 8px;
+    }
+
+    .replayBtn {
+      cursor: pointer;
+    }
+
+    .replayBtn:hover {
+      border-color: rgba(63, 124, 255, 0.52);
+    }
+
+    .replayLabel {
+      color: #93a1b7;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .replayMeta {
+      color: #aeb9cb;
+      font-size: 0.76rem;
+    }
+
+    .replaySlider {
+      width: 100%;
+      accent-color: #3f7cff;
+    }
+
+    .replayEvent {
+      border: 1px solid rgba(178, 188, 204, 0.2);
+      border-radius: 6px;
+      background: #0d141d;
+      padding: 8px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .replayEventTitle {
+      color: #e8eef8;
+      font-size: 0.81rem;
+      font-weight: 600;
+    }
+
+    .replayEventBody {
+      color: #b4c0d5;
+      font-size: 0.77rem;
+      line-height: 1.45;
+    }
+
+    .replayEventTime {
+      color: #8e9cb1;
+      font-size: 0.72rem;
+      font-family: "JetBrains Mono", monospace;
+    }
+
+    .conditionList,
+    .watchlist,
+    .timelineList,
+    .newsList,
+    .miniList {
+      list-style: none;
+      display: grid;
+      gap: 7px;
+    }
+
+    .conditionItem,
+    .watchItem,
+    .timelineList li,
+    .newsList li,
+    .miniList li {
+      border-bottom: 1px solid rgba(178, 188, 204, 0.14);
+      padding-bottom: 7px;
+      color: #d4dceb;
+      font-size: 0.82rem;
+    }
+
+    .conditionItem:last-child,
+    .watchItem:last-child,
+    .timelineList li:last-child,
+    .newsList li:last-child,
+    .miniList li:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .conditionStatus {
+      font-weight: 700;
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .statusPending { color: var(--amber); }
+    .statusCompleted { color: var(--green); }
+    .statusFailed { color: var(--red); }
+    .statusNA { color: #9ca7b8; }
+
+    .rowThree {
+      display: grid;
+      grid-template-columns: minmax(190px, 0.9fr) minmax(340px, 1.55fr) minmax(250px, 1.1fr);
+      gap: 14px;
+    }
+
+    .newsEmpty {
+      display: grid;
+      gap: 10px;
+      justify-items: start;
+      color: #afbacb;
+      font-size: 0.83rem;
+      line-height: 1.5;
+      padding: 2px 0 6px;
+    }
+
+    .newsEmptyIcon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid rgba(178, 188, 204, 0.22);
+      background: #0d131b;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #9aabc7;
+    }
+
+    .newsEmptyIcon svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .timelineShell {
+      border-left: 2px solid rgba(63, 124, 255, 0.4);
+      padding-left: 10px;
+      margin-top: 3px;
+    }
+
+    .timelineList li {
+      position: relative;
+      padding-left: 12px;
+    }
+
+    .timelineList li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 7px;
+      width: 5px;
+      height: 5px;
+      border-radius: 999px;
+      background: #7e91ad;
+    }
+
+    .perfBlock {
+      margin-top: 11px;
+      padding-top: 9px;
+      border-top: 1px dashed rgba(178, 188, 204, 0.24);
+    }
+
+    .watchItem {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: transparent;
+      border: 0;
+      width: 100%;
+      text-align: left;
+      color: #d7deeb;
+      cursor: pointer;
+      padding: 2px 0 8px;
+      transition: transform 120ms ease;
+    }
+
+    .watchItem:hover {
+      transform: translateY(-1px);
+    }
+
+    .watchItem.active span:first-child {
+      color: #ffffff;
+    }
+
+    .watchBias {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.73rem;
+      color: #8ea1c2;
+      text-transform: uppercase;
+    }
+
+    .metricGrid {
+      margin-top: 8px;
+      display: grid;
+      gap: 9px;
+    }
+
+    .metricRow {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      border-bottom: 1px solid rgba(178, 188, 204, 0.14);
+      padding-bottom: 7px;
+      font-size: 0.82rem;
+      color: #c8d2e2;
+    }
+
+    .metricRow:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .metricRow strong {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.82rem;
+      color: #f0f4fc;
+    }
+
+    .sectionHeader {
+      margin-bottom: 10px;
+    }
+
+    .sectionHeader h2 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1.05rem;
+      letter-spacing: 0.03em;
+    }
+
+    .sectionHeader p {
+      color: var(--muted);
+      margin-top: 6px;
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+
+    .emptyCard {
+      border-top: 1px solid var(--line);
+      margin-top: 10px;
+      padding-top: 10px;
+      color: #a8b2c2;
+      font-size: 0.84rem;
+      line-height: 1.55;
+    }
+
+    .missionPageGrid {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 10px;
+    }
+
+    .missionGrid {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .missionPanel {
+      border: 1px solid rgba(178, 188, 204, 0.2);
+      border-radius: 8px;
+      background: #10151d;
+      padding: 10px;
+    }
+
+    .missionPanelWide {
+      grid-column: 1 / -1;
+    }
+
+    .missionPanel h3 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 0.84rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #c6d0df;
+      margin-bottom: 8px;
+    }
+
+    .moduleToolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .moduleToolbar h3 {
+      margin-bottom: 0;
+    }
+
+    .moduleToolbar .utilityInput {
+      max-width: 240px;
+      width: 100%;
+    }
+
+    .moduleBadgeRow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .moduleBadge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(178, 188, 204, 0.18);
+      border-radius: 999px;
+      background: #0d131b;
+      color: #d6dfef;
+      padding: 4px 8px;
+      font-size: 0.71rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .moduleActionRow {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .moduleLink {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(178, 188, 204, 0.22);
+      border-radius: 999px;
+      background: rgba(63, 124, 255, 0.12);
+      color: #e7eefc;
+      padding: 7px 10px;
+      font-size: 0.75rem;
+      text-decoration: none;
+      letter-spacing: 0.03em;
+    }
+
+    .labList {
+      list-style: none;
+      display: grid;
+      gap: 8px;
+    }
+
+    .labList li {
+      border-bottom: 1px solid rgba(178, 188, 204, 0.14);
+      padding-bottom: 8px;
+      display: grid;
+      gap: 5px;
+      color: #d5dceb;
+      font-size: 0.79rem;
+      line-height: 1.45;
+    }
+
+    .labList li:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .labItemTop {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .labItemTitle {
+      color: #eef4ff;
+      font-weight: 600;
+    }
+
+    .labItemMeta {
+      color: #8ea1c2;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.71rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    .labItemBody {
+      color: #a8b5c9;
+    }
+
+    .labItemActions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .labMiniBtn {
+      border: 1px solid rgba(178, 188, 204, 0.18);
+      border-radius: 999px;
+      background: rgba(178, 188, 204, 0.08);
+      color: #e5edf9;
+      padding: 5px 9px;
+      font-size: 0.72rem;
+      cursor: pointer;
+    }
+
+    .labSnapshot {
+      margin-top: 10px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .labSnapshotItem {
+      border: 1px solid rgba(178, 188, 204, 0.16);
+      border-radius: 6px;
+      background: #0d131b;
+      padding: 8px;
+      color: #d6dfee;
+      font-size: 0.77rem;
+      line-height: 1.45;
+    }
+
+    .labSnapshotItem strong {
+      display: block;
+      color: #eef4ff;
+      margin-bottom: 3px;
+      font-size: 0.75rem;
+    }
+
+    .roadmapGrid {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .roadmapCard {
+      border: 1px solid rgba(178, 188, 204, 0.2);
+      border-radius: 8px;
+      background: #10151d;
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .roadmapTop {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .roadmapTop strong {
+      color: #eef4ff;
+      font-size: 0.84rem;
+    }
+
+    .roadmapTop span {
+      color: #9fb0c8;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.74rem;
+    }
+
+    .roadmapTrack {
+      height: 9px;
+      border-radius: 999px;
+      background: rgba(178, 188, 204, 0.12);
+      overflow: hidden;
+    }
+
+    .roadmapFill {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #3f7cff 0%, #6fd3ff 100%);
+    }
+
+    .roadmapMeta {
+      color: #cdd7e8;
+      font-size: 0.79rem;
+      line-height: 1.45;
+    }
+
+    .roadmapFoot {
+      color: #91a2bb;
+      font-size: 0.73rem;
+      line-height: 1.45;
+    }
+
+    .startHereGrid {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.95fr);
+      gap: 10px;
+    }
+
+    .startHereStack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .startCard {
+      border: 1px solid rgba(178, 188, 204, 0.16);
+      border-radius: 8px;
+      background: #10151d;
+      padding: 10px;
+    }
+
+    .startCard h3 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 0.84rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #c6d0df;
+      margin-bottom: 8px;
+    }
+
+    .startCardHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .startCardHeader h3 {
+      margin-bottom: 0;
+    }
+
+    .startHereMeta {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 8px;
+      color: #d4dce9;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+
+    .startHereMeta strong {
+      color: #eef4ff;
+    }
+
+    .startHereProgress {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .startHereProgressBar {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(178, 188, 204, 0.12);
+      overflow: hidden;
+    }
+
+    .startHereProgressBar span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #3f7cff 0%, #7dd3fc 100%);
+      width: 0%;
+    }
+
+    .startHereActions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .startHereButton, .riskActionButton {
+      border: 1px solid rgba(178, 188, 204, 0.24);
+      border-radius: 999px;
+      background: rgba(63, 124, 255, 0.14);
+      color: #e9f1ff;
+      padding: 7px 10px;
+      font-size: 0.76rem;
+      font-family: "Space Grotesk", sans-serif;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+    }
+
+    .startHereButton.secondary, .riskActionButton.secondary {
+      background: rgba(178, 188, 204, 0.08);
+      color: #d8e1ef;
+    }
+
+    .startHereCheckList {
+      list-style: none;
+      display: grid;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .startHereCheckList li {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: start;
+      border-bottom: 1px solid rgba(178, 188, 204, 0.14);
+      padding-bottom: 8px;
+      font-size: 0.8rem;
+      line-height: 1.45;
+      color: #d2dae7;
+    }
+
+    .startHereCheckList li:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .startHereCheck input {
+      margin-top: 3px;
+    }
+
+    .startHereCheck strong {
+      display: block;
+      color: #eef4ff;
+    }
+
+    .startHereCheck .tiny {
+      display: block;
+      margin-top: 2px;
+    }
+
+    .startHereStepAction {
+      min-width: 88px;
+      text-align: right;
+    }
+
+    .startHereContinueTitle {
+      color: #edf2fb;
+      font-size: 0.92rem;
+      margin-bottom: 4px;
+    }
+
+    .startHereList {
+      list-style: none;
+      display: grid;
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .startHereList li {
+      border-bottom: 1px solid rgba(178, 188, 204, 0.14);
+      padding-bottom: 7px;
+      font-size: 0.8rem;
+      line-height: 1.45;
+      color: #d2dae7;
+    }
+
+    .startHereList li:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .glossaryGrid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .glossaryItem {
+      border: 1px solid rgba(178, 188, 204, 0.16);
+      border-radius: 6px;
+      background: #0d131b;
+      padding: 8px;
+    }
+
+    .glossaryTerm {
+      font-family: "Space Grotesk", sans-serif;
+      color: #edf2fb;
+      font-size: 0.79rem;
+      letter-spacing: 0.04em;
+    }
+
+    .glossaryMeaning {
+      margin-top: 4px;
+      color: #a8b4c7;
+      font-size: 0.75rem;
+      line-height: 1.45;
+    }
+
+    .routineTimeline {
+      list-style: none;
+      display: grid;
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .routineTimeline li {
+      border-bottom: 1px solid rgba(178, 188, 204, 0.14);
+      padding-bottom: 7px;
+      display: grid;
+      gap: 3px;
+      font-size: 0.8rem;
+      color: #d2dae7;
+    }
+
+    .routineTimeline li:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .routineTime {
+      font-family: "JetBrains Mono", monospace;
+      color: #90a2c2;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .riskCalc {
+      display: grid;
+      gap: 8px;
+    }
+
+    .riskRow {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .riskField {
+      display: grid;
+      gap: 5px;
+    }
+
+    .riskField label {
+      font-size: 0.72rem;
+      color: #95a4bb;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .riskField input {
+      border: 1px solid rgba(178, 188, 204, 0.22);
+      border-radius: 6px;
+      background: #0d131b;
+      color: #edf2fb;
+      padding: 8px;
+      font-size: 0.8rem;
+      font-family: "JetBrains Mono", monospace;
+    }
+
+    .riskOutput {
+      display: grid;
+      gap: 7px;
+      margin-top: 2px;
+    }
+
+    .riskNotes {
+      display: grid;
+      gap: 6px;
+      margin-top: 2px;
+      color: #9fadbf;
+      font-size: 0.74rem;
+      line-height: 1.45;
+    }
+
+    .riskWarnings {
+      display: grid;
+      gap: 6px;
+      margin-top: 2px;
+      color: #f7c46b;
+      font-size: 0.75rem;
+      line-height: 1.45;
+    }
+
+    .riskCard {
+      border: 1px solid rgba(178, 188, 204, 0.16);
+      border-radius: 6px;
+      background: #0d131b;
+      padding: 8px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.78rem;
+      color: #d1d9e6;
+    }
+
+    .riskCard strong {
+      font-family: "JetBrains Mono", monospace;
+      color: #f0f4fb;
+      text-align: right;
+    }
+
+    .missionBlock {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: var(--surface);
+    }
+
+    .missionBlock h3 {
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #bcc7d8;
+      margin-bottom: 8px;
+      font-family: "Space Grotesk", sans-serif;
+    }
+
+    .tiny { color: var(--muted); font-size: 0.74rem; }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+      border-bottom: 1px solid rgba(178, 188, 204, 0.12);
+      padding-bottom: 6px;
+      font-size: 0.8rem;
+    }
+
+    .row:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .targets {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .target {
+      border: 1px solid rgba(178, 188, 204, 0.2);
+      border-radius: 6px;
+      text-align: center;
+      padding: 6px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.75rem;
+      color: #d6ddeb;
+    }
+
+    .missionList {
+      list-style: none;
+      display: grid;
+      gap: 6px;
+    }
+
+    .missionList li {
+      border-bottom: 1px solid rgba(178, 188, 204, 0.14);
+      padding-bottom: 6px;
+      font-size: 0.79rem;
+      color: #d5dceb;
+    }
+
+    .missionList li:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .missionNote {
+      margin-top: 8px;
+      color: #98a5b9;
+      font-size: 0.76rem;
+      line-height: 1.45;
+    }
+
+    .missionScript {
+      border: 1px solid rgba(178, 188, 204, 0.2);
+      border-radius: 6px;
+      background: #0d131b;
+      padding: 8px;
+      margin-top: 8px;
+      color: #d8e0ed;
+      font-size: 0.78rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      font-family: "JetBrains Mono", monospace;
+    }
+
+    .tradeBibleLayout {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    .tbPanel {
+      border: 1px solid rgba(178, 188, 204, 0.2);
+      border-radius: 8px;
+      background: #10151d;
+      padding: 10px;
+    }
+
+    .tbPanel h3 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 0.84rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #c6d0df;
+      margin-bottom: 8px;
+    }
+
+    .tbRuleGrid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .tbRule {
+      border: 1px solid rgba(178, 188, 204, 0.16);
+      border-radius: 6px;
+      background: #0d131b;
+      padding: 7px;
+    }
+
+    .tbRuleLabel {
+      color: #8f9eb5;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.11em;
+    }
+
+    .tbRuleValue {
+      margin-top: 4px;
+      color: #e7edf8;
+      font-size: 0.82rem;
+      font-family: "JetBrains Mono", monospace;
+    }
+
+    .tbChecklist {
+      list-style: none;
+      display: grid;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .tbChecklist li {
+      border-bottom: 1px solid rgba(178, 188, 204, 0.14);
+      padding-bottom: 6px;
+      font-size: 0.8rem;
+      color: #d2dbea;
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      line-height: 1.45;
+    }
+
+    .tbChecklist li:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .tbCheck {
+      width: 13px;
+      height: 13px;
+      border-radius: 2px;
+      border: 1px solid rgba(178, 188, 204, 0.45);
+      background: #0d131b;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #d8e2f2;
+      font-size: 0.64rem;
+      margin-top: 2px;
+      flex: 0 0 auto;
+    }
+
+    .tbCheck.done {
+      border-color: rgba(40, 200, 138, 0.8);
+      background: rgba(40, 200, 138, 0.18);
+    }
+
+    .tbBadgeRow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .tbBadge {
+      border: 1px solid rgba(178, 188, 204, 0.2);
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 0.71rem;
+      color: #c7d2e4;
+      background: #0e141d;
+    }
+
+    .tbScript {
+      margin-top: 7px;
+      border: 1px solid rgba(178, 188, 204, 0.2);
+      border-radius: 6px;
+      background: #0d131b;
+      padding: 8px;
+      font-family: "JetBrains Mono", monospace;
+      color: #d4deee;
+      white-space: pre-wrap;
+      font-size: 0.77rem;
+      line-height: 1.45;
+    }
+
+    .tbActions {
+      margin-top: 8px;
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .tbBtn {
+      border: 1px solid rgba(178, 188, 204, 0.25);
+      border-radius: 6px;
+      background: #111822;
+      color: #d5deed;
+      font-size: 0.76rem;
+      padding: 7px 9px;
+      cursor: pointer;
+    }
+
+    .tbBtn:hover {
+      border-color: rgba(63, 124, 255, 0.5);
+      color: #edf3ff;
+    }
+
+    .indicatorLayout {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    .indPanel {
+      border: 1px solid rgba(178, 188, 204, 0.2);
+      border-radius: 8px;
+      background: #10151d;
+      padding: 10px;
+    }
+
+    .indPanel h3 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 0.84rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #c6d0df;
+      margin-bottom: 8px;
+    }
+
+    .indGrid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+    }
+
+    .indCard {
+      border: 1px solid rgba(178, 188, 204, 0.16);
+      border-radius: 6px;
+      background: #0d131b;
+      padding: 8px;
+      min-height: 90px;
+      display: grid;
+      gap: 4px;
+      align-content: start;
+    }
+
+    .indCardLabel {
+      color: #8fa0b8;
+      font-size: 0.67rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .indCardValue {
+      color: #e7edf8;
+      font-size: 0.88rem;
+      font-family: "JetBrains Mono", monospace;
+    }
+
+    .indCardDesc {
+      color: #aab5c8;
+      font-size: 0.76rem;
+      line-height: 1.45;
+    }
+
+    .indRuleList {
+      list-style: none;
+      display: grid;
+      gap: 6px;
+    }
+
+    .indRuleList li {
+      border-bottom: 1px solid rgba(178, 188, 204, 0.14);
+      padding-bottom: 6px;
+      color: #d2dbea;
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    .indRuleList li:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .indState {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(178, 188, 204, 0.22);
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 0.7rem;
+      color: #c9d3e3;
+      background: #0f141c;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .indDot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #7f8ca0;
+    }
+
+    .indDot.bull { background: var(--green); }
+    .indDot.bear { background: var(--red); }
+    .indDot.wait { background: var(--amber); }
+
+    .indScript {
+      margin-top: 7px;
+      border: 1px solid rgba(178, 188, 204, 0.2);
+      border-radius: 6px;
+      background: #0d131b;
+      padding: 8px;
+      font-family: "JetBrains Mono", monospace;
+      color: #d4deee;
+      white-space: pre-wrap;
+      font-size: 0.77rem;
+      line-height: 1.45;
+    }
+
+    .playbookGrid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .playbookItem {
+      border: 1px solid rgba(178, 188, 204, 0.18);
+      border-radius: 6px;
+      background: #0f151e;
+      padding: 8px;
+      font-size: 0.77rem;
+      line-height: 1.45;
+      color: #cbd5e6;
+    }
+
+    .playbookItem strong {
+      display: block;
+      color: #e7edf8;
+      margin-bottom: 3px;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .archiveFilters {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .archiveFilters input,
+    .archiveFilters select {
+      border: 1px solid rgba(178, 188, 204, 0.22);
+      border-radius: 6px;
+      background: #0f141c;
+      color: #d6dfef;
+      padding: 6px;
+      font-size: 0.74rem;
+    }
+
+    .mono {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.74rem;
+      white-space: pre-wrap;
+      line-height: 1.5;
+      color: #d8deea;
+    }
+
+    .skeleton {
+      height: 8px;
+      border-radius: 6px;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
+      background-size: 200% 100%;
+      animation: shimmer 1.5s linear infinite;
+    }
+
+    @keyframes shimmer {
+      from { background-position: 200% 0; }
+      to { background-position: -200% 0; }
+    }
+
+    @media (max-width: 1200px) {
+      .heroMeta { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .rowTwo { grid-template-columns: 1fr; }
+      .rowThree { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 980px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .menuBtn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 82%;
+        max-width: 290px;
+        z-index: 30;
+        transform: translateX(-102%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main {
+        padding: 14px;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 12;
+        background: rgba(8, 10, 13, 0.94);
+      }
+
+      .headerBlock h2 {
+        font-size: 1.08rem;
+      }
+
+      .heroTop {
+        grid-template-columns: 1fr;
+      }
+
+      .heroSymbol {
+        text-align: left;
+      }
+
+      .heroRight {
+        border-left: 0;
+        padding-left: 0;
+        border-top: 1px solid rgba(178, 188, 204, 0.2);
+        padding-top: 10px;
+      }
+
+      .heroMeta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .heroBottom {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .missionPageGrid {
+        grid-template-columns: 1fr;
+      }
+
+      .missionGrid {
+        grid-template-columns: 1fr;
+      }
+
+      .roadmapGrid {
+        grid-template-columns: 1fr;
+      }
+
+      .archiveFilters {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .playbookGrid {
+        grid-template-columns: 1fr;
+      }
+
+      .tradeBibleLayout {
+        grid-template-columns: 1fr;
+      }
+
+      .tbRuleGrid {
+        grid-template-columns: 1fr;
+      }
+
+      .indicatorLayout {
+        grid-template-columns: 1fr;
+      }
+
+      .indGrid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brandLogo">
+          <img class="brandMark" src="./assets/brand/signal-bridge-mark-blue.svg" alt="Signal Bridge mark" />
+          <img class="brandWord" src="./assets/brand/signal-bridge-wordmark-blue.svg" alt="Signal Bridge" />
+        </div>
+        <p>Daily market briefing and strategy workspace</p>
+        <div class="liveChip" id="demoBanner"><span class="liveDot"></span><span id="liveChipText">Research data active</span></div>
+      </div>
+      <div id="navGroups"></div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbarLeft">
+          <button class="menuBtn" id="menuBtn" aria-label="Toggle navigation">Menu</button>
+          <div class="headerBlock">
+            <h2 id="headerTitle">Start Here</h2>
+            <div class="headerMeta">
+              <span id="sessionDate">Session --</span>
+              <span class="dot"></span>
+              <span class="marketStatus" id="marketStatus">Market status unavailable</span>
+            </div>
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="iconBtn" id="searchBtn" aria-label="Search" data-tooltip="Search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5L21 21"></path></svg>
+          </button>
+          <button class="iconBtn" id="notificationsBtn" aria-label="Notifications" data-tooltip="Notifications">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18H4.5C5.7 16.7 6.5 14.5 6.5 12V10C6.5 7 8.7 4.5 12 4.5C15.3 4.5 17.5 7 17.5 10V12C17.5 14.5 18.3 16.7 19.5 18H15"></path><path d="M10 19.5C10.4 20.4 11.1 21 12 21C12.9 21 13.6 20.4 14 19.5"></path></svg>
+            <span class="badge" id="notificationsBadge">2</span>
+          </button>
+          <button class="iconBtn" id="profileBtn" aria-label="Profile" data-tooltip="Profile">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 19.5C6.2 17.2 8.7 15.8 12 15.8C15.3 15.8 17.8 17.2 19 19.5"></path></svg>
+          </button>
+          <div class="utilityPanel" id="utilityPanel"></div>
+        </div>
+      </header>
+
+      <section class="section active" data-section="start-here">
+        <div class="sectionHeader">
+          <h2>Start Here</h2>
+          <p>A beginner path for learning Signal Bridge before you touch a live session.</p>
+        </div>
+        <div class="startHereGrid">
+          <div class="startHereStack">
+            <article class="startCard" id="startHereOverview"></article>
+            <article class="startCard">
+              <div class="startCardHeader">
+                <h3>Beginner Progress</h3>
+                <button class="startHereButton secondary" id="startHereResetBtn" type="button">Reset progress</button>
+              </div>
+              <div class="startHereProgress">
+                <div class="tiny" id="startHereProgressText">0 of 0 completed</div>
+                <div class="startHereProgressBar"><span id="startHereProgressBar"></span></div>
+              </div>
+            </article>
+            <article class="startCard" id="startHereContinue"></article>
+            <article class="startCard">
+              <h3>How To Start Today</h3>
+              <ul class="startHereList" id="startHereChecklist">
+                <li>Loading beginner checklist...</li>
+              </ul>
+            </article>
+            <article class="startCard">
+              <h3>Learning Path</h3>
+              <ul class="startHereList" id="startHereLessons">
+                <li>Loading lessons...</li>
+              </ul>
+            </article>
+            <article class="startCard">
+              <h3>Beginner Confirmation</h3>
+              <ul class="startHereCheckList" id="startHereReadiness">
+                <li>Loading confirmation items...</li>
+              </ul>
+            </article>
+          </div>
+
+          <div class="startHereStack">
+            <article class="startCard">
+              <h3>Glossary</h3>
+              <div class="glossaryGrid" id="startHereGlossary"></div>
+            </article>
+            <article class="startCard">
+              <h3>Daily Routine</h3>
+              <ul class="routineTimeline" id="startHereRoutine"></ul>
+            </article>
+            <article class="startCard">
+              <h3>Risk Calculator</h3>
+              <div class="riskCalc">
+                <div class="riskRow">
+                  <div class="riskField"><label for="riskAccount">Account Balance</label><input id="riskAccount" type="number" step="100" value="10000" /></div>
+                  <div class="riskField"><label for="riskPct">Risk %</label><input id="riskPct" type="number" step="0.1" value="1" /></div>
+                </div>
+                <div class="riskRow">
+                  <div class="riskField"><label for="riskEntry">Entry</label><input id="riskEntry" type="number" step="0.25" /></div>
+                  <div class="riskField"><label for="riskStop">Stop</label><input id="riskStop" type="number" step="0.25" /></div>
+                </div>
+                <div class="riskField"><label for="riskTarget">Target</label><input id="riskTarget" type="number" step="0.25" /></div>
+                <div class="startHereActions">
+                  <button class="riskActionButton" id="riskLoadMissionBtn" type="button">Load mission values</button>
+                  <button class="riskActionButton secondary" id="riskClearBtn" type="button">Clear fields</button>
+                </div>
+                <div class="riskOutput">
+                  <div class="riskCard"><span>Direction</span><strong id="riskDirection">--</strong></div>
+                  <div class="riskCard"><span>Stop Distance</span><strong id="riskStopDistance">--</strong></div>
+                  <div class="riskCard"><span>Tick Distance</span><strong id="riskTickDistance">--</strong></div>
+                  <div class="riskCard"><span>Risk Per Contract</span><strong id="riskPerContract">--</strong></div>
+                  <div class="riskCard"><span>Risk Per Tick</span><strong id="riskPerTick">--</strong></div>
+                  <div class="riskCard"><span>Max Risk Allowed</span><strong id="riskMaxRisk">--</strong></div>
+                  <div class="riskCard"><span>Risk With Fees</span><strong id="riskWithFees">--</strong></div>
+                  <div class="riskCard"><span>Max MES Contracts</span><strong id="riskMaxContracts">--</strong></div>
+                  <div class="riskCard"><span>Max Contracts After Fees</span><strong id="riskMaxContractsAfterFees">--</strong></div>
+                  <div class="riskCard"><span>Reward Per Contract</span><strong id="riskReward">--</strong></div>
+                  <div class="riskCard"><span>Risk / Reward</span><strong id="riskRR">--</strong></div>
+                </div>
+                <div class="riskNotes" id="riskNotes"></div>
+                <div class="riskWarnings" id="riskWarnings"></div>
+              </div>
+            </article>
+            <article class="startCard">
+              <h3>Example Mission</h3>
+              <pre class="mono" id="startHereSample" style="white-space:pre-wrap; line-height:1.5;">Loading example...</pre>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" data-section="dashboard">
+        <div class="dashboard">
+          <article class="missionHero">
+            <div class="heroTop">
+              <div class="heroLeft">
+                <div class="eyebrow">Today's Mission</div>
+                <div class="heroAction wait" id="action">WAIT</div>
+                <p class="heroThesis" id="missionThesisHero">Mission context is not available for this session yet.</p>
+                <ul class="heroChecklist" id="heroChecklist">
+                  <li><span class="heroBullet pending"></span><span>Waiting for live mission conditions.</span></li>
+                </ul>
+              </div>
+              <div class="heroRight">
+                <div class="heroSymbol">
+                  <div id="symbol">MES</div>
+                  <div id="missionDateHero">--</div>
+                </div>
+                <div class="readiness">
+                  <div class="readinessRing" id="readinessRing">
+                    <div class="readinessInner"><div id="readinessPct">0%</div></div>
+                  </div>
+                  <div class="readinessMeta">
+                    <div>Checklist <strong id="checklistSummary">0/0</strong></div>
+                    <div>Session Progress <strong id="sessionProgress">0%</strong></div>
+                    <div>Setup Ready <strong id="setupReadiness">No</strong></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="heroMeta">
+              <div>
+                <div class="metaLabel">Confidence</div>
+                <div class="metaValue" id="confidence">--</div>
+              </div>
+              <div>
+                <div class="metaLabel">Session Status</div>
+                <div class="metaValue" id="missionState">--</div>
+              </div>
+              <div>
+                <div class="metaLabel">Entry</div>
+                <div class="metaValue pending" id="entry">Pending</div>
+              </div>
+              <div>
+                <div class="metaLabel">Invalidation</div>
+                <div class="metaValue" id="invalidation">--</div>
+              </div>
+              <div>
+                <div class="metaLabel">Primary Target</div>
+                <div class="metaValue" id="targetPrimary">--</div>
+              </div>
+            </div>
+
+            <div class="heroBottom">
+              <p class="noTrade" id="heroNoTrade">No-trade condition unavailable.</p>
+              <div class="moduleState" id="heroStateLabel">Mission Data | Unavailable</div>
+            </div>
+          </article>
+
+          <div class="rowTwo">
+            <article class="panel">
+              <h3>Execution Chart</h3>
+              <div class="panelSubtle">Chart state: <span id="chartState">Unavailable</span></div>
+              <div class="chartWrap" id="tvChart"></div>
+              <div class="replayShell">
+                <div class="replayTop">
+                  <div>
+                    <div class="replayLabel">Session Replay</div>
+                    <div class="replayMeta" id="replayMeta">Replay unavailable until mission events are loaded.</div>
+                  </div>
+                  <div class="replayControls">
+                    <select class="replaySelect" id="replayDateSelect"></select>
+                    <button class="replayBtn" id="replayPlayBtn" type="button">Play</button>
+                    <button class="replayBtn" id="replayPauseBtn" type="button">Pause</button>
+                    <button class="replayBtn" id="replayResetBtn" type="button">Reset</button>
+                  </div>
+                </div>
+                <input class="replaySlider" id="replaySlider" type="range" min="0" max="0" value="0" />
+                <div class="replayEvent" id="replayEvent">
+                  <div class="replayEventTitle">No replay event selected</div>
+                  <div class="replayEventBody">Load a session to review setup progression and outcomes.</div>
+                  <div class="replayEventTime">--</div>
+                </div>
+              </div>
+            </article>
+
+            <article class="panel">
+              <h3>Live Conditions</h3>
+              <ul class="conditionList" id="conditionsMiniList">
+                <li class="conditionItem"><div class="skeleton"></div></li>
+                <li class="conditionItem"><div class="skeleton"></div></li>
+                <li class="conditionItem"><div class="skeleton"></div></li>
+              </ul>
+            </article>
+          </div>
+
+          <div class="rowThree">
+            <article class="panel">
+              <h3>Watchlist</h3>
+              <ul class="watchlist" id="watchlist"></ul>
+              <div class="emptyCard">Only instruments with verified mission context are highlighted.</div>
+            </article>
+
+            <article class="panel">
+              <h3>News</h3>
+              <ul class="newsList" id="newsList">
+                <li>
+                  <div class="newsEmpty">
+                    <span class="newsEmptyIcon">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5H20V18.5H4V5.5Z"></path><path d="M7 9.5H17"></path><path d="M7 12.5H13"></path></svg>
+                    </span>
+                    <span>Market headlines are not connected yet. This panel will surface macro events and instrument-specific context when the feed is enabled.</span>
+                  </div>
+                </li>
+              </ul>
+            </article>
+
+            <article class="panel">
+              <h3>Session Timeline</h3>
+              <div class="timelineShell">
+                <ul class="timelineList" id="timelineListMini"></ul>
+              </div>
+              <div class="perfBlock">
+                <h3>Performance Context</h3>
+                <div class="metricGrid">
+                  <div class="metricRow"><span>Net</span><strong id="perfNet">--</strong></div>
+                  <div class="metricRow"><span>Win Rate</span><strong id="perfWinRate">--</strong></div>
+                  <div class="metricRow"><span>Trades</span><strong id="perfTrades">--</strong></div>
+                  <div class="metricRow"><span>Plan Source</span><strong id="planSource">--</strong></div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" data-section="mission">
+        <div class="sectionHeader"><h2>Morning Mission</h2><p>Daily mission record with strategy conditions, execution plan, and session timeline.</p></div>
+        <div class="missionPageGrid">
+          <div class="missionBlock">
+            <h3>Mission Header</h3>
+            <div class="row"><span class="tiny">Mission ID</span><strong id="missionId">--</strong></div>
+            <div class="row"><span class="tiny">Date</span><strong id="missionDate">--</strong></div>
+            <div class="row"><span class="tiny">Instrument</span><strong id="missionInstrument">--</strong></div>
+            <div class="row"><span class="tiny">Strategy Version</span><strong id="missionVersion">--</strong></div>
+            <div class="row"><span class="tiny">Data State</span><strong id="missionDataState">--</strong></div>
+            <div class="row"><span class="tiny">Last Updated</span><strong id="missionUpdated">--</strong></div>
+          </div>
+
+          <div class="missionBlock">
+            <h3>Primary Decision</h3>
+            <div class="heroAction wait" id="missionActionPage">WAIT</div>
+            <div class="tiny" id="missionThesis">Awaiting strategy output.</div>
+            <div class="row"><span class="tiny">Confidence</span><strong id="missionConfidence">--</strong></div>
+            <div class="row"><span class="tiny">Market Phase</span><strong id="missionPhase">--</strong></div>
+            <div class="row"><span class="tiny">Risk Status</span><strong id="missionRisk">--</strong></div>
+          </div>
+
+          <div class="missionBlock">
+            <h3>Required Conditions</h3>
+            <ul class="missionList" id="conditionsList"></ul>
+          </div>
+
+          <div class="missionBlock">
+            <h3>No-Trade Conditions</h3>
+            <ul class="missionList" id="noTradeList"></ul>
+          </div>
+
+          <div class="missionBlock">
+            <h3>Execution Plan</h3>
+            <div class="row"><span class="tiny">Entry Zone</span><strong id="missionEntryZone">--</strong></div>
+            <div class="row"><span class="tiny">Invalidation</span><strong id="missionInvalidation">--</strong></div>
+            <div class="row"><span class="tiny">Expected RR</span><strong id="missionRR">--</strong></div>
+            <div class="row"><span class="tiny">Max Trades</span><strong id="missionMaxTrades">--</strong></div>
+            <div class="targets" id="missionTargets"></div>
+            <div class="missionScript" id="missionExecutionScript">Execution script will appear when mission data loads.</div>
+          </div>
+
+          <div class="missionBlock">
+            <h3>Session Timeline</h3>
+            <ul class="missionList" id="timelineList"></ul>
+          </div>
+
+          <div class="missionBlock">
+            <h3>Decision Gate</h3>
+            <div class="row"><span class="tiny">Checklist Progress</span><strong id="missionGateSummary">--</strong></div>
+            <div class="row"><span class="tiny">Trade Authorization</span><strong id="missionAuthorization">--</strong></div>
+            <p class="missionNote" id="missionGateReason">Mission gate logic will update from required conditions.</p>
+          </div>
+
+          <div class="missionBlock">
+            <h3>If / Then Playbook</h3>
+            <div class="playbookGrid" id="missionIfThen">
+              <div class="playbookItem"><strong>If</strong>Mission conditions are not available yet.</div>
+              <div class="playbookItem"><strong>Then</strong>Hold position and wait for structured setup rules.</div>
+            </div>
+          </div>
+
+          <div class="missionBlock">
+            <h3>Post-Session Review</h3>
+            <ul class="missionList" id="missionReviewList"></ul>
+          </div>
+
+          <div class="missionBlock">
+            <h3>Mission Archive</h3>
+            <div class="archiveFilters">
+              <input id="archiveFilterDate" type="date" />
+              <input id="archiveFilterInstrument" type="text" placeholder="Instrument" />
+              <select id="archiveFilterAction">
+                <option value="">Action (All)</option>
+                <option value="LONG">LONG</option>
+                <option value="SHORT">SHORT</option>
+                <option value="WAIT">WAIT</option>
+              </select>
+              <input id="archiveFilterOutcome" type="text" placeholder="Outcome" />
+              <select id="archiveFilterDataState">
+                <option value="">Data State (All)</option>
+                <option value="Research">Research</option>
+                <option value="Unavailable">Unavailable</option>
+                <option value="Live">Live</option>
+              </select>
+              <select id="archiveFilterTriggered">
+                <option value="">Triggered (All)</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+            <ul class="missionList" id="archiveList"></ul>
+          </div>
+
+          <div class="missionBlock">
+            <h3>Discord Summary</h3>
+            <div class="mono" id="discordSummary">--</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" data-section="journal"><div class="sectionHeader"><h2>Journal</h2><p>Daily execution records and post-market reflections.</p></div><div class="emptyCard">Journal remains hidden from navigation until entries, tags, and export workflows are live.</div></section>
+      <section class="section" data-section="trade-bible">
+        <div class="sectionHeader">
+          <h2>Trade Bible</h2>
+          <p>Execution doctrine translated into a practical desk reference for the current session.</p>
+        </div>
+        <div class="tradeBibleLayout">
+          <article class="tbPanel">
+            <h3>Session Playbook</h3>
+            <div class="tbRuleGrid">
+              <div class="tbRule"><div class="tbRuleLabel">Action Bias</div><div class="tbRuleValue" id="tbActionBias">WAIT</div></div>
+              <div class="tbRule"><div class="tbRuleLabel">Entry Plan</div><div class="tbRuleValue" id="tbEntryPlan">Pending</div></div>
+              <div class="tbRule"><div class="tbRuleLabel">Invalidation</div><div class="tbRuleValue" id="tbInvalidation">--</div></div>
+            </div>
+            <ul class="tbChecklist" id="tbChecklist">
+              <li><span class="tbCheck"></span><span>Session checklist will load from mission conditions.</span></li>
+            </ul>
+            <div class="tbBadgeRow" id="tbBadgeRow">
+              <span class="tbBadge">No conditions loaded</span>
+            </div>
+          </article>
+
+          <article class="tbPanel">
+            <h3>Execution Script</h3>
+            <div class="tbScript" id="tbScript">No script generated yet.</div>
+            <div class="tbActions">
+              <button class="tbBtn" id="tbCopyBriefBtn" type="button">Copy Desk Brief</button>
+              <button class="tbBtn" id="tbCopyReviewBtn" type="button">Copy Review Template</button>
+            </div>
+            <div class="missionNote" id="tbCopyState">Copy-ready templates for desk notes and journal handoff.</div>
+          </article>
+
+          <article class="tbPanel">
+            <h3>No-Trade Protocol</h3>
+            <ul class="tbChecklist" id="tbNoTradeChecklist"></ul>
+          </article>
+
+          <article class="tbPanel">
+            <h3>Risk Guardrails</h3>
+            <ul class="tbChecklist" id="tbRiskChecklist">
+              <li><span class="tbCheck">X</span><span>One setup attempt per mission direction.</span></li>
+              <li><span class="tbCheck">X</span><span>No chase entries after session cutoff.</span></li>
+              <li><span class="tbCheck">X</span><span>Respect invalidation. No widening stop.</span></li>
+              <li><span class="tbCheck">X</span><span>Stop trading when mission gate is broken.</span></li>
+            </ul>
+          </article>
+        </div>
+      </section>
+      <section class="section" data-section="indicator-library">
+        <div class="sectionHeader">
+          <h2>Indicator Library</h2>
+          <p>Live indicator context translated into concrete execution thresholds and trigger rules.</p>
+        </div>
+        <div class="indicatorLayout">
+          <article class="indPanel">
+            <h3>Active Indicator Stack</h3>
+            <div class="indGrid" id="indStackGrid">
+              <div class="indCard">
+                <div class="indCardLabel">ORB</div>
+                <div class="indCardValue">No data</div>
+                <div class="indCardDesc">ORB levels will appear when mission levels are available.</div>
+              </div>
+            </div>
+          </article>
+
+          <article class="indPanel">
+            <h3>Signal State</h3>
+            <div class="indState" id="indSignalState"><span class="indDot wait"></span><span>Waiting</span></div>
+            <div class="indScript" id="indSignalScript">Indicator script will update once mission data is loaded.</div>
+          </article>
+
+          <article class="indPanel">
+            <h3>Trigger Rules</h3>
+            <ul class="indRuleList" id="indTriggerRules"></ul>
+          </article>
+
+          <article class="indPanel">
+            <h3>Usage Notes</h3>
+            <ul class="indRuleList" id="indUsageNotes">
+              <li>Use indicator states only with mission checklist confirmation.</li>
+              <li>Do not override invalidation because of indicator lag.</li>
+              <li>Record false signals in post-session review.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+      <section class="section" data-section="videos"><div class="sectionHeader"><h2>Videos</h2><p>Recorded breakdowns and strategy walkthroughs.</p></div><div class="emptyCard">Videos stay out of navigation until the walkthrough library is published.</div></section>
+      <section class="section" data-section="strategy-center">
+        <div class="sectionHeader"><h2>Strategy Center</h2><p>Current edge profile, hypotheses, and update logs.</p></div>
+        <div class="missionGrid">
+          <article class="missionPanel">
+            <h3>Current Strategy</h3>
+            <div class="metricGrid" id="strategySummaryGrid"></div>
+            <div class="moduleBadgeRow" id="strategyHighlights"></div>
+            <div class="missionNote" id="strategyNarrative">Loading strategy context...</div>
+            <div class="labSnapshot" id="strategySnapshot"></div>
+          </article>
+          <article class="missionPanel">
+            <h3>What's New / Why</h3>
+            <ul class="labList" id="strategyWhatsNew">
+              <li>Loading strategy changes...</li>
+            </ul>
+          </article>
+          <article class="missionPanel">
+            <div class="moduleToolbar">
+              <h3>Version History</h3>
+              <button class="tbBtn" id="strategyOpenSourceTruthBtn" type="button">Open source of truth</button>
+            </div>
+            <ul class="labList" id="strategyVersionList">
+              <li>Loading version history...</li>
+            </ul>
+          </article>
+          <article class="missionPanel">
+            <h3>Experiment Tracker</h3>
+            <ul class="labList" id="strategyExperimentList">
+              <li>Loading experiment queue...</li>
+            </ul>
+          </article>
+          <article class="missionPanel">
+            <h3>Future Queue</h3>
+            <ul class="labList" id="strategyFutureList">
+              <li>Loading future experiments...</li>
+            </ul>
+          </article>
+          <article class="missionPanel">
+            <div class="moduleToolbar">
+              <h3>Changelog</h3>
+              <button class="tbBtn" id="strategyOpenChangelogBtn" type="button">Open changelog</button>
+            </div>
+            <div class="missionScript" id="strategyChangelog">Loading changelog...</div>
+          </article>
+          <article class="missionPanel">
+            <div class="moduleToolbar">
+              <h3>Strategy Files</h3>
+              <input class="utilityInput" id="strategyFileSearch" type="search" placeholder="Search strategy docs" />
+            </div>
+            <div class="missionNote" id="strategyFileStatus">Loading strategy files...</div>
+            <ul class="missionList" id="strategyFileList"></ul>
+          </article>
+          <article class="missionPanel missionPanelWide">
+            <div class="moduleToolbar">
+              <h3 id="strategyFileTitle">File Preview</h3>
+              <div class="moduleActionRow">
+                <button class="tbBtn" id="strategyCopyPathBtn" type="button">Copy Path</button>
+                <a class="moduleLink" id="strategyRawLink" href="#" target="_blank" rel="noreferrer">Open Raw</a>
+              </div>
+            </div>
+            <pre class="mono" id="strategyFileContent" style="white-space:pre-wrap; max-height:420px; overflow:auto;">Select a file to preview.</pre>
+          </article>
+        </div>
+      </section>
+      <section class="section" data-section="backtests">
+        <div class="sectionHeader"><h2>Backtests</h2><p>Historical and forward validation.</p></div>
+        <div class="missionGrid">
+          <article class="missionPanel">
+            <h3>Validation Snapshot</h3>
+            <div class="metricGrid" id="backtestsSummaryGrid"></div>
+            <div class="moduleBadgeRow" id="backtestsHighlights"></div>
+            <div class="missionNote" id="backtestsNarrative">Loading backtest context...</div>
+          </article>
+          <article class="missionPanel">
+            <div class="moduleToolbar">
+              <h3>Backtest Files</h3>
+              <input class="utilityInput" id="backtestsFileSearch" type="search" placeholder="Search backtests" />
+            </div>
+            <div class="missionNote" id="backtestsFileStatus">Loading backtest files...</div>
+            <ul class="missionList" id="backtestsFileList"></ul>
+          </article>
+          <article class="missionPanel missionPanelWide">
+            <div class="moduleToolbar">
+              <h3 id="backtestsFileTitle">File Preview</h3>
+              <div class="moduleActionRow">
+                <button class="tbBtn" id="backtestsCopyPathBtn" type="button">Copy Path</button>
+                <a class="moduleLink" id="backtestsRawLink" href="#" target="_blank" rel="noreferrer">Open Raw</a>
+              </div>
+            </div>
+            <pre class="mono" id="backtestsFileContent" style="white-space:pre-wrap; max-height:420px; overflow:auto;">Select a file to preview.</pre>
+          </article>
+        </div>
+      </section>
+      <section class="section" data-section="research-vault">
+        <div class="sectionHeader"><h2>Research Vault</h2><p>Curated research notes and references.</p></div>
+        <div class="missionGrid">
+          <article class="missionPanel">
+            <h3>Research Map</h3>
+            <div class="metricGrid" id="research-vaultSummaryGrid"></div>
+            <div class="moduleBadgeRow" id="research-vaultHighlights"></div>
+            <div class="missionNote" id="research-vaultNarrative">Loading research categories...</div>
+          </article>
+          <article class="missionPanel">
+            <div class="moduleToolbar">
+              <h3>Research Files</h3>
+              <input class="utilityInput" id="research-vaultFileSearch" type="search" placeholder="Search research vault" />
+            </div>
+            <div class="missionNote" id="research-vaultFileStatus">Loading research files...</div>
+            <ul class="missionList" id="research-vaultFileList"></ul>
+          </article>
+          <article class="missionPanel missionPanelWide">
+            <div class="moduleToolbar">
+              <h3 id="research-vaultFileTitle">File Preview</h3>
+              <div class="moduleActionRow">
+                <button class="tbBtn" id="research-vaultCopyPathBtn" type="button">Copy Path</button>
+                <a class="moduleLink" id="research-vaultRawLink" href="#" target="_blank" rel="noreferrer">Open Raw</a>
+              </div>
+            </div>
+            <pre class="mono" id="research-vaultFileContent" style="white-space:pre-wrap; max-height:420px; overflow:auto;">Select a file to preview.</pre>
+          </article>
+        </div>
+      </section>
+      <section class="section" data-section="downloads">
+        <div class="sectionHeader"><h2>Downloads</h2><p>Templates, tools, and companion files.</p></div>
+        <div class="missionGrid">
+          <article class="missionPanel">
+            <h3>Download Pack</h3>
+            <div class="metricGrid" id="downloadsSummaryGrid"></div>
+            <div class="moduleBadgeRow" id="downloadsHighlights"></div>
+            <div class="missionNote" id="downloadsNarrative">Loading download inventory...</div>
+          </article>
+          <article class="missionPanel">
+            <div class="moduleToolbar">
+              <h3>Downloadable Files</h3>
+              <input class="utilityInput" id="downloadsFileSearch" type="search" placeholder="Search downloads" />
+            </div>
+            <div class="missionNote" id="downloadsFileStatus">Loading downloadable files...</div>
+            <ul class="missionList" id="downloadsFileList"></ul>
+          </article>
+          <article class="missionPanel missionPanelWide">
+            <div class="moduleToolbar">
+              <h3 id="downloadsFileTitle">File Preview</h3>
+              <div class="moduleActionRow">
+                <button class="tbBtn" id="downloadsCopyPathBtn" type="button">Copy Path</button>
+                <a class="moduleLink" id="downloadsRawLink" href="#" target="_blank" rel="noreferrer">Open / Download</a>
+              </div>
+            </div>
+            <pre class="mono" id="downloadsFileContent" style="white-space:pre-wrap; max-height:420px; overflow:auto;">Select a file to preview.</pre>
+          </article>
+        </div>
+      </section>
+      <section class="section" data-section="roadmap">
+        <div class="sectionHeader"><h2>Roadmap</h2><p>Live module progress, hidden work, and what is already good enough to ship.</p></div>
+        <div class="roadmapGrid" id="roadmapBoard"></div>
+        <div class="emptyCard" id="roadmapPolicy">Navigation now stays focused on modules with enough working content to justify the click.</div>
+      </section>
+      <section class="section" data-section="account"><div class="sectionHeader"><h2>Account</h2><p>Profile and membership settings.</p></div><div class="emptyCard">Account remains hidden from navigation until member settings and subscription controls are functional.</div></section>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+  <script>
+    const MODULE_GROUPS = [
+      {
+        title: "Session",
+        items: [
+          { id: "start-here", label: "Start Here" },
+          { id: "dashboard", label: "Dashboard" },
+          { id: "mission", label: "Morning Mission" },
+          { id: "journal", label: "Journal" },
+        ],
+      },
+      {
+        title: "Knowledge",
+        items: [
+          { id: "trade-bible", label: "Trade Bible" },
+          { id: "indicator-library", label: "Indicator Library" },
+          { id: "videos", label: "Videos" },
+        ],
+      },
+      {
+        title: "Research",
+        items: [
+          { id: "strategy-center", label: "Strategy Center" },
+          { id: "backtests", label: "Backtests" },
+          { id: "research-vault", label: "Research Vault" },
+        ],
+      },
+      {
+        title: "System",
+        items: [
+          { id: "downloads", label: "Downloads" },
+          { id: "roadmap", label: "Roadmap" },
+          { id: "account", label: "Account" },
+        ],
+      },
+    ];
+
+    const MODULE_ICONS = {
+      "start-here": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6H19"></path><path d="M5 12H13"></path><path d="M5 18H16"></path><path d="M16 12L20 16"></path><path d="M16 16L20 12"></path></svg>',
+      "dashboard": '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7"></rect><rect x="13" y="4" width="7" height="7"></rect><rect x="4" y="13" width="7" height="7"></rect><rect x="13" y="13" width="7" height="7"></rect></svg>',
+      "mission": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3L20 7V12C20 17 16.8 20.8 12 22C7.2 20.8 4 17 4 12V7L12 3Z"></path></svg>',
+      "journal": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5H18V19.5H6V4.5Z"></path><path d="M9 8H15"></path><path d="M9 12H15"></path><path d="M9 16H13"></path></svg>',
+      "trade-bible": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5H17C18.1 5.5 19 6.4 19 7.5V18.5H7C5.9 18.5 5 17.6 5 16.5V5.5Z"></path><path d="M7 18.5V7.5C7 6.4 7.9 5.5 9 5.5"></path></svg>',
+      "indicator-library": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19L9 11L13 15L20 6"></path><path d="M20 10V6H16"></path></svg>',
+      "videos": '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="12" height="12"></rect><path d="M16 10L20 8V16L16 14"></path></svg>',
+      "strategy-center": '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M12 8V12L15 14"></path></svg>',
+      "backtests": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19H20"></path><path d="M7 16V11"></path><path d="M12 16V8"></path><path d="M17 16V6"></path></svg>',
+      "research-vault": '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"></rect><path d="M9 11H15"></path><path d="M9 15H13"></path></svg>',
+      "downloads": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4V14"></path><path d="M8.5 10.5L12 14L15.5 10.5"></path><path d="M5 18.5H19"></path></svg>',
+      "roadmap": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5H20"></path><path d="M4 12H14"></path><path d="M4 18.5H18"></path><circle cx="17" cy="12" r="2"></circle></svg>',
+      "account": '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3"></circle><path d="M6 19C7.3 16.8 9.2 15.7 12 15.7C14.8 15.7 16.7 16.8 18 19"></path></svg>'
+    };
+
+    const MODULE_LABELS = Object.fromEntries(MODULE_GROUPS.flatMap((group) => group.items.map((item) => [item.id, item.label])));
+    const HIDDEN_NAV_MODULES = new Set(["journal", "videos", "account"]);
+
+    let selectedSymbol = "MES";
+    let currentArchive = [];
+    let activeUtility = null;
+    let tradeBibleState = { brief: "", review: "" };
+    const replayState = { events: [], index: 0, timer: null, snapshotsByKey: {}, currentKey: null, baseData: null, baseState: "Unavailable" };
+    const fileDeskState = { catalog: {}, source: "unavailable", filters: {} };
+
+    const FILE_MODULE_VIEW = {
+      "strategy-center": { listId: "strategyFileList", statusId: "strategyFileStatus", titleId: "strategyFileTitle", contentId: "strategyFileContent", searchId: "strategyFileSearch", summaryId: "strategySummaryGrid", highlightsId: "strategyHighlights", narrativeId: "strategyNarrative", rawLinkId: "strategyRawLink", copyBtnId: "strategyCopyPathBtn" },
+      "backtests": { listId: "backtestsFileList", statusId: "backtestsFileStatus", titleId: "backtestsFileTitle", contentId: "backtestsFileContent", searchId: "backtestsFileSearch", summaryId: "backtestsSummaryGrid", highlightsId: "backtestsHighlights", narrativeId: "backtestsNarrative", rawLinkId: "backtestsRawLink", copyBtnId: "backtestsCopyPathBtn" },
+      "research-vault": { listId: "research-vaultFileList", statusId: "research-vaultFileStatus", titleId: "research-vaultFileTitle", contentId: "research-vaultFileContent", searchId: "research-vaultFileSearch", summaryId: "research-vaultSummaryGrid", highlightsId: "research-vaultHighlights", narrativeId: "research-vaultNarrative", rawLinkId: "research-vaultRawLink", copyBtnId: "research-vaultCopyPathBtn" },
+      "downloads": { listId: "downloadsFileList", statusId: "downloadsFileStatus", titleId: "downloadsFileTitle", contentId: "downloadsFileContent", searchId: "downloadsFileSearch", summaryId: "downloadsSummaryGrid", highlightsId: "downloadsHighlights", narrativeId: "downloadsNarrative", rawLinkId: "downloadsRawLink", copyBtnId: "downloadsCopyPathBtn" },
+    };
+
+    function iconForModule(moduleId) {
+      return MODULE_ICONS[moduleId] || MODULE_ICONS.dashboard;
+    }
+
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = value;
+    }
+
+    function setMissionAction(id, action) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = action || "WAIT";
+      el.classList.remove("long", "short", "wait");
+      if (action === "LONG") el.classList.add("long");
+      else if (action === "SHORT") el.classList.add("short");
+      else el.classList.add("wait");
+    }
+
+    function initNav() {
+      const navRoot = document.getElementById("navGroups");
+      navRoot.innerHTML = MODULE_GROUPS.map((group) => {
+        const visibleItems = group.items.filter((item) => !HIDDEN_NAV_MODULES.has(item.id));
+        if (!visibleItems.length) return "";
+        const list = visibleItems.map((m, index) => `
+          <li>
+            <button class="navBtn ${m.id === "start-here" ? "active" : ""}" data-module="${m.id}">
+              <span class="navIcon">${iconForModule(m.id)}</span>
+              <span>${m.label}</span>
+            </button>
+          </li>
+        `).join("");
+
+        return `<div class="navGroup"><div class="navTitle">${group.title}</div><ul class="navList">${list}</ul></div>`;
+      }).join("");
+
+      navRoot.querySelectorAll(".navBtn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          switchModule(btn.dataset.module);
+          document.getElementById("sidebar").classList.remove("open");
+        });
+      });
+    }
+
+    function switchModule(moduleId) {
+      document.querySelectorAll(".navBtn").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.module === moduleId);
+      });
+
+      document.querySelectorAll(".section").forEach((section) => {
+        section.classList.toggle("active", section.dataset.section === moduleId);
+      });
+
+      setText("headerTitle", MODULE_LABELS[moduleId] || "Dashboard");
+    }
+
+    function initMobileNav() {
+      const menuBtn = document.getElementById("menuBtn");
+      const sidebar = document.getElementById("sidebar");
+      if (!menuBtn || !sidebar) return;
+      menuBtn.addEventListener("click", () => {
+        sidebar.classList.toggle("open");
+      });
+    }
+
+    function initSessionDate() {
+      const now = new Date();
+      const label = now.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+      setText("sessionDate", `Session ${label}`);
+    }
+
+    function utilityContent(type) {
+      if (type === "search") {
+        return {
+          title: "Search Workspace",
+          body: `
+            <input class="utilityInput" id="utilitySearchInput" type="search" placeholder="Find module, setup, or note" />
+            <ul>
+              <li>Morning Mission</li>
+              <li>Trade Bible</li>
+              <li>Indicator Library</li>
+            </ul>
+          `,
+        };
+      }
+
+      if (type === "notifications") {
+        return {
+          title: "Notifications",
+          body: `
+            <ul>
+              <li>Mission summary refreshed.</li>
+              <li>No high-impact events linked yet.</li>
+            </ul>
+          `,
+        };
+      }
+
+      return {
+        title: "Profile",
+        body: `
+          <ul>
+            <li>Plan: Premium Member</li>
+            <li>Workspace: Signal Bridge</li>
+            <li>Status: Active</li>
+          </ul>
+        `,
+      };
+    }
+
+    function setUtilityOpen(type) {
+      const panel = document.getElementById("utilityPanel");
+      const buttons = {
+        search: document.getElementById("searchBtn"),
+        notifications: document.getElementById("notificationsBtn"),
+        profile: document.getElementById("profileBtn"),
+      };
+
+      Object.values(buttons).forEach((btn) => btn && btn.classList.remove("active"));
+
+      if (!type || activeUtility === type) {
+        activeUtility = null;
+        panel.classList.remove("open");
+        panel.innerHTML = "";
+        return;
+      }
+
+      activeUtility = type;
+      const content = utilityContent(type);
+      panel.innerHTML = `<h4>${content.title}</h4>${content.body}`;
+      panel.classList.add("open");
+      buttons[type]?.classList.add("active");
+
+      if (type === "search") {
+        const input = document.getElementById("utilitySearchInput");
+        if (input) input.focus();
+      }
+    }
+
+    function initUtilityActions() {
+      const searchBtn = document.getElementById("searchBtn");
+      const notificationsBtn = document.getElementById("notificationsBtn");
+      const profileBtn = document.getElementById("profileBtn");
+      const panel = document.getElementById("utilityPanel");
+
+      if (searchBtn) searchBtn.addEventListener("click", () => setUtilityOpen("search"));
+      if (notificationsBtn) notificationsBtn.addEventListener("click", () => setUtilityOpen("notifications"));
+      if (profileBtn) profileBtn.addEventListener("click", () => setUtilityOpen("profile"));
+
+      document.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!panel.classList.contains("open")) return;
+        if (panel.contains(target) || searchBtn.contains(target) || notificationsBtn.contains(target) || profileBtn.contains(target)) return;
+        setUtilityOpen(null);
+      });
+    }
+
+    function initArchiveFilters() {
+      [
+        "archiveFilterDate",
+        "archiveFilterInstrument",
+        "archiveFilterAction",
+        "archiveFilterOutcome",
+        "archiveFilterDataState",
+        "archiveFilterTriggered",
+      ].forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener("input", renderArchiveList);
+        el.addEventListener("change", renderArchiveList);
+      });
+    }
+
+    function renderArchiveList() {
+      const date = (document.getElementById("archiveFilterDate")?.value || "").trim();
+      const instrument = (document.getElementById("archiveFilterInstrument")?.value || "").trim().toUpperCase();
+      const action = (document.getElementById("archiveFilterAction")?.value || "").trim().toUpperCase();
+      const outcome = (document.getElementById("archiveFilterOutcome")?.value || "").trim().toLowerCase();
+      const dataState = (document.getElementById("archiveFilterDataState")?.value || "").trim();
+      const triggered = (document.getElementById("archiveFilterTriggered")?.value || "").trim();
+
+      const filtered = (Array.isArray(currentArchive) ? currentArchive : []).filter((item) => {
+        if (date && item.date !== date) return false;
+        if (instrument && String(item.instrument || "").toUpperCase() !== instrument) return false;
+        if (action && String(item.initial_action || "").toUpperCase() !== action) return false;
+        if (outcome && !String(item.final_outcome || "").toLowerCase().includes(outcome)) return false;
+        if (dataState && String(item.data_state || "") !== dataState) return false;
+        if (triggered === "yes" && !item.trade_triggered) return false;
+        if (triggered === "no" && item.trade_triggered) return false;
+        return true;
+      });
+
+      const archiveList = document.getElementById("archiveList");
+      if (!archiveList) return;
+
+      archiveList.innerHTML = filtered.length
+        ? filtered.map((item) => `<li><strong>${item.date || "--"}</strong> ${item.instrument || "--"} | ${item.initial_action || "WAIT"} | ${item.final_outcome || "Pending"} | ${item.data_state || "Unavailable"}</li>`).join("")
+        : "<li>No missions archived yet. Your completed session briefs will appear here.</li>";
+    }
+
+    function formatPrice(value) {
+      return Number(value).toFixed(value > 1000 ? 2 : 3);
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function formatFileSize(bytes) {
+      const n = Number(bytes || 0);
+      if (!Number.isFinite(n) || n <= 0) return "0 B";
+      if (n < 1024) return `${n} B`;
+      if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+      return `${(n / (1024 * 1024)).toFixed(2)} MB`;
+    }
+
+    function formatFileDate(iso) {
+      if (!iso) return "--";
+      const dt = new Date(iso);
+      if (Number.isNaN(dt.getTime())) return "--";
+      return dt.toLocaleString();
+    }
+
+    function fileHref(path) {
+      return `./${String(path || "").split("/").map((part) => encodeURIComponent(part)).join("/")}`;
+    }
+
+    function topTagsForModule(moduleId, files) {
+      const counters = new Map();
+      const push = (label) => counters.set(label, (counters.get(label) || 0) + 1);
+
+      files.forEach((file) => {
+        const haystack = `${file.path || ""} ${file.name || ""}`.toLowerCase();
+        if (moduleId === "strategy-center") {
+          if (/phase|version|v\d/.test(haystack)) push("versions");
+          if (/decision|principle|philosophy|truth/.test(haystack)) push("governance");
+          if (/checklist|brief|summary/.test(haystack)) push("operations");
+          if (/pine|indicator|script/.test(haystack)) push("scripts");
+        } else if (moduleId === "backtests") {
+          if (haystack.endsWith(".csv")) push("csv");
+          if (haystack.endsWith(".json")) push("json");
+          if (/output|summary|report/.test(haystack)) push("reports");
+          if (/walk|funded|robust|evaluation/.test(haystack)) push("robustness");
+        } else if (moduleId === "research-vault") {
+          if (/liquidity/.test(haystack)) push("liquidity");
+          if (/orb/.test(haystack)) push("orb");
+          if (/risk|drawdown/.test(haystack)) push("risk");
+          if (/psych|mindset|discipline/.test(haystack)) push("psychology");
+          if (/volume|order/.test(haystack)) push("volume");
+          if (/review|replay/.test(haystack)) push("reviews");
+          if (/book/.test(haystack)) push("books");
+          if (/video|youtube/.test(haystack)) push("videos");
+          if (/claude|chatgpt/.test(haystack)) push("conversations");
+          if (/fail|reject|abandon/.test(haystack)) push("failed ideas");
+        } else if (moduleId === "downloads") {
+          if (haystack.endsWith(".html")) push("dashboards");
+          if (haystack.endsWith(".json")) push("reports");
+          if (/checklist/.test(haystack)) push("checklists");
+          if (/brand|wallpaper/.test(haystack)) push("assets");
+        }
+      });
+
+      return Array.from(counters.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    }
+
+    function renderLabItems(rootId, items, emptyMessage, files, moduleId) {
+      const root = document.getElementById(rootId);
+      if (!root) return;
+
+      if (!Array.isArray(items) || !items.length) {
+        root.innerHTML = `<li>${emptyMessage}</li>`;
+        return;
+      }
+
+      root.innerHTML = items.map((item) => `
+        <li>
+          <div class="labItemTop">
+            <div class="labItemTitle">${escapeHtml(item.title || "Untitled")}</div>
+            <div class="labItemMeta">${escapeHtml(item.meta || "Research")}</div>
+          </div>
+          <div class="labItemBody">${escapeHtml(item.body || "")}</div>
+          <div class="labItemActions">
+            ${item.path ? `<button class="labMiniBtn" type="button" data-strategy-open="${escapeHtml(item.path)}">Open in preview</button>` : ""}
+          </div>
+        </li>
+      `).join("");
+
+      root.querySelectorAll("[data-strategy-open]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const path = btn.dataset.strategyOpen;
+          const selected = (Array.isArray(files) ? files : []).find((file) => file.path === path);
+          if (selected) previewModuleFile(moduleId, selected);
+        });
+      });
+    }
+
+    function fileExcerpt(file, fallback = "") {
+      const raw = String(file?.content || fallback || "");
+      const lines = raw.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+      const usable = lines.filter((line) => !line.startsWith("#") && !line.startsWith("```") && line.length > 20);
+      return (usable[0] || lines[1] || lines[0] || fallback || "").slice(0, 220);
+    }
+
+    function strategyLabelFromPath(path) {
+      const value = String(path || "");
+      if (/SOURCE_OF_TRUTH|MASTER_DOCUMENT/i.test(value)) return "canonical";
+      if (/V\d|SPEC/i.test(value)) return "version";
+      if (/BASELINE|LOCK/i.test(value)) return "baseline";
+      if (/PHASE/i.test(value)) return "phase";
+      if (/CHANGELOG/i.test(value)) return "history";
+      if (/NEXT_EXECUTION_BRIEF|TEST_PLAN|RESEARCH_GAPS|SPRINT/i.test(value)) return "queue";
+      if (/experiment|validation|optimizer|report|summary\.json/i.test(value)) return "experiment";
+      return "doc";
+    }
+
+    function renderStrategyCenterExperience(files, data, mission) {
+      const snapshotEl = document.getElementById("strategySnapshot");
+      if (snapshotEl) {
+        snapshotEl.innerHTML = [
+          {
+            title: "Why members come back",
+            body: "To see what changed in the strategy this week, what is locked, and what is being tested next.",
+          },
+          {
+            title: "Current operating model",
+            body: data.status?.mode || "regime-aware ORB workflow",
+          },
+          {
+            title: "Promotion rule",
+            body: "Ideas move only when evidence improves expectancy quality without breaking risk integrity.",
+          },
+        ].map((item) => `
+          <div class="labSnapshotItem">
+            <strong>${escapeHtml(item.title)}</strong>
+            ${escapeHtml(item.body)}
+          </div>
+        `).join("");
+      }
+
+      const byPath = (pattern) => files.find((file) => pattern.test(file.path || "") || pattern.test(file.name || ""));
+      const changeCandidates = [
+        { file: byPath(/DECISION_ENGINE_PRINCIPLES/i), why: "Locks how changes are judged so the strategy stops drifting with every new idea." },
+        { file: byPath(/MASON_DECISION_TREE_IF_THEN_V1/i), why: "Converts discretionary notes into testable logic blocks instead of intuition." },
+        { file: byPath(/BASELINE_V1_0_LOCK/i), why: "Prevents accidental mutation of the golden baseline while branches are tested." },
+        { file: byPath(/RESEARCH_UPDATES_CONFIDENCE_FIX/i), why: "Reorients evaluation away from raw profit chasing and toward robustness." },
+        { file: byPath(/NEXT_EXECUTION_BRIEF_MARKET_REGIME_ENGINE/i), why: "Queues the next major research branch instead of letting the project wander." },
+      ].filter((item) => item.file);
+
+      renderLabItems(
+        "strategyWhatsNew",
+        changeCandidates.map((item) => ({
+          title: item.file.name.replace(/\.(md|json|csv|pine)$/i, "").replaceAll("_", " "),
+          meta: strategyLabelFromPath(item.file.path),
+          body: `${fileExcerpt(item.file, item.why)} ${item.why}`.trim(),
+          path: item.file.path,
+        })),
+        "No recent strategy changes are classified yet.",
+        files,
+        "strategy-center"
+      );
+
+      const versionFiles = files.filter((file) => /SOURCE_OF_TRUTH|MASTER_DOCUMENT|V\d|SPEC|PHASE2|PHASE_3|START_HERE_PAPER_TRADING|EXECUTION_STATUS/i.test(file.path || "")).slice(0, 8);
+      renderLabItems(
+        "strategyVersionList",
+        versionFiles.map((file) => ({
+          title: file.name.replace(/\.(md|json|csv|pine)$/i, "").replaceAll("_", " "),
+          meta: strategyLabelFromPath(file.path),
+          body: fileExcerpt(file, "Version notes and implementation history."),
+          path: file.path,
+        })),
+        "No version history files were found.",
+        files,
+        "strategy-center"
+      );
+
+      const experimentFiles = files.filter((file) => /experiment|validation|optimizer|robust|report|summary\.json|PHASE7|TEST_PLAN|SPRINT/i.test(file.path || "")).slice(0, 8);
+      renderLabItems(
+        "strategyExperimentList",
+        experimentFiles.map((file) => ({
+          title: file.name.replace(/\.(md|json|csv|pine)$/i, "").replaceAll("_", " "),
+          meta: /NEXT_|GAPS/i.test(file.path || "") ? "queued" : (file.path.includes("outputs/") ? "measured" : "research"),
+          body: fileExcerpt(file, "Experiment artifact available for review."),
+          path: file.path,
+        })),
+        "No experiment files were surfaced for this lab.",
+        files,
+        "strategy-center"
+      );
+
+      const futureFiles = files.filter((file) => /NEXT_EXECUTION_BRIEF|RESEARCH_GAPS|PRIORITIZED_COMPONENTS|TEST_PLAN|SPRINT/i.test(file.path || "")).slice(0, 6);
+      renderLabItems(
+        "strategyFutureList",
+        futureFiles.map((file) => ({
+          title: file.name.replace(/\.(md|json|csv|pine)$/i, "").replaceAll("_", " "),
+          meta: "next up",
+          body: fileExcerpt(file, "Queued as a future research branch or testing decision."),
+          path: file.path,
+        })),
+        "No future strategy queue files are classified yet.",
+        files,
+        "strategy-center"
+      );
+
+      const changelogFile = byPath(/CHANGELOG\.md$/i) || byPath(/TESTING_CHECKLIST_AND_CHANGELOG/i);
+      const changelog = document.getElementById("strategyChangelog");
+      if (changelog) {
+        changelog.textContent = changelogFile
+          ? String(changelogFile.content || "").split(/\r?\n/).filter((line) => line.trim()).slice(0, 12).join("\n")
+          : "No changelog file is available yet.";
+      }
+
+      const sourceTruthBtn = document.getElementById("strategyOpenSourceTruthBtn");
+      if (sourceTruthBtn) {
+        const sourceTruthFile = byPath(/SOURCE_OF_TRUTH|MASTER_DOCUMENT/i) || versionFiles[0];
+        sourceTruthBtn.onclick = () => {
+          if (sourceTruthFile) previewModuleFile("strategy-center", sourceTruthFile);
+        };
+      }
+
+      const changelogBtn = document.getElementById("strategyOpenChangelogBtn");
+      if (changelogBtn) {
+        changelogBtn.onclick = () => {
+          if (changelogFile) previewModuleFile("strategy-center", changelogFile);
+        };
+      }
+    }
+
+    function renderModuleSummary(moduleId, files, data, mission) {
+      const view = FILE_MODULE_VIEW[moduleId];
+      if (!view) return;
+      const summaryEl = document.getElementById(view.summaryId);
+      const highlightsEl = document.getElementById(view.highlightsId);
+      const narrativeEl = document.getElementById(view.narrativeId);
+      if (!summaryEl || !highlightsEl || !narrativeEl) return;
+
+      const latestModified = files.reduce((latest, file) => {
+        const next = Date.parse(file.modified || 0);
+        return Number.isFinite(next) && next > latest ? next : latest;
+      }, 0);
+      const latestLabel = latestModified ? new Date(latestModified).toLocaleDateString() : "--";
+      const csvCount = files.filter((file) => String(file.extension || file.path || "").toLowerCase().endsWith(".csv")).length;
+      const jsonCount = files.filter((file) => String(file.extension || file.path || "").toLowerCase().endsWith(".json")).length;
+      const tags = topTagsForModule(moduleId, files);
+
+      let metrics = [];
+      let note = "";
+
+      if (moduleId === "strategy-center") {
+        metrics = [
+          { label: "Current Version", value: mission.identity?.strategy_version || "ORB-edge-v1.0" },
+          { label: "Bias Engine", value: mission.directional?.market_phase || data.research_output?.dominant_phase || "Research" },
+          { label: "Files", value: String(files.length) },
+          { label: "Last Update", value: latestLabel },
+        ];
+        note = `This is the active strategy workspace: current protocol, prior decision documents, and the Pine artifacts that explain how the edge evolved.`;
+      } else if (moduleId === "backtests") {
+        metrics = [
+          { label: "Trade Count", value: String(data.research_output?.trades ?? "--") },
+          { label: "CSV Reports", value: String(csvCount) },
+          { label: "JSON Reports", value: String(jsonCount) },
+          { label: "Dominant Phase", value: data.research_output?.dominant_phase || "--" },
+        ];
+        note = `Backtests is now the validation bench: metrics files, experiment outputs, and report artifacts that justify rule changes before promotion.`;
+      } else if (moduleId === "research-vault") {
+        metrics = [
+          { label: "Research Files", value: String(files.length) },
+          { label: "Categories Surfaced", value: String(tags.length) },
+          { label: "Latest Note", value: latestLabel },
+          { label: "Focus", value: tags[0]?.[0] || "strategy" },
+        ];
+        note = `Research Vault acts as the system's second brain: searchable notes, doctrine, prompts, and reference material grouped by topic rather than left as dead folders.`;
+      } else if (moduleId === "downloads") {
+        metrics = [
+          { label: "Ready Assets", value: String(files.length) },
+          { label: "Dashboards", value: String(files.filter((file) => String(file.path || "").endsWith(".html")).length) },
+          { label: "Reports", value: String(jsonCount) },
+          { label: "Last Build", value: latestLabel },
+        ];
+        note = `Downloads now points at real artifacts already in the workspace: exported dashboards, reports, and checklists that members can actually take with them.`;
+      }
+
+      summaryEl.innerHTML = metrics.map((metric) => `<div class="metricRow"><span>${metric.label}</span><strong>${escapeHtml(metric.value)}</strong></div>`).join("");
+      highlightsEl.innerHTML = tags.length ? tags.map(([label, count]) => `<span class="moduleBadge">${escapeHtml(label)} ${count}</span>`).join("") : '<span class="moduleBadge">live files</span>';
+      narrativeEl.textContent = note;
+
+      if (moduleId === "strategy-center") {
+        renderStrategyCenterExperience(files, data, mission);
+      }
+    }
+
+    function renderRoadmap(data, mission) {
+      const board = document.getElementById("roadmapBoard");
+      if (!board) return;
+
+      const strategyFiles = fileDeskState.catalog["strategy-center"] || [];
+      const backtestFiles = fileDeskState.catalog.backtests || [];
+      const researchFiles = fileDeskState.catalog["research-vault"] || [];
+      const downloadFiles = fileDeskState.catalog.downloads || [];
+      const replayCount = Array.isArray(data.session_replay?.keys) ? data.session_replay.keys.length : 0;
+
+      const items = [
+        { label: "Morning Mission", progress: 100, status: "Live", meta: "Daily mission, gate logic, archive filters, and replay-linked planning are already shipped." },
+        { label: "Start Here", progress: 82, status: "Active", meta: "Beginner path, glossary, routine, progress tracking, and MES risk calculator are live." },
+        { label: "Trade Bible", progress: 76, status: "Active", meta: "Desk brief, execution script, no-trade protocol, and copy-ready templates are usable now." },
+        { label: "Strategy Center", progress: Math.min(92, 45 + strategyFiles.length), status: "Growing", meta: `${strategyFiles.length} live strategy documents and scripts are already discoverable from one place.` },
+        { label: "Backtests", progress: Math.min(88, 35 + backtestFiles.length * 2), status: "Growing", meta: `${backtestFiles.length} validation artifacts available for review.` },
+        { label: "Research Vault", progress: Math.min(90, 25 + researchFiles.length), status: "Growing", meta: `${researchFiles.length} research files surfaced with searchable previews and topic tags.` },
+        { label: "Replay Engine", progress: replayCount ? 68 : 24, status: replayCount ? "Active" : "Seeded", meta: replayCount ? `${replayCount} replay sessions are ready to review.` : "Replay is wired, but it still needs a deeper archive." },
+        { label: "Downloads", progress: Math.min(84, 20 + downloadFiles.length * 6), status: "Active", meta: `${downloadFiles.length} real artifacts are available today instead of a dead download tab.` },
+        { label: "Journal", progress: 12, status: "Hidden", meta: "Hidden from navigation until screenshot upload, tagging, and statistics are real." },
+        { label: "Videos", progress: 8, status: "Hidden", meta: "Hidden from navigation until the walkthrough library exists." },
+        { label: "Account", progress: 5, status: "Hidden", meta: "Hidden from navigation until settings, membership state, and lesson history are functional." },
+      ];
+
+      board.innerHTML = items.map((item) => `
+        <article class="roadmapCard">
+          <div class="roadmapTop"><strong>${item.label}</strong><span>${item.progress}% | ${item.status}</span></div>
+          <div class="roadmapTrack"><span class="roadmapFill" style="width:${Math.max(0, Math.min(100, item.progress))}%;"></span></div>
+          <div class="roadmapMeta">${item.meta}</div>
+          <div class="roadmapFoot">Rule: if a module cannot hold attention yet, keep it out of the sidebar.</div>
+        </article>
+      `).join("");
+
+      const policy = document.getElementById("roadmapPolicy");
+      if (policy) {
+        policy.textContent = `Current operating rule: Start Here, Dashboard, Morning Mission, Trade Bible, Indicator Library, Strategy Center, Backtests, Research Vault, Downloads, and Roadmap stay visible. Journal, Videos, and Account stay hidden until they are real tools.`;
+      }
+    }
+
+    async function fetchLibraryCatalog(source, embeddedData = null) {
+      if (source === "embedded" && embeddedData && embeddedData.library_catalog) return embeddedData.library_catalog;
+
+      const candidates = ["/api/library", "./api/library", "./trading_os/src/integrations/api/library"];
+      for (const path of candidates) {
+        try {
+          const response = await fetch(path, { cache: "no-store" });
+          if (!response.ok) continue;
+          const payload = await response.json();
+          if (payload && typeof payload === "object" && payload.modules) {
+            return payload.modules;
+          }
+        } catch (_error) {
+          continue;
+        }
+      }
+      return null;
+    }
+
+    async function fetchLibraryFileContent(filePath) {
+      const candidates = [
+        `/api/library/file?path=${encodeURIComponent(filePath)}`,
+        `./api/library/file?path=${encodeURIComponent(filePath)}`,
+        `./trading_os/src/integrations/api/library/file?path=${encodeURIComponent(filePath)}`,
+      ];
+      for (const path of candidates) {
+        try {
+          const response = await fetch(path, { cache: "no-store" });
+          if (!response.ok) continue;
+          return await response.json();
+        } catch (_error) {
+          continue;
+        }
+      }
+      throw new Error("File preview service unavailable");
+    }
+
+    async function previewModuleFile(moduleId, fileMeta) {
+      const view = FILE_MODULE_VIEW[moduleId];
+      if (!view) return;
+      const titleEl = document.getElementById(view.titleId);
+      const contentEl = document.getElementById(view.contentId);
+      if (!titleEl || !contentEl) return;
+
+      titleEl.textContent = `${fileMeta.name} | Loading...`;
+      contentEl.textContent = "Loading file content...";
+
+      const rawLink = view.rawLinkId ? document.getElementById(view.rawLinkId) : null;
+      if (rawLink) rawLink.href = fileHref(fileMeta.path);
+      const copyBtn = view.copyBtnId ? document.getElementById(view.copyBtnId) : null;
+      if (copyBtn) {
+        copyBtn.onclick = async () => {
+          const ok = await copyText(fileMeta.path);
+          const statusEl = document.getElementById(view.statusId);
+          if (statusEl) statusEl.textContent = ok ? `Copied path: ${fileMeta.path}` : "Clipboard is unavailable in this environment.";
+        };
+      }
+
+      try {
+        if (fileMeta.content) {
+          const truncatedNote = fileMeta.truncated ? "\n\n[preview truncated]" : "";
+          titleEl.textContent = `${fileMeta.name} | ${fileMeta.size_label || formatFileSize(fileMeta.size)} | ${fileMeta.path}`;
+          contentEl.textContent = `${fileMeta.content}${truncatedNote}`;
+          return;
+        }
+
+        const payload = await fetchLibraryFileContent(fileMeta.path);
+        const truncatedNote = payload.truncated ? "\n\n[preview truncated at 200KB]" : "";
+        titleEl.textContent = `${payload.name} | ${formatFileSize(payload.size)} | ${payload.path}`;
+        contentEl.textContent = `${payload.content || ""}${truncatedNote}`;
+      } catch (_error) {
+        titleEl.textContent = fileMeta.name;
+        contentEl.textContent = "Unable to load file preview right now.";
+      }
+    }
+
+    function renderModuleFiles(moduleId, files, source) {
+      const view = FILE_MODULE_VIEW[moduleId];
+      if (!view) return;
+      const listEl = document.getElementById(view.listId);
+      const statusEl = document.getElementById(view.statusId);
+      const titleEl = document.getElementById(view.titleId);
+      const contentEl = document.getElementById(view.contentId);
+      const searchEl = view.searchId ? document.getElementById(view.searchId) : null;
+      if (!listEl || !statusEl || !titleEl || !contentEl) return;
+
+      if (searchEl) {
+        searchEl.value = fileDeskState.filters[moduleId] || "";
+        if (!searchEl.dataset.bound) {
+          searchEl.dataset.bound = "true";
+          searchEl.addEventListener("input", () => {
+            fileDeskState.filters[moduleId] = searchEl.value || "";
+            renderModuleFiles(moduleId, fileDeskState.catalog[moduleId] || [], source);
+          });
+        }
+      }
+
+      renderModuleSummary(moduleId, files, window.__activeReportData || {}, window.__activeMission || {});
+
+      if (!Array.isArray(files) || !files.length) {
+        statusEl.textContent = "No files discovered for this module yet.";
+        listEl.innerHTML = "";
+        titleEl.textContent = "File Preview";
+        contentEl.textContent = "Add files to this module path and refresh report.";
+        return;
+      }
+
+      const query = String(fileDeskState.filters[moduleId] || "").trim().toLowerCase();
+      const filteredFiles = query
+        ? files.filter((file) => `${file.name || ""} ${file.path || ""} ${file.content || ""}`.toLowerCase().includes(query))
+        : files;
+
+      if (!filteredFiles.length) {
+        statusEl.textContent = `No files match \"${query}\".`;
+        listEl.innerHTML = "";
+        titleEl.textContent = "File Preview";
+        contentEl.textContent = "Adjust your search to load a file preview.";
+        return;
+      }
+
+      statusEl.textContent = query ? `${filteredFiles.length} of ${files.length} files match your search.` : `${files.length} files discovered. Select one to preview.`;
+      listEl.innerHTML = filteredFiles.map((file, idx) => `
+        <li>
+          <button class="watchItem ${idx === 0 ? "active" : ""}" type="button" data-module="${moduleId}" data-path="${escapeHtml(file.path)}" style="width:100%; text-align:left;">
+            <span>${escapeHtml(file.name)}</span>
+            <span class="watchBias">${formatFileDate(file.modified)} | ${formatFileSize(file.size)}</span>
+          </button>
+        </li>
+      `).join("");
+
+      listEl.querySelectorAll(".watchItem").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          listEl.querySelectorAll(".watchItem").forEach((item) => item.classList.remove("active"));
+          btn.classList.add("active");
+          const path = btn.dataset.path;
+          const selected = filteredFiles.find((f) => f.path === path);
+          if (selected) previewModuleFile(moduleId, selected);
+        });
+      });
+
+      previewModuleFile(moduleId, filteredFiles[0]);
+    }
+
+    async function initFileWorkspace(source, embeddedData = null) {
+      fileDeskState.source = source || "unavailable";
+      const modules = await fetchLibraryCatalog(fileDeskState.source, embeddedData);
+      fileDeskState.catalog = modules || {};
+
+      Object.keys(FILE_MODULE_VIEW).forEach((moduleId) => {
+        renderModuleFiles(moduleId, fileDeskState.catalog[moduleId] || [], fileDeskState.source);
+      });
+    }
+
+    function stateFromSource(source, data) {
+      if (data?.data_state?.overall) return data.data_state.overall;
+      if (source === "embedded") return "Simulated";
+      if (source === "live-report") return "Research";
+      return "Unavailable";
+    }
+
+    function getWatchlist(data) {
+      const list = Array.isArray(data.watchlist) ? data.watchlist : [];
+      if (list.length) return list;
+      return [{ symbol: "MES", data_state: "Unavailable", price: null, bias: "Unavailable", action: "Unavailable" }];
+    }
+
+    function getSelectedInstrument(watchlist) {
+      return watchlist.find((item) => item.symbol === selectedSymbol) || watchlist[0];
+    }
+
+    function missionForSymbol(data, selectedInstrument) {
+      const mission = data.morning_mission || {};
+      const identity = mission.identity || {};
+      const directional = mission.directional_plan || {};
+      const execution = mission.execution_plan || {};
+      const supporting = mission.supporting_levels || {};
+      const outcome = mission.outcome || {};
+      const session = mission.session_context || {};
+
+      return {
+        source: mission.source || "Awaiting strategy output",
+        action: directional.action || mission.action || "WAIT",
+        state: directional.setup_state || mission.state || "Awaiting strategy output",
+        bias: directional.primary_bias || selectedInstrument.bias || "Unknown",
+        htf: directional.htf_bias || "Unknown",
+        entry: execution.entry_zone,
+        invalidation: execution.invalidation,
+        confidencePct: directional.confidence_pct,
+        targets: Array.isArray(execution.targets) ? execution.targets : (Array.isArray(mission.targets) ? mission.targets : []),
+        phase: data.research_output?.dominant_phase || "n/a",
+        trades: data.research_output?.trades,
+        update: data.status?.last_updated || "n/a",
+        identity,
+        directional,
+        execution,
+        supporting,
+        outcome,
+        session,
+        requiredConditions: Array.isArray(mission.required_conditions) ? mission.required_conditions : [],
+        noTradeConditions: Array.isArray(mission.no_trade_conditions) ? mission.no_trade_conditions : [],
+        discordSummary: data.discord_summary || mission.discord_summary || "Awaiting strategy output",
+        archive: Array.isArray(data.missions?.archive) ? data.missions.archive : [],
+        dataState: mission.data_state || "Unavailable",
+      };
+    }
+
+    function renderWatchlist(data, mission) {
+      const watchlist = getWatchlist(data);
+      const root = document.getElementById("watchlist");
+      root.innerHTML = watchlist.map((item) => {
+        const active = item.symbol === selectedSymbol ? "active" : "";
+        const label = item.data_state === "Unavailable" ? "Unavailable" : (item.action || mission.action || "WAIT");
+        return `<li><button class="watchItem ${active}" data-symbol="${item.symbol}"><span>${item.symbol}</span><span class="watchBias">${label}</span></button></li>`;
+      }).join("");
+
+      root.querySelectorAll(".watchItem").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          selectedSymbol = btn.dataset.symbol;
+          loadReport();
+        });
+      });
+    }
+
+    function renderConditionsMini(mission) {
+      const statusClass = (status) => {
+        if (status === "Completed") return "statusCompleted";
+        if (status === "Failed") return "statusFailed";
+        if (status === "Not applicable") return "statusNA";
+        return "statusPending";
+      };
+
+      const list = Array.isArray(mission.requiredConditions) ? mission.requiredConditions : [];
+      const root = document.getElementById("conditionsMiniList");
+      root.innerHTML = list.length
+        ? list.slice(0, 6).map((c) => `
+          <li class="conditionItem">
+            <div><strong>${c.label || "Condition"}</strong></div>
+            <div class="conditionStatus ${statusClass(c.status)}">${c.status || "Pending"}</div>
+            <div style="color:#9ba6b8; font-size:0.75rem; margin-top:3px;">${c.evidence || "Awaiting evidence"}</div>
+          </li>
+        `).join("")
+        : "<li class=\"conditionItem\">No active condition checklist available yet.</li>";
+    }
+
+    function renderNews(data, newsItemsOverride = null) {
+      const root = document.getElementById("newsList");
+      const items = Array.isArray(newsItemsOverride) ? newsItemsOverride : (Array.isArray(data.news?.items) ? data.news.items : []);
+      root.innerHTML = items.length
+        ? items.slice(0, 4).map((item) => `<li><strong>${item.title || "News update"}</strong><br>${item.summary || ""}</li>`).join("")
+        : `<li>
+            <div class="newsEmpty">
+              <span class="newsEmptyIcon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5H20V18.5H4V5.5Z"></path><path d="M7 9.5H17"></path><path d="M7 12.5H13"></path></svg>
+              </span>
+              <span>Market headlines are not connected yet. This panel will surface macro events and instrument-specific context when the feed is enabled.</span>
+            </div>
+          </li>`;
+    }
+
+    function renderTimelineMini(mission) {
+      const timeline = [
+        `Premarket: ${mission.session.premarket_status || "Unknown"}`,
+        `ORB window: ${mission.session.orb_start || "--"} to ${mission.session.orb_end || "--"}`,
+        `Execution: ${mission.session.execution_window || "--"}`,
+        `Cutoff: ${mission.session.hard_cutoff_time || "--"}`,
+      ];
+      document.getElementById("timelineListMini").innerHTML = timeline.map((item) => `<li>${item}</li>`).join("");
+    }
+
+    function renderPerformance(data, mission) {
+      const net = data.research_output?.net;
+      const winRate = data.research_output?.win_rate;
+      const trades = data.research_output?.trades;
+
+      setText("perfNet", Number.isFinite(Number(net)) ? `${Number(net).toFixed(2)}R` : "--");
+      setText("perfWinRate", Number.isFinite(Number(winRate)) ? `${Math.round(Number(winRate) * 100)}%` : "--");
+      setText("perfTrades", trades ?? "--");
+      setText("planSource", mission.source || "--");
+    }
+
+    function renderTradeBible(mission) {
+      const action = mission.action || "WAIT";
+      const entry = Number.isFinite(Number(mission.execution.entry_zone)) ? formatPrice(Number(mission.execution.entry_zone)) : "Pending";
+      const invalidation = Number.isFinite(Number(mission.execution.invalidation)) ? formatPrice(Number(mission.execution.invalidation)) : "--";
+      const confidence = Number.isFinite(Number(mission.confidencePct)) ? `${Number(mission.confidencePct)}%` : "--";
+      const conditions = Array.isArray(mission.requiredConditions) ? mission.requiredConditions : [];
+      const noTrade = Array.isArray(mission.noTradeConditions) ? mission.noTradeConditions : [];
+
+      setText("tbActionBias", `${action} | ${mission.bias || "Unknown"}`);
+      setText("tbEntryPlan", entry);
+      setText("tbInvalidation", invalidation);
+
+      const checklistRoot = document.getElementById("tbChecklist");
+      checklistRoot.innerHTML = conditions.length
+        ? conditions.slice(0, 6).map((c) => {
+          const done = c.status === "Completed" || c.status === "Not applicable";
+          return `<li><span class="tbCheck ${done ? "done" : ""}">${done ? "X" : ""}</span><span><strong>${c.label || "Condition"}</strong><br>${c.evidence || "No evidence logged"}</span></li>`;
+        }).join("")
+        : "<li><span class=\"tbCheck\"></span><span>No mission checklist available for this session.</span></li>";
+
+      const badgeRoot = document.getElementById("tbBadgeRow");
+      const complete = conditions.filter((c) => c.status === "Completed").length;
+      const pending = conditions.filter((c) => c.status !== "Completed" && c.status !== "Not applicable").length;
+      badgeRoot.innerHTML = `
+        <span class="tbBadge">Confidence ${confidence}</span>
+        <span class="tbBadge">Completed ${complete}/${conditions.length || 0}</span>
+        <span class="tbBadge">Pending ${pending}</span>
+      `;
+
+      const noTradeRoot = document.getElementById("tbNoTradeChecklist");
+      noTradeRoot.innerHTML = noTrade.length
+        ? noTrade.slice(0, 5).map((rule) => `<li><span class="tbCheck">X</span><span>${rule}</span></li>`).join("")
+        : "<li><span class=\"tbCheck\">X</span><span>No no-trade triggers were provided for this session.</span></li>";
+
+      const targetOne = Array.isArray(mission.targets) && Number.isFinite(Number(mission.targets[0])) ? formatPrice(Number(mission.targets[0])) : "Pending";
+      const script = [
+        `MISSION ACTION: ${action}`,
+        `ENTRY ZONE: ${entry}`,
+        `INVALIDATION: ${invalidation}`,
+        `PRIMARY TARGET: ${targetOne}`,
+        `CHECKLIST: ${complete}/${conditions.length || 0} complete`,
+        `RULE: One attempt. No chase after cutoff.`,
+      ].join("\n");
+      setText("tbScript", script);
+
+      const brief = [
+        `Signal Bridge Desk Brief`,
+        `Date: ${mission.identity.trading_date || "--"}`,
+        `Instrument: ${mission.identity.instrument || "--"}`,
+        `Action: ${action}`,
+        `Entry: ${entry}`,
+        `Invalidation: ${invalidation}`,
+        `Target: ${targetOne}`,
+        `Confidence: ${confidence}`,
+        `No Trade If: ${(noTrade[0] || "No-trade rule not provided")}`,
+      ].join("\n");
+
+      const review = [
+        `Post-Session Review Template`,
+        `1) Was the mission gate respected?`,
+        `2) Was entry executed only after confirmation?`,
+        `3) Were stop and target rules followed without exception?`,
+        `4) What invalidated the setup or confirmed the edge?`,
+        `5) What one improvement will be applied tomorrow?`,
+      ].join("\n");
+
+      tradeBibleState = { brief, review };
+    }
+
+    function renderIndicatorLibrary(data, mission) {
+      const levels = (data.chart && data.chart.levels) ? data.chart.levels : {};
+      const action = mission.action || "WAIT";
+      const bias = mission.bias || "Unknown";
+      const confidence = Number.isFinite(Number(mission.confidencePct)) ? `${Number(mission.confidencePct)}%` : "--";
+      const orbHigh = Number.isFinite(Number(levels.orb_high)) ? formatPrice(Number(levels.orb_high)) : "--";
+      const orbLow = Number.isFinite(Number(levels.orb_low)) ? formatPrice(Number(levels.orb_low)) : "--";
+      const entry = Number.isFinite(Number(mission.execution.entry_zone)) ? formatPrice(Number(mission.execution.entry_zone)) : "Pending";
+      const invalidation = Number.isFinite(Number(mission.execution.invalidation)) ? formatPrice(Number(mission.execution.invalidation)) : "--";
+      const targets = Array.isArray(mission.targets) && mission.targets.length ? mission.targets : [];
+      const t1 = Number.isFinite(Number(targets[0])) ? formatPrice(Number(targets[0])) : "--";
+
+      const stackGrid = document.getElementById("indStackGrid");
+      stackGrid.innerHTML = `
+        <div class="indCard">
+          <div class="indCardLabel">ORB Range</div>
+          <div class="indCardValue">${orbLow} - ${orbHigh}</div>
+          <div class="indCardDesc">Primary opening range reference for setup validation.</div>
+        </div>
+        <div class="indCard">
+          <div class="indCardLabel">Mission Bias</div>
+          <div class="indCardValue">${bias}</div>
+          <div class="indCardDesc">Directional context from active morning mission.</div>
+        </div>
+        <div class="indCard">
+          <div class="indCardLabel">Entry Trigger</div>
+          <div class="indCardValue">${entry}</div>
+          <div class="indCardDesc">Execute only after rule confirmation and checklist completion.</div>
+        </div>
+        <div class="indCard">
+          <div class="indCardLabel">Risk Line</div>
+          <div class="indCardValue">${invalidation}</div>
+          <div class="indCardDesc">Hard invalidation. No stop widening after entry.</div>
+        </div>
+      `;
+
+      const signalState = document.getElementById("indSignalState");
+      const dotClass = action === "LONG" ? "bull" : action === "SHORT" ? "bear" : "wait";
+      signalState.innerHTML = `<span class="indDot ${dotClass}"></span><span>${action} | Confidence ${confidence}</span>`;
+
+      const signalScript = [
+        `ACTION: ${action}`,
+        `ENTRY: ${entry}`,
+        `INVALIDATION: ${invalidation}`,
+        `TARGET 1: ${t1}`,
+        `NOTE: Trigger only when mission gate is authorized.`
+      ].join("\n");
+      setText("indSignalScript", signalScript);
+
+      const triggerRules = [
+        `If price reclaims trigger zone near ${entry}, allow execution check.`,
+        `If price accepts beyond invalidation ${invalidation}, cancel setup.`,
+        `If confidence drops below 60%, defer entry and reassess context.`,
+        `If target ${t1} is reached, shift to break-even management.`
+      ];
+      document.getElementById("indTriggerRules").innerHTML = triggerRules.map((rule) => `<li>${rule}</li>`).join("");
+    }
+
+    function stopReplay() {
+      if (replayState.timer) {
+        clearInterval(replayState.timer);
+        replayState.timer = null;
+      }
+    }
+
+    function renderReplayFrame() {
+      const events = replayState.events;
+      const idx = Math.max(0, Math.min(replayState.index, Math.max(0, events.length - 1)));
+      replayState.index = idx;
+      const event = events[idx] || {
+        title: "No replay event selected",
+        body: "Load a session to review setup progression and outcomes.",
+        time: "--",
+      };
+
+      const root = document.getElementById("replayEvent");
+      root.innerHTML = `
+        <div class="replayEventTitle">${event.title}</div>
+        <div class="replayEventBody">${event.body}</div>
+        <div class="replayEventTime">${event.time || "--"}</div>
+      `;
+
+      const slider = document.getElementById("replaySlider");
+      slider.max = String(Math.max(0, events.length - 1));
+      slider.value = String(idx);
+      const replayLabel = replayState.currentKey || "current";
+      setText("replayMeta", `${replayLabel} | ${idx + 1}/${Math.max(events.length, 1)} events`);
+    }
+
+    function buildReplayEvents(mission) {
+      const conditions = Array.isArray(mission.requiredConditions) ? mission.requiredConditions : [];
+      const events = conditions.map((c, i) => ({
+        title: c.label || `Condition ${i + 1}`,
+        body: `${c.status || "Pending"} | ${c.evidence || "No evidence logged"}`,
+        time: c.updated_time || mission.identity.last_updated_time || "--",
+      }));
+
+      events.unshift({
+        title: "Mission Published",
+        body: `${mission.action || "WAIT"} | ${mission.state || "No setup state"}`,
+        time: mission.identity.created_time || mission.identity.last_updated_time || "--",
+      });
+
+      events.push({
+        title: "Outcome Snapshot",
+        body: `${mission.outcome.outcome || "Pending"} | Rule adherence ${mission.outcome.rule_adherence || "Pending"}`,
+        time: mission.identity.last_updated_time || "--",
+      });
+
+      return events;
+    }
+
+    function buildFallbackReplaySnapshot(data, mission) {
+      const key = `${mission.identity.trading_date || "current"}::${mission.identity.instrument || "MES"}`;
+      return {
+        key,
+        snapshot: {
+          date: mission.identity.trading_date || "current",
+          instrument: mission.identity.instrument || "MES",
+          chart: data.chart || {},
+          mission: data.morning_mission || {},
+          events: buildReplayEvents(mission),
+          news: Array.isArray(data.news?.items) ? data.news.items : [],
+        },
+      };
+    }
+
+    function getCurrentReplaySnapshot() {
+      const key = replayState.currentKey;
+      if (!key) return null;
+      return replayState.snapshotsByKey[key] || null;
+    }
+
+    function updateReplaySelection(key) {
+      const snapshot = replayState.snapshotsByKey[key];
+      if (!snapshot) return;
+
+      replayState.currentKey = key;
+      const baseData = replayState.baseData || {};
+      const watchlist = getWatchlist(baseData);
+      if (snapshot.instrument && watchlist.find((item) => item.symbol === snapshot.instrument)) {
+        selectedSymbol = snapshot.instrument;
+      }
+      const selectedInstrument = getSelectedInstrument(watchlist);
+      const replayData = {
+        ...baseData,
+        morning_mission: snapshot.mission || baseData.morning_mission || {},
+        chart: snapshot.chart || baseData.chart || {},
+        news: {
+          items: Array.isArray(snapshot.news)
+            ? snapshot.news
+            : (Array.isArray(baseData.news?.items) ? baseData.news.items : []),
+        },
+      };
+      const mission = missionForSymbol(replayData, selectedInstrument);
+
+      replayState.events = Array.isArray(snapshot.events) && snapshot.events.length
+        ? snapshot.events
+        : buildReplayEvents(mission);
+      replayState.index = 0;
+      renderReplayFrame();
+
+      renderWatchlist(replayData, mission);
+      renderMission(mission, selectedInstrument);
+      renderChart(replayData, replayData.chart || {});
+      renderNews(replayData, replayData.news.items);
+      renderPerformance(replayData, mission);
+      renderTradeBible(mission);
+      renderIndicatorLibrary(replayData, mission);
+      renderDataState(replayState.baseState, mission, (replayData.chart || {}).data_state);
+    }
+
+    function setupReplayData(data, mission, baseState) {
+      const replay = data.session_replay || {};
+      const snapshotsByKey = (replay.snapshots_by_key && typeof replay.snapshots_by_key === "object") ? replay.snapshots_by_key : {};
+
+      let keys = Object.keys(snapshotsByKey);
+      if (!keys.length) {
+        const fallback = buildFallbackReplaySnapshot(data, mission);
+        replayState.snapshotsByKey = { [fallback.key]: fallback.snapshot };
+        keys = [fallback.key];
+      } else {
+        replayState.snapshotsByKey = snapshotsByKey;
+      }
+
+      replayState.baseData = data;
+  replayState.baseState = baseState || "Unavailable";
+  const requestedKey = replay.current_key;
+      const initialKey = keys.includes(requestedKey) ? requestedKey : keys[0];
+
+      const select = document.getElementById("replayDateSelect");
+      select.innerHTML = keys.map((key) => {
+        const snap = replayState.snapshotsByKey[key] || {};
+        const label = `${snap.date || "--"} ${snap.instrument || ""}`.trim();
+        return `<option value="${key}" ${key === initialKey ? "selected" : ""}>${label}</option>`;
+      }).join("");
+
+      updateReplaySelection(initialKey);
+    }
+
+    function initReplayActions() {
+      const playBtn = document.getElementById("replayPlayBtn");
+      const pauseBtn = document.getElementById("replayPauseBtn");
+      const resetBtn = document.getElementById("replayResetBtn");
+      const slider = document.getElementById("replaySlider");
+      const select = document.getElementById("replayDateSelect");
+
+      playBtn.addEventListener("click", () => {
+        stopReplay();
+        replayState.timer = setInterval(() => {
+          if (!replayState.events.length) return;
+          if (replayState.index >= replayState.events.length - 1) {
+            stopReplay();
+            return;
+          }
+          replayState.index += 1;
+          renderReplayFrame();
+        }, 1200);
+      });
+
+      pauseBtn.addEventListener("click", () => stopReplay());
+
+      resetBtn.addEventListener("click", () => {
+        stopReplay();
+        replayState.index = 0;
+        renderReplayFrame();
+      });
+
+      slider.addEventListener("input", () => {
+        stopReplay();
+        replayState.index = Number(slider.value || 0);
+        renderReplayFrame();
+      });
+
+      select.addEventListener("change", () => {
+        stopReplay();
+        updateReplaySelection(select.value);
+      });
+    }
+
+    function copyText(text) {
+      if (!text) return Promise.resolve(false);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text).then(() => true).catch(() => false);
+      }
+      return Promise.resolve(false);
+    }
+
+    function initTradeBibleActions() {
+      const briefBtn = document.getElementById("tbCopyBriefBtn");
+      const reviewBtn = document.getElementById("tbCopyReviewBtn");
+      const stateEl = document.getElementById("tbCopyState");
+      if (!briefBtn || !reviewBtn || !stateEl) return;
+
+      briefBtn.addEventListener("click", async () => {
+        const ok = await copyText(tradeBibleState.brief);
+        stateEl.textContent = ok ? "Desk brief copied to clipboard." : "Clipboard is unavailable in this environment.";
+      });
+
+      reviewBtn.addEventListener("click", async () => {
+        const ok = await copyText(tradeBibleState.review);
+        stateEl.textContent = ok ? "Review template copied to clipboard." : "Clipboard is unavailable in this environment.";
+      });
+    }
+
+    function renderChart(data, chartOverride = null) {
+      const root = document.getElementById("tvChart");
+      root.innerHTML = "";
+
+      if (!window.LightweightCharts || !window.LightweightCharts.createChart) {
+        root.innerHTML = '<div style="padding:14px;color:#a1b3d1;font-size:0.84rem;">Chart unavailable.</div>';
+        return;
+      }
+
+      const chartPayload = chartOverride || data.chart || {};
+      const candles = Array.isArray(chartPayload.candles) ? chartPayload.candles : [];
+
+      if (!candles.length) {
+        root.innerHTML = '<div style="padding:14px;color:#a1b3d1;font-size:0.84rem;">No chart data for this session yet.</div>';
+        setText("chartState", "Unavailable");
+        return;
+      }
+
+      const chart = window.LightweightCharts.createChart(root, {
+        layout: { background: { color: "#101318" }, textColor: "#96a2b5" },
+        rightPriceScale: { borderColor: "rgba(178,188,204,0.20)" },
+        timeScale: { borderColor: "rgba(178,188,204,0.20)", timeVisible: true },
+        grid: {
+          vertLines: { color: "rgba(178,188,204,0.08)" },
+          horzLines: { color: "rgba(178,188,204,0.08)" }
+        }
+      });
+
+      const series = chart.addCandlestickSeries({
+        upColor: "#28c88a",
+        downColor: "#ef6262",
+        borderVisible: false,
+        wickUpColor: "#28c88a",
+        wickDownColor: "#ef6262"
+      });
+      series.setData(candles);
+
+      const levels = chartPayload.levels || {};
+      const lineMap = [
+        { label: "ORB HIGH", price: levels.orb_high, color: "#3f7cff" },
+        { label: "ORB LOW", price: levels.orb_low, color: "#e2b24a" },
+        { label: "PRIOR CLOSE", price: levels.prior_close, color: "#9bb0d3" },
+        { label: "ENTRY", price: levels.entry, color: "#3f7cff" },
+        { label: "STOP", price: levels.invalidation, color: "#ef6262" },
+      ];
+      (Array.isArray(levels.targets) ? levels.targets : []).forEach((target, i) => {
+        lineMap.push({ label: `T${i + 1}`, price: target, color: "#28c88a" });
+      });
+
+      lineMap.forEach((line) => {
+        if (!Number.isFinite(Number(line.price))) return;
+        series.createPriceLine({
+          price: Number(line.price),
+          color: line.color,
+          lineStyle: 2,
+          lineWidth: 1,
+          axisLabelVisible: true,
+          title: line.label,
+        });
+      });
+
+      chart.timeScale().fitContent();
+      setText("chartState", chartPayload.data_state || "Research");
+    }
+
+    function renderMission(mission, selectedInstrument) {
+      const statusClass = (status) => {
+        if (status === "Completed") return "statusCompleted";
+        if (status === "Failed") return "statusFailed";
+        if (status === "Not applicable") return "statusNA";
+        return "statusPending";
+      };
+
+      const conditions = Array.isArray(mission.requiredConditions) ? mission.requiredConditions : [];
+      const completed = conditions.filter((c) => c.status === "Completed").length;
+      const total = conditions.length;
+      const readinessPct = total ? Math.round((completed / total) * 100) : 0;
+      const ringDegrees = Math.max(0, Math.min(360, Math.round((readinessPct / 100) * 360)));
+      const ring = document.getElementById("readinessRing");
+      if (ring) ring.style.background = `conic-gradient(var(--accent) ${ringDegrees}deg, rgba(148, 162, 183, 0.2) ${ringDegrees}deg)`;
+      setText("readinessPct", `${readinessPct}%`);
+      setText("checklistSummary", `${completed}/${total}`);
+      setText("sessionProgress", `${readinessPct}%`);
+      setText("setupReadiness", readinessPct >= 70 ? "Yes" : "No");
+
+      const checklist = document.getElementById("heroChecklist");
+      checklist.innerHTML = conditions.length
+        ? conditions.slice(0, 4).map((c) => `<li><span class="heroBullet ${c.status === "Completed" ? "done" : "pending"}"></span><span>${c.label || "Condition"}</span></li>`).join("")
+        : "<li><span class=\"heroBullet pending\"></span><span>No mission checklist is available yet.</span></li>";
+
+      setMissionAction("action", mission.action || "WAIT");
+      setText("missionState", mission.state || "No setup state yet");
+      setText("symbol", selectedInstrument.symbol || "--");
+      setText("missionDateHero", mission.identity.trading_date || "--");
+      setText("missionThesisHero", mission.directional.thesis || "A mission thesis will appear once session conditions are available.");
+      setText("confidence", Number.isFinite(Number(mission.confidencePct)) ? `${Number(mission.confidencePct)}%` : "--");
+      setText("entry", Number.isFinite(Number(mission.entry)) ? formatPrice(Number(mission.entry)) : "Pending");
+      setText("invalidation", Number.isFinite(Number(mission.invalidation)) ? formatPrice(Number(mission.invalidation)) : "--");
+      setText("targetPrimary", Array.isArray(mission.targets) && Number.isFinite(Number(mission.targets[0])) ? formatPrice(Number(mission.targets[0])) : "--");
+
+      const noTradeRule = (Array.isArray(mission.noTradeConditions) ? mission.noTradeConditions[0] : null) || "No-trade condition unavailable.";
+      setText("heroNoTrade", `No trade if: ${noTradeRule}`);
+      setText("heroStateLabel", `Mission Data | ${mission.dataState || "Unavailable"}`);
+
+      setMissionAction("missionActionPage", mission.action || "WAIT");
+      setText("missionId", mission.identity.mission_id || "--");
+      setText("missionDate", mission.identity.trading_date || "--");
+      setText("missionInstrument", mission.identity.instrument || selectedInstrument.symbol || "--");
+      setText("missionVersion", mission.identity.strategy_version || "--");
+      setText("missionDataState", mission.dataState || "Unavailable");
+      setText("missionUpdated", mission.identity.last_updated_time || mission.update || "--");
+
+      setText("missionThesis", mission.directional.thesis || "A mission thesis will appear once session conditions are available.");
+      setText("missionConfidence", Number.isFinite(Number(mission.confidencePct)) ? `${Number(mission.confidencePct)}%` : "--");
+      setText("missionPhase", mission.directional.market_phase || mission.phase || "--");
+      setText("missionRisk", mission.execution.maximum_risk || "--");
+      setText("missionEntryZone", Number.isFinite(Number(mission.execution.entry_zone)) ? formatPrice(Number(mission.execution.entry_zone)) : "--");
+      setText("missionInvalidation", Number.isFinite(Number(mission.execution.invalidation)) ? formatPrice(Number(mission.execution.invalidation)) : "--");
+      setText("missionRR", Number.isFinite(Number(mission.execution.expected_rr)) ? `${Number(mission.execution.expected_rr)}R` : "--");
+      setText("missionMaxTrades", mission.execution.maximum_number_of_trades ?? "--");
+
+      const targets = Array.isArray(mission.targets) ? mission.targets : [];
+      const missionTargets = document.getElementById("missionTargets");
+      missionTargets.innerHTML = targets.length
+        ? targets.slice(0, 3).map((t, i) => `<div class="target">T${i + 1} ${formatPrice(Number(t))}</div>`).join("")
+        : '<div class="target">T1 --</div><div class="target">T2 --</div><div class="target">T3 --</div>';
+
+      const conditionsRoot = document.getElementById("conditionsList");
+      conditionsRoot.innerHTML = conditions.length
+        ? conditions.map((c) => `<li><strong>${c.label || "Condition"}</strong><br><span class="${statusClass(c.status)}">${c.status || "Pending"}</span> | ${c.evidence || "Awaiting evidence"}</li>`).join("")
+        : "<li>No mission conditions available.</li>";
+
+      const pendingCount = conditions.filter((c) => c.status !== "Completed" && c.status !== "Not applicable").length;
+      const notApplicableCount = conditions.filter((c) => c.status === "Not applicable").length;
+      const tradable = completed > 0 && pendingCount === 0;
+      setText("missionGateSummary", `${completed}/${total} complete`);
+      setText("missionAuthorization", tradable ? "Authorized" : "Hold");
+      const gateReason = tradable
+        ? "All required conditions are satisfied. Execute only if risk rules remain valid."
+        : `Pending checks: ${pendingCount}. Not applicable: ${notApplicableCount}. No discretionary overrides.`;
+      setText("missionGateReason", gateReason);
+
+      const entryText = Number.isFinite(Number(mission.execution.entry_zone)) ? formatPrice(Number(mission.execution.entry_zone)) : "Pending";
+      const invalidationText = Number.isFinite(Number(mission.execution.invalidation)) ? formatPrice(Number(mission.execution.invalidation)) : "Pending";
+      const targetOne = Array.isArray(mission.targets) && Number.isFinite(Number(mission.targets[0])) ? formatPrice(Number(mission.targets[0])) : "Pending";
+      const actionText = mission.action || "WAIT";
+      const scriptLines = [
+        `ACTION: ${actionText}`,
+        `ENTRY: ${entryText}`,
+        `INVALIDATION: ${invalidationText}`,
+        `TARGET 1: ${targetOne}`,
+        `RULE: One attempt only. No chase after cutoff.`,
+      ];
+      setText("missionExecutionScript", scriptLines.join("\n"));
+
+      const ifThen = [
+        {
+          ifText: `If price confirms ${actionText} above entry zone ${entryText}`,
+          thenText: `Then execute planned order and keep invalidation at ${invalidationText}.`,
+        },
+        {
+          ifText: `If price invalidates below/above ${invalidationText}`,
+          thenText: "Then cancel setup and do not re-enter without full reset.",
+        },
+        {
+          ifText: "If setup forms after cutoff or confidence degrades",
+          thenText: "Then mark as no-trade and log the reason in review notes.",
+        },
+        {
+          ifText: "If first target is reached",
+          thenText: "Then apply break-even rule and follow management plan.",
+        },
+      ];
+      document.getElementById("missionIfThen").innerHTML = ifThen.map((item) => `
+        <div class="playbookItem"><strong>If</strong>${item.ifText}</div>
+        <div class="playbookItem"><strong>Then</strong>${item.thenText}</div>
+      `).join("");
+
+      const noTrade = Array.isArray(mission.noTradeConditions) ? mission.noTradeConditions : [];
+      document.getElementById("noTradeList").innerHTML = noTrade.length
+        ? noTrade.map((rule) => `<li>${rule}</li>`).join("")
+        : "<li>No no-trade conditions listed.</li>";
+
+      const reviewPrompts = [
+        `Was the action (${actionText}) executed exactly as planned?`,
+        "Did any condition fail before entry? If yes, which one?",
+        "Was risk capped according to maximum risk and trade count?",
+        "What would improve this mission tomorrow?",
+      ];
+      document.getElementById("missionReviewList").innerHTML = reviewPrompts.map((item) => `<li>${item}</li>`).join("");
+
+      const timeline = [
+        `Premarket: ${mission.session.premarket_status || "Unknown"}`,
+        `ORB Window: ${mission.session.orb_start || "--"} to ${mission.session.orb_end || "--"}`,
+        `Execution Window: ${mission.session.execution_window || "--"}`,
+        `Cutoff: ${mission.session.hard_cutoff_time || "--"}`,
+        `Session Status: ${mission.session.session_status || "Unknown"}`,
+      ];
+      document.getElementById("timelineList").innerHTML = timeline.map((item) => `<li>${item}</li>`).join("");
+
+      currentArchive = Array.isArray(mission.archive) ? mission.archive : [];
+      renderArchiveList();
+
+      setText("discordSummary", mission.discordSummary || "Awaiting strategy output");
+
+      renderConditionsMini(mission);
+      renderTimelineMini(mission);
+    }
+
+    function renderDataState(state, mission, chartState) {
+      const marketText = `Data State: ${state} | Chart: ${chartState || "Unavailable"}`;
+      setText("marketStatus", marketText);
+      setText("liveChipText", state === "Live" ? "Live execution feed" : `${state} data active`);
+    }
+
+    function calcRisk(entry, stop, account, riskPct, target) {
+      const entryNum = Number(entry);
+      const stopNum = Number(stop);
+      const accountNum = Number(account);
+      const riskPctNum = Number(riskPct);
+      const targetNum = Number(target);
+      const tickSize = 0.25;
+      const pointValue = 5;
+      const tickValue = 1.25;
+      const estimatedFeesPerContract = 3.50;
+
+      const stopDistance = Math.abs(entryNum - stopNum);
+      const tickDistance = stopDistance / tickSize;
+      const riskPerContract = stopDistance * pointValue;
+      const riskPerTick = tickDistance * tickValue;
+      const maxRiskDollars = accountNum * (riskPctNum / 100);
+      const riskWithFeesPerContract = riskPerContract + estimatedFeesPerContract;
+      const maxContracts = riskPerContract > 0 ? Math.floor(maxRiskDollars / riskPerContract) : 0;
+      const maxContractsAfterFees = riskWithFeesPerContract > 0 ? Math.floor(maxRiskDollars / riskWithFeesPerContract) : 0;
+      const rewardPerContract = Number.isFinite(targetNum) ? Math.abs(targetNum - entryNum) * 5 : 0;
+      const rr = stopDistance > 0 && Number.isFinite(targetNum) ? Math.abs(targetNum - entryNum) / stopDistance : 0;
+      const direction = Number.isFinite(entryNum) && Number.isFinite(stopNum)
+        ? (entryNum > stopNum ? "Long setup" : (entryNum < stopNum ? "Short setup" : "Neutral"))
+        : "Neutral";
+
+      const warnings = [];
+      if (!Number.isFinite(accountNum) || accountNum <= 0) warnings.push("Account balance must be greater than zero.");
+      if (!Number.isFinite(riskPctNum) || riskPctNum <= 0) warnings.push("Risk % must be greater than zero.");
+      if (Number.isFinite(riskPctNum) && riskPctNum > 5) warnings.push("Risk above 5% is aggressive for this system.");
+      if (!Number.isFinite(entryNum) || !Number.isFinite(stopNum)) warnings.push("Entry and stop are required to size the trade.");
+      if (Number.isFinite(entryNum) && Number.isFinite(stopNum) && entryNum === stopNum) warnings.push("Entry and stop cannot be the same price.");
+      if (maxContractsAfterFees < 1 && Number.isFinite(maxRiskDollars) && Number.isFinite(riskWithFeesPerContract)) warnings.push("One MES contract exceeds your risk limit once fees are included.");
+
+      return {
+        direction,
+        stopDistance,
+        tickDistance,
+        riskPerContract,
+        riskPerTick,
+        maxRiskDollars,
+        maxContracts,
+        riskWithFeesPerContract,
+        maxContractsAfterFees,
+        rewardPerContract,
+        rr,
+        estimatedFeesPerContract,
+        warnings,
+      };
+    }
+
+    function renderStartHere(data, mission) {
+      const guide = data.beginner_guide || {};
+      const overview = guide.overview || {};
+      const checklist = Array.isArray(guide.checklist) ? guide.checklist : [];
+      const lessons = Array.isArray(guide.lessons) ? guide.lessons : [];
+      const readinessChecks = Array.isArray(guide.readiness_checks) ? guide.readiness_checks : [];
+      const glossary = Array.isArray(guide.glossary) ? guide.glossary : [];
+      const routine = Array.isArray(guide.routine) ? guide.routine : [];
+      const support = guide.support || {};
+      const riskExample = guide.risk_example || {};
+      const continueNext = guide.continue_next || {};
+      const progressKey = `start-here:${mission.identity.instrument || "MES"}:${mission.identity.trading_date || "default"}`;
+      let savedProgress = { completed: [] };
+
+      try {
+        savedProgress = JSON.parse(localStorage.getItem(progressKey) || "{\"completed\":[]}");
+      } catch (_error) {
+        savedProgress = { completed: [] };
+      }
+
+      const checklistItems = checklist.map((item, index) => {
+        if (typeof item === "string") {
+          return {
+            id: `step-${index + 1}`,
+            label: item,
+            detail: "",
+            target: "dashboard",
+          };
+        }
+        return {
+          id: item.id || `step-${index + 1}`,
+          label: item.label || item.title || `Step ${index + 1}`,
+          detail: item.detail || item.body || "",
+          target: item.target || "dashboard",
+        };
+      });
+
+      const completedSet = new Set(Array.isArray(savedProgress.completed) ? savedProgress.completed : []);
+      const totalSteps = checklistItems.length;
+      const completedSteps = checklistItems.filter((item) => completedSet.has(item.id)).length;
+      const progressPct = totalSteps ? Math.round((completedSteps / totalSteps) * 100) : 0;
+      const nextStep = checklistItems.find((item) => !completedSet.has(item.id)) || checklistItems[0] || null;
+
+      const overviewEl = document.getElementById("startHereOverview");
+      if (overviewEl) {
+        overviewEl.innerHTML = `
+          <h3>${overview.title || "Welcome to Signal Bridge"}</h3>
+          <div class="startHereMeta">
+            <div><strong>What it is:</strong> ${overview.what_it_is || overview.body || "A guided path for new members."}</div>
+            <div><strong>What it is not:</strong> ${overview.what_it_is_not || "Not automated execution or guaranteed income."}</div>
+            <div><strong>Your first goal:</strong> ${overview.first_goal || "Learn the setup and follow the rules."}</div>
+          </div>
+          <p class="tiny">${overview.body || "A guided path for new members."}</p>
+        `;
+      }
+
+      const continueEl = document.getElementById("startHereContinue");
+      if (continueEl) {
+        continueEl.innerHTML = `
+          <h3>Continue where you left off</h3>
+          <div class="startHereContinueTitle">${continueNext.label || nextStep?.label || "Lesson 1: What MES is"}</div>
+          <p class="tiny">${continueNext.body || nextStep?.detail || "Pick up with the next unfinished beginner step."}</p>
+          <div class="startHereActions">
+            <button class="startHereButton" type="button" data-start-here-target="${continueNext.target || nextStep?.target || "trade-bible"}">Open next section</button>
+            <button class="startHereButton secondary" type="button" data-start-here-focus="${escapeHtml(nextStep?.id || "read-mission")}">Mark next step complete</button>
+          </div>
+        `;
+
+        continueEl.querySelectorAll("[data-start-here-target]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const target = btn.dataset.startHereTarget;
+            if (target) switchModule(target);
+          });
+        });
+
+        continueEl.querySelectorAll("[data-start-here-focus]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const focusId = btn.dataset.startHereFocus;
+            const targetStep = checklistItems.find((item) => item.id === focusId) || nextStep;
+            if (!targetStep) return;
+            const next = new Set(Array.isArray(savedProgress.completed) ? savedProgress.completed : []);
+            next.add(targetStep.id);
+            savedProgress = { completed: Array.from(next) };
+            try { localStorage.setItem(progressKey, JSON.stringify(savedProgress)); } catch (_error) {}
+            renderStartHere(data, mission);
+          });
+        });
+      }
+
+      const progressTextEl = document.getElementById("startHereProgressText");
+      if (progressTextEl) progressTextEl.textContent = `${completedSteps} of ${totalSteps} completed`;
+      const progressBarEl = document.getElementById("startHereProgressBar");
+      if (progressBarEl) progressBarEl.style.width = `${progressPct}%`;
+
+      const resetBtn = document.getElementById("startHereResetBtn");
+      if (resetBtn) {
+        resetBtn.onclick = () => {
+          try { localStorage.removeItem(progressKey); } catch (_error) {}
+          renderStartHere(data, mission);
+        };
+      }
+
+      const checklistEl = document.getElementById("startHereChecklist");
+      if (checklistEl) {
+        checklistEl.innerHTML = checklistItems.map((item) => `
+          <li>
+            <input type="checkbox" data-start-here-step="${escapeHtml(item.id)}" ${completedSet.has(item.id) ? "checked" : ""} />
+            <div class="startHereCheck">
+              <strong>${escapeHtml(item.label)}</strong>
+              <span class="tiny">${escapeHtml(item.detail || "")}</span>
+            </div>
+            <button class="startHereButton secondary startHereStepAction" type="button" data-start-here-open="${escapeHtml(item.target || "dashboard")}">${completedSet.has(item.id) ? "Done" : "Open"}</button>
+          </li>
+        `).join("");
+
+        checklistEl.querySelectorAll("[data-start-here-step]").forEach((el) => {
+          el.addEventListener("change", () => {
+            const stepId = el.dataset.startHereStep;
+            const next = new Set(Array.isArray(savedProgress.completed) ? savedProgress.completed : []);
+            if (el.checked) next.add(stepId);
+            else next.delete(stepId);
+            savedProgress = { completed: Array.from(next) };
+            try { localStorage.setItem(progressKey, JSON.stringify(savedProgress)); } catch (_error) {}
+            renderStartHere(data, mission);
+          });
+        });
+
+        checklistEl.querySelectorAll("[data-start-here-open]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const target = btn.dataset.startHereOpen;
+            if (target) switchModule(target);
+          });
+        });
+      }
+
+      const lessonsEl = document.getElementById("startHereLessons");
+      if (lessonsEl) {
+        lessonsEl.innerHTML = lessons.map((lesson) => `
+          <li>
+            <strong>${lesson.title}</strong><br>
+            <span class="tiny">${lesson.status}</span><br>
+            ${lesson.body}
+            <div class="startHereActions">
+              <button class="startHereButton secondary" type="button" data-start-here-open="${escapeHtml(lesson.target || "trade-bible")}">Open lesson</button>
+            </div>
+          </li>
+        `).join("");
+
+        lessonsEl.querySelectorAll("[data-start-here-open]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const target = btn.dataset.startHereOpen;
+            if (target) switchModule(target);
+          });
+        });
+      }
+
+      const readinessEl = document.getElementById("startHereReadiness");
+      if (readinessEl) {
+        readinessEl.innerHTML = readinessChecks.map((item, index) => `
+          <li>
+            <span class="heroBullet ${completedSet.size >= checklistItems.length ? "done" : "pending"}" style="margin-top:5px;"></span>
+            <div class="startHereCheck">
+              <strong>${escapeHtml(item)}</strong>
+              <span class="tiny">Confirm this before moving into live sessions.</span>
+            </div>
+            <button class="startHereButton secondary startHereStepAction" type="button" data-start-here-open="start-here">Review</button>
+          </li>
+        `).join("");
+
+        readinessEl.querySelectorAll("[data-start-here-open]").forEach((btn) => {
+          btn.addEventListener("click", () => switchModule(btn.dataset.startHereOpen || "start-here"));
+        });
+      }
+
+      const glossaryEl = document.getElementById("startHereGlossary");
+      if (glossaryEl) {
+        glossaryEl.innerHTML = glossary.map((item) => `
+          <div class="glossaryItem">
+            <div class="glossaryTerm">${item.term}</div>
+            <div class="glossaryMeaning">${item.meaning}</div>
+          </div>
+        `).join("");
+      }
+
+      const routineEl = document.getElementById("startHereRoutine");
+      if (routineEl) {
+        routineEl.innerHTML = routine.map((item) => `
+          <li>
+            <div class="routineTime">${item.time}</div>
+            <div>${item.step}</div>
+          </li>
+        `).join("");
+      }
+
+      const sampleText = [
+        `Instrument: ${support.instrument || mission.identity.instrument || "MES"}`,
+        `Mission date: ${support.mission_date || mission.identity.trading_date || "--"}`,
+        `Action: ${support.action || mission.action || "WAIT"}`,
+        `Entry: ${Number.isFinite(Number(support.entry)) ? formatPrice(Number(support.entry)) : "--"}`,
+        `Stop: ${Number.isFinite(Number(support.stop)) ? formatPrice(Number(support.stop)) : "--"}`,
+        `Target: ${Number.isFinite(Number(support.target)) ? formatPrice(Number(support.target)) : "--"}`,
+        `Prior Close: ${Number.isFinite(Number(support.prior_close)) ? formatPrice(Number(support.prior_close)) : "--"}`,
+        `Progress: ${completedSteps} / ${totalSteps} completed`,
+      ].join("\n");
+      setText("startHereSample", sampleText);
+
+      const missionLoadBtn = document.getElementById("riskLoadMissionBtn");
+      if (missionLoadBtn) {
+        missionLoadBtn.onclick = () => {
+          const entryInput = document.getElementById("riskEntry");
+          const stopInput = document.getElementById("riskStop");
+          const targetInput = document.getElementById("riskTarget");
+          if (entryInput && Number.isFinite(Number(riskExample.entry))) entryInput.value = String(riskExample.entry);
+          if (stopInput && Number.isFinite(Number(riskExample.stop))) stopInput.value = String(riskExample.stop);
+          if (targetInput && Number.isFinite(Number(riskExample.target))) targetInput.value = String(riskExample.target);
+          initStartHereCalculator(data, mission, riskExample);
+        };
+      }
+
+      const riskClearBtn = document.getElementById("riskClearBtn");
+      if (riskClearBtn) {
+        riskClearBtn.onclick = () => {
+          const accountInput = document.getElementById("riskAccount");
+          const pctInput = document.getElementById("riskPct");
+          const entryInput = document.getElementById("riskEntry");
+          const stopInput = document.getElementById("riskStop");
+          const targetInput = document.getElementById("riskTarget");
+          if (accountInput) accountInput.value = "10000";
+          if (pctInput) pctInput.value = "1";
+          if (entryInput) entryInput.value = "";
+          if (stopInput) stopInput.value = "";
+          if (targetInput) targetInput.value = "";
+          initStartHereCalculator(data, mission, riskExample);
+        };
+      }
+
+      initStartHereCalculator(data, mission, riskExample);
+    }
+
+    function initStartHereCalculator(data, mission, riskExample = {}) {
+      const accountInput = document.getElementById("riskAccount");
+      const pctInput = document.getElementById("riskPct");
+      const entryInput = document.getElementById("riskEntry");
+      const stopInput = document.getElementById("riskStop");
+      const targetInput = document.getElementById("riskTarget");
+
+      const refresh = () => {
+        const calc = calcRisk(
+          entryInput?.value || riskExample.entry || mission.execution.entry_zone || 0,
+          stopInput?.value || riskExample.stop || mission.execution.invalidation || 0,
+          accountInput?.value || 10000,
+          pctInput?.value || 1,
+          targetInput?.value || riskExample.target || (Array.isArray(mission.targets) ? mission.targets[0] : 0)
+        );
+
+        setText("riskDirection", calc.direction || "--");
+        setText("riskStopDistance", Number.isFinite(calc.stopDistance) ? `${calc.stopDistance.toFixed(2)} pts` : "--");
+        setText("riskTickDistance", Number.isFinite(calc.tickDistance) ? `${calc.tickDistance.toFixed(0)} ticks` : "--");
+        setText("riskPerContract", Number.isFinite(calc.riskPerContract) ? `$${calc.riskPerContract.toFixed(2)}` : "--");
+        setText("riskPerTick", Number.isFinite(calc.riskPerTick) ? `$${calc.riskPerTick.toFixed(2)}` : "--");
+        setText("riskMaxRisk", Number.isFinite(calc.maxRiskDollars) ? `$${calc.maxRiskDollars.toFixed(2)}` : "--");
+        setText("riskWithFees", Number.isFinite(calc.riskWithFeesPerContract) ? `$${calc.riskWithFeesPerContract.toFixed(2)}` : "--");
+        setText("riskMaxContracts", Number.isFinite(calc.maxContracts) ? `${calc.maxContracts}` : "--");
+        setText("riskMaxContractsAfterFees", Number.isFinite(calc.maxContractsAfterFees) ? `${calc.maxContractsAfterFees}` : "--");
+        setText("riskReward", Number.isFinite(calc.rewardPerContract) ? `$${calc.rewardPerContract.toFixed(2)}` : "--");
+        setText("riskRR", Number.isFinite(calc.rr) ? `${calc.rr.toFixed(2)}R` : "--");
+
+        const notes = document.getElementById("riskNotes");
+        if (notes) {
+          notes.innerHTML = [
+            `Fees estimate: $${Number(calc.estimatedFeesPerContract || 0).toFixed(2)} per contract.`,
+            `Tick value: $1.25 per 0.25 point.`,
+          ].map((line) => `<div>${line}</div>`).join("");
+        }
+
+        const warnings = document.getElementById("riskWarnings");
+        if (warnings) {
+          warnings.innerHTML = Array.isArray(calc.warnings) && calc.warnings.length
+            ? calc.warnings.map((warning) => `<div>${warning}</div>`).join("")
+            : "<div>No calculator warnings. Still confirm the setup manually.</div>";
+        }
+      };
+
+      [accountInput, pctInput, entryInput, stopInput, targetInput].forEach((el) => {
+        if (!el) return;
+        el.addEventListener("input", refresh);
+      });
+
+      if (entryInput && !entryInput.value && Number.isFinite(Number(riskExample.entry))) entryInput.value = String(riskExample.entry);
+      if (stopInput && !stopInput.value && Number.isFinite(Number(riskExample.stop))) stopInput.value = String(riskExample.stop);
+      if (targetInput && !targetInput.value && Number.isFinite(Number(riskExample.target))) targetInput.value = String(riskExample.target);
+
+      refresh();
+    }
+
+    async function fetchReport() {
+      if (window.__EMBEDDED_REPORT__) return { data: window.__EMBEDDED_REPORT__, source: "embedded" };
+
+      const sources = ["./trading_os/src/integrations/report.json", "/report.json", "./report.json"];
+      for (const src of sources) {
+        try {
+          const response = await fetch(src, { cache: "no-store" });
+          if (!response.ok) continue;
+          const data = await response.json();
+          return { data, source: "live-report" };
+        } catch (_error) {
+          continue;
+        }
+      }
+      return { data: {}, source: "unavailable" };
+    }
+
+    async function loadReport() {
+      const { data, source } = await fetchReport();
+      const state = stateFromSource(source, data);
+      data.__source = source;
+      const watchlist = getWatchlist(data);
+
+      if (!watchlist.find((item) => item.symbol === selectedSymbol)) {
+        selectedSymbol = watchlist[0].symbol;
+      }
+
+      const selectedInstrument = getSelectedInstrument(watchlist);
+      const mission = missionForSymbol(data, selectedInstrument);
+      window.__activeReportData = data;
+      window.__activeMission = mission;
+      await initFileWorkspace(source, data);
+      renderStartHere(data, mission);
+      renderRoadmap(data, mission);
+      setupReplayData(data, mission, state);
+    }
+
+    initNav();
+    initMobileNav();
+    initSessionDate();
+    initArchiveFilters();
+    initUtilityActions();
+    initTradeBibleActions();
+    initReplayActions();
+    loadReport();
+  </script>
+</body>
+</html>

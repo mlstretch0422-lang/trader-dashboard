@@ -1,0 +1,16 @@
+{
+  "side": "long",
+  "entry_price": 7575.12,
+  "confidence": 0.85,
+  "note": "Live market brief candidate",
+  "market_snapshot": {
+    "timestamp": "2026-07-01 15:59:00",
+    "latest_close": 7575.12,
+    "latest_high": 7614.0,
+    "latest_low": 7540.5,
+    "volume": 65108,
+    "live_price": 7575.12,
+    "live_high": null,
+    "live_low": null
+  }
+}

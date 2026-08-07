@@ -1,0 +1,56 @@
+{
+  "type": "news_calendar_brief",
+  "generated_at": "2026-08-06T17:07:52.243088",
+  "market_snapshot": {
+    "timestamp": "2026-07-01 15:59:00",
+    "latest_close": 7575.12,
+    "latest_high": 7614.0,
+    "latest_low": 7540.5,
+    "volume": 65108,
+    "live_price": 7736.25,
+    "live_high": 7770.75,
+    "live_low": 7724.25
+  },
+  "headline_summary": {
+    "count": 5,
+    "items": [
+      {
+        "title": "Tesla Continues to Crater in 2026: Why One of Wall Street\u2019s Most Controversial Pros Expects 100% Gains",
+        "publisher": "24/7 Wall St.",
+        "link": "https://finance.yahoo.com/m/2807ad75-f370-3b69-b628-a99b300b9108/tesla-continues-to-crater-in.html",
+        "provider": null
+      },
+      {
+        "title": "Pre-Market Flat on Consistently Low Jobless Claims",
+        "publisher": "Zacks",
+        "link": "https://finance.yahoo.com/markets/stocks/articles/pre-market-flat-consistently-low-142600404.html",
+        "provider": null
+      },
+      {
+        "title": "Exchange-Traded Funds, Equity Futures Mixed Pre-Bell Thursday Amid Corporate Earnings Deluge",
+        "publisher": "MT Newswires",
+        "link": "https://finance.yahoo.com/markets/stocks/articles/exchange-traded-funds-equity-futures-132120169.html",
+        "provider": null
+      },
+      {
+        "title": "Nasdaq, Dow Futures Mixed Ahead Of Jobless Claims: Why SPCX, SNDK, SOUN, IONQ, FIG Stocks Are In Focus",
+        "publisher": "Stocktwits",
+        "link": "https://finance.yahoo.com/m/8cf7d830-5466-3eeb-895c-1dfd1d703036/nasdaq%2C-dow-futures-mixed.html",
+        "provider": null
+      },
+      {
+        "title": "What Determines Applied Materials\u2019 Resilience on Aug 13 Earnings",
+        "publisher": "24/7 Wall St.",
+        "link": "https://finance.yahoo.com/m/2d411500-b088-3b72-aef1-42c85f76ee7b/what-determines-applied.html",
+        "provider": null
+      }
+    ]
+  },
+  "trade_idea": {
+    "bias": "long",
+    "reason": "Momentum remains above the prior close and headline flow is being monitored for continuation or reversal."
+  },
+  "economic_context": {
+    "note": "Live economic calendar support can be added next using a dedicated calendar source or API."
+  }
+}

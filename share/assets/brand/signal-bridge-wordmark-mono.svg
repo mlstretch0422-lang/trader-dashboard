@@ -1,0 +1,10 @@
+<svg width="640" height="160" viewBox="0 0 640 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="0" width="160" height="160" rx="36" fill="#0E1219"/>
+  <rect x="26" y="32" width="16" height="96" rx="8" fill="#E6EBF5"/>
+  <rect x="118" y="32" width="16" height="96" rx="8" fill="#E6EBF5"/>
+  <path d="M42 56H118V70H42V56Z" fill="#D2DBEA"/>
+  <path d="M42 90H118V104H42V90Z" fill="#D2DBEA"/>
+  <circle cx="80" cy="80" r="16" fill="#F3F6FB"/>
+  <text x="190" y="74" fill="#EAF0FA" font-family="Inter, Arial, sans-serif" font-size="44" font-weight="700" letter-spacing="2">SIGNAL</text>
+  <text x="190" y="120" fill="#C6D1E3" font-family="Inter, Arial, sans-serif" font-size="38" font-weight="600" letter-spacing="2">BRIDGE</text>
+</svg>

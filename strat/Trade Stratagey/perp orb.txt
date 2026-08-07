@@ -1,0 +1,327 @@
+//@version=5
+indicator("ORB Midpoint Continuation Debug Overlay", overlay = true, max_labels_count = 500)
+
+//──────────────────────────────────────────────────────────────────────
+// 1. INPUTS
+//──────────────────────────────────────────────────────────────────────
+
+orbSessStr    = input.session("0800-0815", "ORB Session (exchange time)")
+tradeSessStr  = input.session("0930-1100", "Trade Window (exchange time)")
+
+atrLen        = input.int(14, "ATR Length", minval = 1)
+bodyVsRange   = input.float(0.35, "Min Body % of ORB Range", minval = 0.0, maxval = 2.0)
+bodyAtrMult   = input.float(0.75, "Min Body x ATR", minval = 0.0, maxval = 5.0)
+
+midZonePct    = input.float(0.15, "Midpoint Zone % of ORB Range", minval = 0.0, maxval = 0.5)
+
+pullShallowPct = input.float(0.15, "Pullback Shallow Threshold %", minval = 0.0, maxval = 1.0)
+pullDeepPct    = input.float(0.65, "Pullback Deep Threshold %", minval = 0.0, maxval = 1.0)
+
+emaLen        = input.int(50, "EMA Length", minval = 1)
+useVWAP       = input.bool(true, "Use VWAP Filter")
+
+envBarsOutside = input.int(5, "Good Env: Bars Outside ORB", minval = 1)
+midCrossMax    = input.int(6, "Bad Env: Max Midpoint Crossings", minval = 1)
+
+showDashboard  = input.bool(true, "Show Filter Dashboard")
+dashPosOpt     = input.string("Top Right", "Dashboard Position", options = ["Top Right", "Top Left", "Bottom Right", "Bottom Left"])
+
+//──────────────────────────────────────────────────────────────────────
+// 2. SESSION & ORB
+//──────────────────────────────────────────────────────────────────────
+
+inSession(sess) =>
+    not na(time(timeframe.period, sess))
+
+newDay = ta.change(time("D")) != 0
+
+var float orbHigh = na
+var float orbLow  = na
+var bool  orbDone = false
+
+inOrbSession  = inSession(orbSessStr)
+inTradeWindow = inSession(tradeSessStr)
+
+if newDay
+    orbHigh := na
+    orbLow  := na
+    orbDone := false
+
+if inOrbSession
+    orbHigh := na(orbHigh) ? high : math.max(orbHigh, high)
+    orbLow  := na(orbLow)  ? low  : math.min(orbLow, low)
+
+if not inOrbSession and not orbDone and not na(orbHigh) and not na(orbLow)
+    orbDone := true
+
+orbMid   = orbDone ? (orbHigh + orbLow) / 2.0 : na
+orbRange = orbDone ? (orbHigh - orbLow) : na
+
+midZoneHalf = orbDone ? orbRange * midZonePct : 0.0
+midTop      = orbDone ? orbMid + midZoneHalf  : na
+midBot      = orbDone ? orbMid - midZoneHalf  : na
+
+plot(orbDone and orbRange > 0 ? orbHigh : na, "ORB High", color = color.new(color.green, 0))
+plot(orbDone and orbRange > 0 ? orbLow  : na, "ORB Low",  color = color.new(color.red,   0))
+plot(orbDone and orbRange > 0 ? orbMid  : na, "ORB Mid",  color = color.new(color.orange,0))
+
+bgcolor(inTradeWindow ? color.new(color.yellow, 90) : na)
+
+//──────────────────────────────────────────────────────────────────────
+// 3. BREAKOUT & DISPLACEMENT
+//──────────────────────────────────────────────────────────────────────
+
+atrVal  = ta.atr(atrLen)
+barBody = math.abs(close - open)
+
+var bool breakoutLong   = false
+var bool breakoutShort  = false
+var int  breakoutBarIdx = na
+var float breakoutPrice = na
+var bool displacementOK = false
+
+if newDay
+    breakoutLong   := false
+    breakoutShort  := false
+    breakoutBarIdx := na
+    breakoutPrice  := na
+    displacementOK := false
+
+if orbDone and orbRange > 0 and not (breakoutLong or breakoutShort)
+    if close > orbHigh
+        breakoutLong   := true
+        breakoutShort  := false
+        breakoutBarIdx := bar_index
+        breakoutPrice  := close
+    else if close < orbLow
+        breakoutShort  := true
+        breakoutLong   := false
+        breakoutBarIdx := bar_index
+        breakoutPrice  := close
+
+if orbDone and not na(breakoutBarIdx) and bar_index == breakoutBarIdx
+    bodyVsOrb = orbRange > 0 ? barBody / orbRange : 0.0
+    bodyVsAtr = atrVal   > 0 ? barBody / atrVal   : 0.0
+    displacementOK := (bodyVsOrb >= bodyVsRange) or (bodyVsAtr >= bodyAtrMult)
+
+plotshape(
+     breakoutLong,
+     title    = "Breakout Up",
+     style    = shape.triangleup,
+     location = location.belowbar,
+     color    = color.new(color.lime, 0),
+     size     = size.small,
+     text     = "BRK↑")
+
+plotshape(
+     breakoutShort,
+     title    = "Breakout Down",
+     style    = shape.triangledown,
+     location = location.abovebar,
+     color    = color.new(color.red, 0),
+     size     = size.small,
+     text     = "BRK↓")
+
+dispText  = displacementOK ? "DISP✔" : "DISP✖"
+dispColor = displacementOK ? color.lime : color.red
+
+plotshape(
+     orbDone and not na(breakoutBarIdx) and bar_index == breakoutBarIdx,
+     title    = "Displacement",
+     style    = shape.circle,
+     location = location.top,
+     color    = dispColor,
+     size     = size.tiny,
+     text     = dispText)
+
+//──────────────────────────────────────────────────────────────────────
+// 4. PULLBACK TO MIDPOINT ZONE & DEPTH
+//──────────────────────────────────────────────────────────────────────
+
+var bool  pullbackSeen    = false
+var bool  pullbackValid   = false
+var bool  pullbackShallow = false
+var bool  pullbackDeep    = false
+var int   pullbackBarIdx  = na
+
+if newDay
+    pullbackSeen    := false
+    pullbackValid   := false
+    pullbackShallow := false
+    pullbackDeep    := false
+    pullbackBarIdx  := na
+
+canSeekPullback = orbDone and orbRange > 0 and displacementOK and (breakoutLong or breakoutShort)
+inMidZoneNow    = orbDone and orbRange > 0 and low <= midTop and high >= midBot
+
+if canSeekPullback and not pullbackSeen and inMidZoneNow
+    pullbackSeen   := true
+    pullbackBarIdx := bar_index
+
+    float fullMove = 0.0
+    float retrace  = 0.0
+
+    if breakoutLong
+        fullMove := breakoutPrice - orbMid
+        retrace  := breakoutPrice - low
+    else
+        fullMove := orbMid - breakoutPrice
+        retrace  := high - breakoutPrice
+
+    depthPct = fullMove > 0 ? math.max(0.0, math.min(1.0, retrace / fullMove)) : 0.0
+
+    pullbackShallow := depthPct < pullShallowPct
+    pullbackDeep    := depthPct > pullDeepPct
+    pullbackValid   := not pullbackShallow and not pullbackDeep
+
+pullColor =
+     pullbackShallow ? color.yellow :
+     pullbackDeep    ? color.red :
+     pullbackValid   ? color.lime : na
+
+pullText =
+     pullbackShallow ? "PB Shallow" :
+     pullbackDeep    ? "PB Deep" :
+     pullbackValid   ? "PB OK" : "PB"
+
+plotshape(
+     not na(pullbackBarIdx) and bar_index == pullbackBarIdx,
+     title    = "Midpoint Pullback",
+     style    = shape.diamond,
+     location = location.bottom,
+     color    = pullColor,
+     size     = size.small,
+     text     = pullText)
+
+//──────────────────────────────────────────────────────────────────────
+// 5. RECLAIM / TRIGGER
+//──────────────────────────────────────────────────────────────────────
+
+var bool triggerLong   = false
+var bool triggerShort  = false
+var int  triggerBarIdx = na
+
+if newDay
+    triggerLong   := false
+    triggerShort  := false
+    triggerBarIdx := na
+
+inMidZone() =>
+    orbDone and orbRange > 0 and low <= midTop and high >= midBot
+
+if pullbackValid and breakoutLong and not triggerLong and inTradeWindow and inMidZone() and close > open and close >= midTop
+    triggerLong   := true
+    triggerShort  := false
+    triggerBarIdx := bar_index
+
+if pullbackValid and breakoutShort and not triggerShort and inTradeWindow and inMidZone() and close < open and close <= midBot
+    triggerShort  := true
+    triggerLong   := false
+    triggerBarIdx := bar_index
+
+plotshape(
+     triggerLong and bar_index == triggerBarIdx,
+     title    = "Long Reclaim",
+     style    = shape.triangleup,
+     location = location.belowbar,
+     color    = color.new(color.lime, 0),
+     size     = size.large,
+     text     = "LONG")
+
+plotshape(
+     triggerShort and bar_index == triggerBarIdx,
+     title    = "Short Reclaim",
+     style    = shape.triangledown,
+     location = location.abovebar,
+     color    = color.new(color.red, 0),
+     size     = size.large,
+     text     = "SHORT")
+
+//──────────────────────────────────────────────────────────────────────
+// 6. FILTERS & ENVIRONMENT
+//──────────────────────────────────────────────────────────────────────
+
+emaVal       = ta.ema(close, emaLen)
+emaPassLong  = close > emaVal
+emaPassShort = close < emaVal
+
+vwapVal       = ta.vwap
+vwapPassLong  = useVWAP ? close > vwapVal : true
+vwapPassShort = useVWAP ? close < vwapVal : true
+
+orbHalfLong  = orbDone and close > orbMid
+orbHalfShort = orbDone and close < orbMid
+
+isLongDir  = breakoutLong
+isShortDir = breakoutShort
+
+emaPass  = isLongDir ? emaPassLong  : isShortDir ? emaPassShort  : false
+vwapPass = isLongDir ? vwapPassLong : isShortDir ? vwapPassShort : false
+orbHalf  = isLongDir ? orbHalfLong  : isShortDir ? orbHalfShort  : false
+
+var int midCrossCount = 0
+if newDay
+    midCrossCount := 0
+
+crossMid = orbDone and orbRange > 0 and ta.cross(close, orbMid)
+if crossMid
+    midCrossCount += 1
+
+var int barsOutside = 0
+if newDay
+    barsOutside := 0
+
+outsideNow = orbDone and orbRange > 0 and ((breakoutLong and close > orbHigh) or (breakoutShort and close < orbLow))
+if outsideNow
+    barsOutside += 1
+
+goodEnv =
+    displacementOK and
+    barsOutside >= envBarsOutside and
+    pullbackValid
+
+badEnv =
+    (breakoutLong and breakoutShort) or
+    midCrossCount > midCrossMax or
+    not displacementOK
+
+hardAllMet =
+    orbDone and
+    (breakoutLong or breakoutShort) and
+    displacementOK and
+    pullbackValid and
+    ((triggerLong and isLongDir) or (triggerShort and isShortDir)) and
+    inTradeWindow
+
+//──────────────────────────────────────────────────────────────────────
+// 7. DASHBOARD
+//──────────────────────────────────────────────────────────────────────
+
+getPos(str) =>
+    switch str
+        "Top Right"    => position.top_right
+        "Top Left"     => position.top_left
+        "Bottom Right" => position.bottom_right
+        "Bottom Left"  => position.bottom_left
+
+var table dash = table.new(getPos(dashPosOpt), 2, 9, border_width = 1, frame_color = color.new(color.black, 60))
+
+setRow(tbl, lbl, val, row, colLbl, colVal, colTxt) =>
+    table.cell(tbl, colLbl, row, lbl, text_color = color.white, bgcolor = color.new(color.black, 80))
+    table.cell(tbl, colVal, row, val, text_color = colTxt,  bgcolor = color.new(color.black, 80))
+
+if barstate.islast and showDashboard
+    table.clear(dash)
+
+    dirText = isLongDir ? "LONG" : isShortDir ? "SHORT" : "NONE"
+
+    setRow(dash, "Direction",      dirText,                                     0, 0, 1, color.white)
+    setRow(dash, "EMA Filter",     emaPass       ? "PASS" : "FAIL",             1, 0, 1, emaPass       ? color.lime : color.red)
+    setRow(dash, "VWAP Filter",    vwapPass      ? "PASS" : "FAIL",             2, 0, 1, vwapPass      ? color.lime : color.red)
+    setRow(dash, "ORB-Half",       orbHalf       ? "PASS" : "FAIL",             3, 0, 1, orbHalf       ? color.lime : color.red)
+    setRow(dash, "Breakout",       (breakoutLong or breakoutShort) ? "YES" : "NO", 4, 0, 1, (breakoutLong or breakoutShort) ? color.lime : color.red)
+    setRow(dash, "Displacement",   displacementOK ? "YES" : "NO",               5, 0, 1, displacementOK ? color.lime : color.red)
+    setRow(dash, "Pullback Valid", pullbackValid  ? "YES" : "NO",               6, 0, 1, pullbackValid  ? color.lime : color.red)
+    setRow(dash, "Setup Qualified", hardAllMet    ? "YES" : "NO",               7, 0, 1, hardAllMet     ? color.lime : color.red)
+    setRow(dash, "Env (G/B)",      goodEnv ? "GOOD" : badEnv ? "BAD" : "NEUTRAL", 8, 0, 1,
+           goodEnv ? color.lime : badEnv ? color.red : color.orange)

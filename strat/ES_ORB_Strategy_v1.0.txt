@@ -1,0 +1,515 @@
+//@version=6
+
+// ╔════════════════════════════════════════════════════════════════════════════════╗
+// ║  ES/MES OPENING RANGE BREAKOUT STRATEGY V1.0                                  ║
+// ║                                                                                ║
+// ║  Simple, data-backed ORB system for ES futures                                ║
+// ║  - 9:30–9:45 ET ORB window                                                    ║
+// ║  - Breakout + displacement confirmation                                       ║
+// ║  - Retest entry                                                               ║
+// ║  - Opposite-side SL, 3-level partial TP with staircase                        ║
+// ║  - VWAP filter + time cutoff                                                  ║
+// ║  - 1 trade/day max, hard flat at 11:00 ET                                     ║
+// ║                                                                                ║
+// ║  Author: Strategy Bot                                                         ║
+// ║  Date: June 2026                                                              ║
+// ╚════════════════════════════════════════════════════════════════════════════════╝
+
+strategy(
+    title        = "ES ORB Strategy v1.0",
+    shorttitle   = "ES_ORB_v1",
+    overlay      = true,
+    
+    // Backtest defaults
+    initial_capital         = 50000,
+    currency                = currency.USD,
+    default_qty_type        = strategy.fixed,
+    default_qty_value       = 1,
+    
+    // Commission & slippage (realistic for ES futures)
+    commission_type         = strategy.commission.cash_per_contract,
+    commission_value        = 1.2,  // $1.20 per contract round trip
+    slippage                = 2,
+    
+    // Order execution
+    process_orders_on_close = true,
+    calc_on_order_fills     = false,
+    
+    // Drawing limits
+    max_lines_count         = 200,
+    max_labels_count        = 200
+)
+
+// ════════════════════════════════════════════════════════════════════════════════
+// 1. INPUTS
+// ════════════════════════════════════════════════════════════════════════════════
+
+grpTime = "Time Settings"
+i_timezone    = input.string("America/New_York", "Timezone", 
+                            options=["America/New_York", "America/Chicago", "UTC"], 
+                            group=grpTime, 
+                            tooltip="All times are in this timezone")
+i_orbStart    = input.string("0930", "ORB Start (HHMM)",   group=grpTime, tooltip="When ORB window opens (24h format)")
+i_orbEnd      = input.string("0945", "ORB End (HHMM)",     group=grpTime, tooltip="When ORB window closes")
+i_tradeStart  = input.string("0945", "Trade Start (HHMM)", group=grpTime, tooltip="When entries allowed (usually after ORB ends)")
+i_tradeEnd    = input.string("1100", "Trade End (HHMM)",   group=grpTime, tooltip="No new entries after this time")
+i_flatTime    = input.string("1700", "Flat Time (HHMM)",   group=grpTime, tooltip="Force close all positions at this time")
+
+grpEntry = "Entry Settings"
+i_enableLongs      = input.bool(true, "Enable Longs",  group=grpEntry)
+i_enableShorts     = input.bool(true, "Enable Shorts", group=grpEntry)
+i_bodyMinPct       = input.float(0.35, "Min Body % of ORB Range", 
+                                minval=0.0, maxval=1.0, step=0.05, group=grpEntry,
+                                tooltip="Body must be ≥ this % of ORB range to confirm breakout")
+i_bodyMinAtr       = input.float(0.75, "Min Body × ATR(14)", 
+                                minval=0.0, maxval=2.0, step=0.05, group=grpEntry,
+                                tooltip="Body must be ≥ this multiple of ATR to confirm")
+i_atrLen          = input.int(14, "ATR Length", minval=1, group=grpEntry)
+i_retestMode      = input.string("Boundary", "Retest Mode", 
+                                options=["Breakout", "Boundary", "Midpoint"], group=grpEntry,
+                                tooltip="Breakout=immediate, Boundary=retest ORB edge, Midpoint=retest mid")
+i_retestTimeout   = input.int(20, "Retest Timeout (bars)", minval=5, maxval=100, group=grpEntry,
+                             display=display.none, tooltip="Max bars to wait for retest")
+
+grpFilters = "Filters"
+i_useVWAP        = input.bool(true, "Use VWAP Filter", group=grpFilters,
+                             tooltip="Long only above VWAP, Short only below VWAP")
+i_minRange       = input.float(5.0, "Min ORB Range (pts)", minval=1.0, step=0.5, group=grpFilters,
+                             tooltip="Skip if ORB range < this (too tight)")
+i_maxRange       = input.float(50.0, "Max ORB Range (pts)", minval=10.0, step=1.0, group=grpFilters,
+                             tooltip="Skip if ORB range > this (too wild)")
+
+grpStop = "Stop Loss"
+i_slMethod       = input.string("Opposite", "SL Method", 
+                               options=["Opposite", "Midpoint"], group=grpStop,
+                               tooltip="Opposite=other ORB boundary, Midpoint=middle of range")
+
+grpTP = "Take Profit"
+i_tp1Pct         = input.float(50.0, "TP1 Qty %", minval=10.0, maxval=100.0, step=10.0, 
+                              inline="tp1", group=grpTP)
+i_tp1Rr          = input.float(1.0, "R:R", minval=0.1, maxval=5.0, step=0.1, 
+                              inline="tp1", group=grpTP)
+i_tp2Pct         = input.float(30.0, "TP2 Qty %", minval=0.0, maxval=100.0, step=10.0, 
+                              inline="tp2", group=grpTP)
+i_tp2Rr          = input.float(2.0, "R:R", minval=0.1, maxval=5.0, step=0.1, 
+                              inline="tp2", group=grpTP)
+i_tp3Pct         = input.float(20.0, "TP3 Qty %", minval=0.0, maxval=100.0, step=10.0, 
+                              inline="tp3", group=grpTP)
+i_tp3Rr          = input.float(3.0, "R:R", minval=0.1, maxval=5.0, step=0.1, 
+                              inline="tp3", group=grpTP)
+i_useStaircase   = input.bool(true, "Use Staircase Stop", group=grpTP,
+                             tooltip="SL→Entry after TP1, SL→TP1 after TP2, etc.")
+
+grpDisplay = "Display"
+i_showOrbLines   = input.bool(true, "Show ORB Lines",   group=grpDisplay)
+i_showSlTpLines  = input.bool(true, "Show SL/TP Lines", group=grpDisplay)
+i_showLabels     = input.bool(true, "Show Labels",      group=grpDisplay)
+i_showDashboard  = input.bool(true, "Show Dashboard",   group=grpDisplay)
+
+// ════════════════════════════════════════════════════════════════════════════════
+// 2. HELPER FUNCTIONS & TIME UTILITIES
+// ════════════════════════════════════════════════════════════════════════════════
+
+// Parse HHMM string to minutes since midnight
+f_timeToMins(string hhmm) =>
+    h = str.tonumber(str.substring(hhmm, 0, 2))
+    m = str.tonumber(str.substring(hhmm, 2, 4))
+    h * 60 + m
+
+// Check if current time is within window [startHHMM, endHHMM]
+f_inWindow(string startHHMM, string endHHMM) =>
+    curH = hour(time, i_timezone)
+    curM = minute(time, i_timezone)
+    curMins = curH * 60 + curM
+    startMins = f_timeToMins(startHHMM)
+    endMins = f_timeToMins(endHHMM)
+    
+    // Handle midnight wrap: if endMins < startMins, range spans midnight
+    if startMins < endMins
+        curMins >= startMins and curMins < endMins
+    else
+        curMins >= startMins or curMins < endMins
+
+// New day check
+f_newDay() =>
+    d = dayofmonth(time, i_timezone)
+    ta.change(d) != 0
+
+// ════════════════════════════════════════════════════════════════════════════════
+// 3. ORB BUILD LOGIC
+// ════════════════════════════════════════════════════════════════════════════════
+
+var float orbHigh = na
+var float orbLow = na
+var float orbMid = na
+var bool orbDone = false
+var int orbStartBar = na
+var int orbEndBar = na
+
+newDay = f_newDay()
+
+if newDay
+    orbHigh := na
+    orbLow := na
+    orbMid := na
+    orbDone := false
+    orbStartBar := na
+    orbEndBar := na
+
+inOrbWindow = f_inWindow(i_orbStart, i_orbEnd)
+
+// Build ORB
+if inOrbWindow and not orbDone
+    if na(orbHigh)
+        orbStartBar := bar_index
+    orbHigh := na(orbHigh) ? high : math.max(orbHigh, high)
+    orbLow := na(orbLow) ? low : math.min(orbLow, low)
+
+// ORB completes when window closes
+if not inOrbWindow and not orbDone and not na(orbHigh) and not na(orbLow)
+    orbDone := true
+    orbMid := (orbHigh + orbLow) / 2.0
+    orbEndBar := bar_index[1]
+
+orbRange = orbDone ? orbHigh - orbLow : 0.0
+orbRangeOk = orbDone and orbRange >= i_minRange and orbRange <= i_maxRange
+
+// ════════════════════════════════════════════════════════════════════════════════
+// 4. BREAKOUT & DISPLACEMENT DETECTION
+// ════════════════════════════════════════════════════════════════════════════════
+
+var bool breakoutLong = false
+var bool breakoutShort = false
+var int breakoutBar = na
+var float breakoutPrice = na
+
+if newDay
+    breakoutLong := false
+    breakoutShort := false
+    breakoutBar := na
+    breakoutPrice := na
+
+atrVal = ta.atr(i_atrLen)
+barBody = math.abs(close - open)
+bodyPctOfRange = orbRange > 0 ? barBody / orbRange : 0.0
+bodyVsAtr = atrVal > 0 ? barBody / atrVal : 0.0
+
+// Check displacement: body must meet AT LEAST ONE criterion
+displacementOk = (bodyPctOfRange >= i_bodyMinPct) or (bodyVsAtr >= i_bodyMinAtr)
+
+// Detect breakouts (only once per day, prefer first direction)
+if orbDone and orbRangeOk and not (breakoutLong or breakoutShort)
+    if close > orbHigh and displacementOk
+        breakoutLong := true
+        breakoutBar := bar_index
+        breakoutPrice := close
+    else if close < orbLow and displacementOk
+        breakoutShort := true
+        breakoutBar := bar_index
+        breakoutPrice := close
+
+// ════════════════════════════════════════════════════════════════════════════════
+// 5. ENTRY SIGNAL GENERATION
+// ════════════════════════════════════════════════════════════════════════════════
+
+inTradeWindow = f_inWindow(i_tradeStart, i_tradeEnd)
+vwapVal = ta.vwap(close)
+vwapFilterLong = not i_useVWAP or (close > vwapVal)
+vwapFilterShort = not i_useVWAP or (close < vwapVal)
+
+var bool entryPending = false
+var int entryPendingDir = 0  // 1=long, -1=short
+var int entryPendingBar = na
+var bool retestSeen = false
+
+if newDay or not inTradeWindow
+    entryPending := false
+    entryPendingDir := 0
+    entryPendingBar := na
+    retestSeen := false
+
+// Signal generation based on retest mode
+bool longSig = false
+bool shortSig = false
+
+if orbDone and orbRangeOk and inTradeWindow and i_enableLongs and not breakoutShort and vwapFilterLong
+
+    if i_retestMode == "Breakout"
+        // Immediate entry on breakout
+        if breakoutLong and not entryPending
+            longSig := true
+            
+    else if i_retestMode == "Boundary"
+        // Wait for retest of ORB boundary, then reentry through boundary
+        if breakoutLong and not entryPending
+            entryPending := true
+            entryPendingDir := 1
+            entryPendingBar := bar_index
+            retestSeen := false
+        
+        if entryPending and entryPendingDir == 1
+            // Check for retest of ORB high
+            if not retestSeen and low <= orbHigh
+                retestSeen := true
+            
+            // Check for re-breakout through ORB high
+            if retestSeen and close > orbHigh and displacementOk
+                longSig := true
+                entryPending := false
+                entryPendingDir := 0
+                retestSeen := false
+            
+            // Timeout: cancel pending
+            if bar_index - entryPendingBar >= i_retestTimeout
+                entryPending := false
+                entryPendingDir := 0
+                retestSeen := false
+    
+    else if i_retestMode == "Midpoint"
+        // Wait for retest of ORB midpoint, then entry
+        if breakoutLong and not entryPending
+            entryPending := true
+            entryPendingDir := 1
+            entryPendingBar := bar_index
+            retestSeen := false
+        
+        if entryPending and entryPendingDir == 1
+            // Check for retest of midpoint
+            if not retestSeen and low <= orbMid
+                retestSeen := true
+            
+            // Check for re-breakout through ORB high
+            if retestSeen and close > orbHigh and displacementOk
+                longSig := true
+                entryPending := false
+                entryPendingDir := 0
+                retestSeen := false
+            
+            if bar_index - entryPendingBar >= i_retestTimeout
+                entryPending := false
+                entryPendingDir := 0
+                retestSeen := false
+
+// SHORTS (mirror logic)
+if orbDone and orbRangeOk and inTradeWindow and i_enableShorts and not breakoutLong and vwapFilterShort
+
+    if i_retestMode == "Breakout"
+        if breakoutShort and not entryPending
+            shortSig := true
+            
+    else if i_retestMode == "Boundary"
+        if breakoutShort and not entryPending
+            entryPending := true
+            entryPendingDir := -1
+            entryPendingBar := bar_index
+            retestSeen := false
+        
+        if entryPending and entryPendingDir == -1
+            if not retestSeen and high >= orbLow
+                retestSeen := true
+            
+            if retestSeen and close < orbLow and displacementOk
+                shortSig := true
+                entryPending := false
+                entryPendingDir := 0
+                retestSeen := false
+            
+            if bar_index - entryPendingBar >= i_retestTimeout
+                entryPending := false
+                entryPendingDir := 0
+                retestSeen := false
+    
+    else if i_retestMode == "Midpoint"
+        if breakoutShort and not entryPending
+            entryPending := true
+            entryPendingDir := -1
+            entryPendingBar := bar_index
+            retestSeen := false
+        
+        if entryPending and entryPendingDir == -1
+            if not retestSeen and high >= orbMid
+                retestSeen := true
+            
+            if retestSeen and close < orbLow and displacementOk
+                shortSig := true
+                entryPending := false
+                entryPendingDir := 0
+                retestSeen := false
+            
+            if bar_index - entryPendingBar >= i_retestTimeout
+                entryPending := false
+                entryPendingDir := 0
+                retestSeen := false
+
+// ════════════════════════════════════════════════════════════════════════════════
+// 6. TRADE EXECUTION
+// ════════════════════════════════════════════════════════════════════════════════
+
+var float entryPrice = na
+var float slPrice = na
+var float tp1Price = na
+var float tp2Price = na
+var float tp3Price = na
+var float trailSl = na
+var int tradeDir = 0  // 1=long, -1=short
+
+var int tp1Qty = 0
+var int tp2Qty = 0
+var int tp3Qty = 0
+
+if newDay
+    entryPrice := na
+    slPrice := na
+    tp1Price := na
+    tp2Price := na
+    tp3Price := na
+    trailSl := na
+    tradeDir := 0
+    tp1Qty := 0
+    tp2Qty := 0
+    tp3Qty := 0
+
+inFlatWindow = f_inWindow(i_tradeEnd, i_flatTime)
+
+// LONG ENTRY
+if barstate.isconfirmed and longSig and strategy.position_size == 0 and not inFlatWindow
+    entryPrice := close
+    tradeDir := 1
+    
+    // Calculate SL
+    slPrice := i_slMethod == "Opposite" ? orbLow : orbMid
+    
+    // Calculate TPs and quantities
+    risk = entryPrice - slPrice
+    tp1Price := entryPrice + risk * i_tp1Rr
+    tp2Price := entryPrice + risk * i_tp2Rr
+    tp3Price := entryPrice + risk * i_tp3Rr
+    
+    tp1Qty := int(math.round(1.0 * i_tp1Pct / 100.0))
+    tp2Qty := int(math.round(1.0 * i_tp2Pct / 100.0))
+    tp3Qty := int(math.round(1.0 * i_tp3Pct / 100.0))
+    
+    // If splits < 1 contract, allocate to first TP
+    if tp1Qty + tp2Qty + tp3Qty < 1
+        tp1Qty := 1
+        tp2Qty := 0
+        tp3Qty := 0
+    
+    trailSl := slPrice
+    
+    // PLACE ORDERS
+    strategy.entry("Long", strategy.long, qty=1, alert_message='{"action":"buy","qty":1}')
+    strategy.exit("Long Exit", from_entry="Long", qty=tp1Qty, limit=tp1Price, stop=slPrice, alert_message='{"action":"exit"}')
+    if tp2Qty > 0
+        strategy.exit("Long Exit 2", from_entry="Long", qty=tp2Qty, limit=tp2Price, stop=slPrice, alert_message='{"action":"exit"}')
+    if tp3Qty > 0
+        strategy.exit("Long Exit 3", from_entry="Long", qty=tp3Qty, limit=tp3Price, stop=slPrice, alert_message='{"action":"exit"}')
+
+// SHORT ENTRY
+if barstate.isconfirmed and shortSig and strategy.position_size == 0 and not inFlatWindow
+    entryPrice := close
+    tradeDir := -1
+    
+    slPrice := i_slMethod == "Opposite" ? orbHigh : orbMid
+    
+    risk = slPrice - entryPrice
+    tp1Price := entryPrice - risk * i_tp1Rr
+    tp2Price := entryPrice - risk * i_tp2Rr
+    tp3Price := entryPrice - risk * i_tp3Rr
+    
+    tp1Qty := int(math.round(1.0 * i_tp1Pct / 100.0))
+    tp2Qty := int(math.round(1.0 * i_tp2Pct / 100.0))
+    tp3Qty := int(math.round(1.0 * i_tp3Pct / 100.0))
+    
+    if tp1Qty + tp2Qty + tp3Qty < 1
+        tp1Qty := 1
+        tp2Qty := 0
+        tp3Qty := 0
+    
+    trailSl := slPrice
+    
+    strategy.entry("Short", strategy.short, qty=1, alert_message='{"action":"sell","qty":1}')
+    strategy.exit("Short Exit", from_entry="Short", qty=tp1Qty, limit=tp1Price, stop=slPrice, alert_message='{"action":"exit"}')
+    if tp2Qty > 0
+        strategy.exit("Short Exit 2", from_entry="Short", qty=tp2Qty, limit=tp2Price, stop=slPrice, alert_message='{"action":"exit"}')
+    if tp3Qty > 0
+        strategy.exit("Short Exit 3", from_entry="Short", qty=tp3Qty, limit=tp3Price, stop=slPrice, alert_message='{"action":"exit"}')
+
+// STAIRCASE STOP UPDATE
+if i_useStaircase and tradeDir != 0 and strategy.position_size != 0
+    if tradeDir == 1  // Long
+        if high >= tp1Price and trailSl == slPrice
+            trailSl := entryPrice
+        else if high >= tp2Price and trailSl == entryPrice
+            trailSl := tp1Price
+        else if high >= tp3Price and trailSl == tp1Price
+            trailSl := tp2Price
+    else  // Short
+        if low <= tp1Price and trailSl == slPrice
+            trailSl := entryPrice
+        else if low <= tp2Price and trailSl == entryPrice
+            trailSl := tp1Price
+        else if low <= tp3Price and trailSl == tp1Price
+            trailSl := tp2Price
+
+// HARD FLAT AT SESSION END
+flatTimeHit = inFlatWindow and not inFlatWindow[1]
+if flatTimeHit and strategy.position_size != 0
+    strategy.close_all(alert_message='{"action":"exit","reason":"session_flat"}')
+    tradeDir := 0
+
+// ════════════════════════════════════════════════════════════════════════════════
+// 7. DRAWING & DISPLAY
+// ════════════════════════════════════════════════════════════════════════════════
+
+// ORB lines
+if orbDone and i_showOrbLines
+    line.new(orbStartBar, orbHigh, bar_index, orbHigh, xloc=xloc.bar_index, color=color.green, width=2)
+    line.new(orbStartBar, orbLow, bar_index, orbLow, xloc=xloc.bar_index, color=color.red, width=2)
+    if orbRange > 0
+        line.new(orbStartBar, orbMid, bar_index, orbMid, xloc=xloc.bar_index, color=color.orange, width=1, style=line.style_dotted)
+
+// SL/TP lines during active trade
+if tradeDir != 0 and i_showSlTpLines
+    // SL line
+    slColor = tradeDir == 1 ? color.red : color.red
+    line.new(bar_index, slPrice, bar_index + 1, slPrice, xloc=xloc.bar_index, color=slColor, width=2)
+    
+    // TP lines
+    if not na(tp1Price)
+        line.new(bar_index, tp1Price, bar_index + 1, tp1Price, xloc=xloc.bar_index, color=color.green, width=2)
+    if not na(tp2Price) and tp2Qty > 0
+        line.new(bar_index, tp2Price, bar_index + 1, tp2Price, xloc=xloc.bar_index, color=color.lime, width=1, style=line.style_dashed)
+    if not na(tp3Price) and tp3Qty > 0
+        line.new(bar_index, tp3Price, bar_index + 1, tp3Price, xloc=xloc.bar_index, color=color.lime, width=1, style=line.style_dotted)
+
+// Plot signals
+plotshape(breakoutLong and orbRangeOk, title="Breakout Long", style=shape.triangleup, location=location.belowbar, color=color.green, size=size.small)
+plotshape(breakoutShort and orbRangeOk, title="Breakout Short", style=shape.triangledown, location=location.abovebar, color=color.red, size=size.small)
+plotshape(longSig, title="Long Signal", style=shape.triangleup, location=location.belowbar, color=color.lime, size=size.large, text="ENTRY")
+plotshape(shortSig, title="Short Signal", style=shape.triangledown, location=location.abovebar, color=color.orange, size=size.large, text="ENTRY")
+
+// ════════════════════════════════════════════════════════════════════════════════
+// 8. DASHBOARD (Optional)
+// ════════════════════════════════════════════════════════════════════════════════
+
+if i_showDashboard
+    dashInfo = ""
+    dashInfo += "ORB: " + (orbDone ? str.tostring(orbRange, "0.0") + " pts" : "Building")
+    dashInfo += "\nORB OK: " + str.tostring(orbRangeOk)
+    dashInfo += "\nBrkOut: " + (breakoutLong ? "LONG" : breakoutShort ? "SHORT" : "—")
+    dashInfo += "\nVWAP: " + (vwapFilterLong ? "✓" : "✗")
+    dashInfo += "\nTrade Window: " + str.tostring(inTradeWindow)
+    
+    var label dashLabel = na
+    if barstate.islast
+        dashLabel := label.new(bar_index - 50, high, dashInfo, 
+                              xloc=xloc.bar_index, 
+                              style=label.style_label_left,
+                              textcolor=color.white,
+                              bgcolor=color.new(color.black, 50),
+                              size=size.small)
+
+// ════════════════════════════════════════════════════════════════════════════════
+// END STRATEGY
+// ════════════════════════════════════════════════════════════════════════════════

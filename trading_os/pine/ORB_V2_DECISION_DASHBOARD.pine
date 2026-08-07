@@ -1,0 +1,225 @@
+//@version=5
+indicator("ORB V2 Decision Dashboard [Evidence-Based]", overlay=false, max_labels_count=500)
+
+// ============================================================================
+// INPUT PARAMETERS
+// ============================================================================
+
+// ORB Configuration
+orb_start_hour = input(8, "ORB Start Hour (ET)")
+orb_start_min = input(0, "ORB Start Min")
+orb_end_hour = input(8, "ORB End Hour (ET)")
+orb_end_min = input(15, "ORB End Min")
+
+// ORB Validity
+min_orb_range = input(4, "Min ORB Range (pts)", minval=1)
+max_orb_range = input(20, "Max ORB Range (pts)", minval=1)
+
+// Filter Configuration
+ema1_period = input(20, "EMA 1 Period")
+ema2_period = input(50, "EMA 2 Period")
+ema3_period = input(200, "EMA 3 Period")
+
+// Display Options
+show_orb_box = input(true, "Show ORB Box")
+show_filters = input(true, "Show Filter Panel")
+show_confluence = input(true, "Show Confluence Score")
+
+// ============================================================================
+// CALCULATIONS
+// ============================================================================
+
+// Convert input times to minutes from midnight
+orb_start_minutes = orb_start_hour * 60 + orb_start_min
+orb_end_minutes = orb_end_hour * 60 + orb_end_min
+market_open_minutes = 9 * 60 + 30  // 09:30 ET
+entry_cutoff_minutes = 10 * 60 + 30  // 10:30 ET
+forced_close_minutes = 11 * 60  // 11:00 ET
+
+// Get current time in ET
+current_time_minutes = hour(time("America/New_York")) * 60 + minute(time("America/New_York"))
+
+// ============================================================================
+// ORB CALCULATION
+// ============================================================================
+
+// Check if we're in ORB window
+in_orb_window = current_time_minutes >= orb_start_minutes and current_time_minutes <= orb_end_minutes
+
+// Calculate ORB using high/low of candles in the ORB window
+var float orb_high = na
+var float orb_low = na
+var bool orb_calculated = false
+
+// Reset at market open
+if current_time_minutes == market_open_minutes
+    orb_high := na
+    orb_low := na
+    orb_calculated := false
+
+// Calculate ORB during window
+if in_orb_window
+    orb_high := na(orb_high) ? high : math.max(orb_high, high)
+    orb_low := na(orb_low) ? low : math.min(orb_low, low)
+    orb_calculated := true
+
+// ORB Range
+orb_range = orb_calculated ? orb_high - orb_low : na
+orb_valid = orb_calculated and orb_range > min_orb_range and orb_range < max_orb_range
+
+// ============================================================================
+// FILTER CALCULATIONS
+// ============================================================================
+
+// EMA Filters
+ema1 = ta.ema(close, ema1_period)
+ema2 = ta.ema(close, ema2_period)
+ema3 = ta.ema(close, ema3_period)
+
+// EMA alignment for LONG (20 > 50 > 200)
+ema_long_aligned = ema1 > ema2 and ema2 > ema3
+
+// VWAP Filter
+vwap = ta.vwap(hlc3)
+vwap_filter_long = close > vwap
+
+// Volume Filter
+avg_volume = ta.sma(volume, 20)
+volume_filter = volume > avg_volume * 1.5
+
+// Displacement Candle (body > 2x average)
+avg_body = ta.sma(math.abs(close - open), 20)
+current_body = math.abs(close - open)
+displacement_candle = current_body > avg_body * 2
+
+// ORB-Half Check (price has retested halfway)
+orb_mid = (orb_high + orb_low) / 2
+orb_half_retested = low <= orb_mid and close >= open  // Closed above open after testing half
+
+// Confluence Score (count how many filters are met)
+confluence_count = (ema_long_aligned ? 1 : 0) + (vwap_filter_long ? 1 : 0) + (volume_filter ? 1 : 0) + (displacement_candle ? 1 : 0) + (ema_long_aligned ? 1 : 0)
+
+// Simplified confluence (3-5 signals)
+confluence_strong = confluence_count >= 3
+
+// ============================================================================
+// BREAKOUT + RETEST DETECTION
+// ============================================================================
+
+// Detect breakout above ORB_HIGH
+breakout_high = close > orb_high and close[1] <= orb_high
+breakout_low = close < orb_low and close[1] >= orb_low
+
+// Detect retest (price pulled back into range)
+retest_high = high >= orb_high and low <= orb_mid and close > orb_high
+retest_low = low <= orb_low and high >= orb_mid and close < orb_low
+
+// Entry signal logic
+entry_ready_breakout_long = breakout_high and retest_high and confluence_strong and vwap_filter_long and ema_long_aligned
+entry_ready_breakout_short = breakout_low and retest_low and not vwap_filter_long and not ema_long_aligned
+
+execute_long = entry_ready_breakout_long and current_time_minutes >= market_open_minutes and current_time_minutes <= entry_cutoff_minutes
+execute_short = entry_ready_breakout_short and current_time_minutes >= market_open_minutes and current_time_minutes <= entry_cutoff_minutes
+
+// ============================================================================
+// DISPLAY - ORB BOX
+// ============================================================================
+
+// Draw ORB range as boxes
+if show_orb_box and orb_valid
+    // ORB High line
+    line.new(bar_index - 50, orb_high, bar_index, orb_high, color=color.new(color.green, 50), width=2)
+    
+    // ORB Low line
+    line.new(bar_index - 50, orb_low, bar_index, orb_low, color=color.new(color.red, 50), width=2)
+    
+    // ORB Mid line
+    line.new(bar_index - 50, orb_mid, bar_index, orb_mid, color=color.new(color.gray, 50), width=1, style=line.style_dashed)
+
+// ============================================================================
+// DISPLAY - DECISION PANEL (Lower Panel)
+// ============================================================================
+
+// Panel data to display
+direction = vwap_filter_long ? "LONG" : "SHORT"
+or_range_str = str.tostring(orb_range, "0.00")
+or_valid_str = orb_valid ? "YES" : "NO"
+ema_filter_str = ema_long_aligned ? "YES" : "FAIL"
+vwap_filter_str = vwap_filter_long ? "YES" : "FAIL"
+displacement_str = displacement_candle ? "YES" : "NO"
+confluence_str = str.tostring(confluence_count) + "/5"
+execute_str = execute_long or execute_short ? "YES" : "NO"
+
+// Plot decision panel
+panel_text = "DIRECTION: " + direction + "\n"
+panel_text += "OR RANGE: " + or_range_str + "\n"
+panel_text += "OR VALID: " + or_valid_str + "\n"
+panel_text += "EMA FILTER: " + ema_filter_str + "\n"
+panel_text += "VWAP FILTER: " + vwap_filter_str + "\n"
+panel_text += "DISPLACEMENT: " + displacement_str + "\n"
+panel_text += "CONFLUENCE: " + confluence_str + "\n"
+panel_text += "EXECUTE: " + execute_str
+
+// Display as table
+var table dashboard = na
+if show_filters
+    if na(dashboard)
+        dashboard := table.new(position=position.top_right, columns=2, rows=8, border_width=1, frame_width=1, frame_color=color.gray)
+    
+    // Update table
+    table.cell(dashboard, 0, 0, "Direction", text_color=color.white, bgcolor=color.new(color.blue, 50))
+    table.cell(dashboard, 1, 0, direction, text_color=color.white, bgcolor=color.new(color.blue, 50))
+    
+    table.cell(dashboard, 0, 1, "OR Range", text_color=color.white, bgcolor=color.new(color.gray, 50))
+    table.cell(dashboard, 1, 1, or_range_str, text_color=color.white, bgcolor=color.new(color.gray, 50))
+    
+    table.cell(dashboard, 0, 2, "OR Valid", text_color=color.white, bgcolor=orb_valid ? color.new(color.green, 50) : color.new(color.red, 50))
+    table.cell(dashboard, 1, 2, or_valid_str, text_color=color.white, bgcolor=orb_valid ? color.new(color.green, 50) : color.new(color.red, 50))
+    
+    table.cell(dashboard, 0, 3, "EMA Filter", text_color=color.white, bgcolor=ema_long_aligned ? color.new(color.green, 50) : color.new(color.red, 50))
+    table.cell(dashboard, 1, 3, ema_filter_str, text_color=color.white, bgcolor=ema_long_aligned ? color.new(color.green, 50) : color.new(color.red, 50))
+    
+    table.cell(dashboard, 0, 4, "VWAP Filter", text_color=color.white, bgcolor=vwap_filter_long ? color.new(color.green, 50) : color.new(color.red, 50))
+    table.cell(dashboard, 1, 4, vwap_filter_str, text_color=color.white, bgcolor=vwap_filter_long ? color.new(color.green, 50) : color.new(color.red, 50))
+    
+    table.cell(dashboard, 0, 5, "Displacement", text_color=color.white, bgcolor=displacement_candle ? color.new(color.green, 50) : color.new(color.orange, 50))
+    table.cell(dashboard, 1, 5, displacement_str, text_color=color.white, bgcolor=displacement_candle ? color.new(color.green, 50) : color.new(color.orange, 50))
+    
+    table.cell(dashboard, 0, 6, "Confluence", text_color=color.white, bgcolor=confluence_strong ? color.new(color.green, 50) : color.new(color.orange, 50))
+    table.cell(dashboard, 1, 6, confluence_str, text_color=color.white, bgcolor=confluence_strong ? color.new(color.green, 50) : color.new(color.orange, 50))
+    
+    table.cell(dashboard, 0, 7, "EXECUTE", text_color=color.white, bgcolor=(execute_long or execute_short) ? color.new(color.green, 50) : color.new(color.red, 50))
+    table.cell(dashboard, 1, 7, execute_str, text_color=color.white, bgcolor=(execute_long or execute_short) ? color.new(color.green, 50) : color.new(color.red, 50))
+
+// ============================================================================
+// SIGNALS & ALERTS
+// ============================================================================
+
+// Alert when entry conditions are met
+alertcondition(execute_long, title="LONG Entry Ready", message="ORB V2 LONG conditions met - breakout + retest + filters aligned")
+alertcondition(execute_short, title="SHORT Entry Ready", message="ORB V2 SHORT conditions met - breakout + retest + filters aligned")
+
+// ============================================================================
+// PLOTS & DEBUG
+// ============================================================================
+
+// Plot EMAs
+plot(ema1, "EMA 20", color=color.new(color.blue, 0), linewidth=1)
+plot(ema2, "EMA 50", color=color.new(color.orange, 0), linewidth=1)
+plot(ema3, "EMA 200", color=color.new(color.red, 0), linewidth=1)
+
+// Plot VWAP
+plot(vwap, "VWAP", color=color.new(color.purple, 50), linewidth=2)
+
+// Highlight entry signals
+bgcolor(execute_long ? color.new(color.green, 80) : execute_short ? color.new(color.red, 80) : na)
+
+// ============================================================================
+// INFORMATION DISPLAY
+// ============================================================================
+
+// Display message about current state
+var label info_label = na
+if show_confluence
+    msg = "ORB: " + or_range_str + " pts | Confluence: " + confluence_str + " | Execute: " + execute_str
+    info_label := label.new(bar_index, high + 20, msg, color=color.gray, textcolor=color.white, style=label.style_label_lower)

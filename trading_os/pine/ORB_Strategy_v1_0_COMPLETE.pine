@@ -1,0 +1,161 @@
+// ORB Strategy v1.0 - TradingView Pine Script
+// Opening Range Breakout on ES/MES with VWAP filter
+// Optimized for 5-minute charts
+
+//@version=5
+strategy("ES/MES ORB Strategy v1.0", 
+         overlay=true, 
+         default_qty_type=strategy.fixed,
+         default_qty_value=1,
+         process_orders_on_close=true)
+
+// ============================================================================
+// INPUTS
+// ============================================================================
+
+orb_start_hour = input.int(8, "ORB Start Hour (ET)", minval=0, maxval=23)
+orb_start_min = input.int(0, "ORB Start Min", minval=0, maxval=59)
+orb_end_hour = input.int(8, "ORB End Hour (ET)", minval=0, maxval=23)
+orb_end_min = input.int(15, "ORB End Min", minval=0, maxval=59)
+
+entry_cutoff_hour = input.int(11, "No Entry After (ET)", minval=0, maxval=23)
+entry_cutoff_min = input.int(0, "No Entry After Min", minval=0, maxval=59)
+
+use_vwap_filter = input.bool(true, "Use VWAP Filter")
+sl_points = input.int(50, "Stop Loss Points", minval=1)
+tp1_points = input.int(50, "TP1 Points (1R)")
+tp2_points = input.int(100, "TP2 Points (2R)")
+tp3_points = input.int(150, "TP3 Points (3R)")
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+// Converts NY time offset to current chart timezone
+to_ny_time(t) =>
+    math.floor(t / 3600 - 5) * 3600 + math.fmod(t, 3600)
+
+// Check if we're in ORB window
+in_orb_window() =>
+    hour_et = hour(time('1', 'America/New_York'))
+    min_et = minute(time('1', 'America/New_York'))
+    
+    start_min_total = orb_start_hour * 60 + orb_start_min
+    end_min_total = orb_end_hour * 60 + orb_end_min
+    current_min_total = hour_et * 60 + min_et
+    
+    current_min_total >= start_min_total and current_min_total < end_min_total
+
+// Check if we're past ORB window but before cutoff
+can_enter() =>
+    hour_et = hour(time('1', 'America/New_York'))
+    min_et = minute(time('1', 'America/New_York'))
+    
+    end_min_total = orb_end_hour * 60 + orb_end_min
+    cutoff_min_total = entry_cutoff_hour * 60 + entry_cutoff_min
+    current_min_total = hour_et * 60 + min_et
+    
+    current_min_total >= end_min_total and current_min_total < cutoff_min_total
+
+// Forced flat time (11:00 ET)
+is_time_to_close() =>
+    hour_et = hour(time('1', 'America/New_York'))
+    min_et = minute(time('1', 'America/New_York'))
+    hour_et >= entry_cutoff_hour
+
+// ============================================================================
+// ORB CALCULATION
+// ============================================================================
+
+var float orb_high = na
+var float orb_low = na
+var float orb_mid = na
+var bool orb_computed = false
+var bool in_orb_phase = false
+
+if in_orb_window()
+    in_orb_phase := true
+    if not orb_computed
+        orb_high := high
+        orb_low := low
+        orb_mid := (orb_high + orb_low) / 2.0
+    else
+        orb_high := math.max(orb_high, high)
+        orb_low := math.min(orb_low, low)
+else
+    if in_orb_phase and not orb_computed
+        orb_computed := true
+        in_orb_phase := false
+
+// Reset at end of day
+if is_time_to_close()
+    orb_computed := false
+    orb_high := na
+    orb_low := na
+    orb_mid := na
+
+// ============================================================================
+// VWAP CALCULATION
+// ============================================================================
+
+tp = (high + low + close) / 3.0
+vwap_line = ta.vwap(tp)
+
+// ============================================================================
+// SIGNAL DETECTION
+// ============================================================================
+
+// Breakout signals (V1.0: breakout only, NO retest)
+breakout_long = can_enter() and orb_computed and close > orb_high and (not use_vwap_filter or close > vwap_line)
+breakout_short = can_enter() and orb_computed and close < orb_low and (not use_vwap_filter or close < vwap_line)
+
+// ============================================================================
+// ENTRY & EXIT LOGIC
+// ============================================================================
+
+// Entry conditions
+if breakout_long
+    strategy.entry("long", strategy.long, comment="ORB Breakout Long")
+
+if breakout_short
+    strategy.entry("short", strategy.short, comment="ORB Breakout Short")
+
+// Stop loss & take profit
+if strategy.position_size > 0  // Long position
+    strategy.exit("close_long", "long",
+                  stop=strategy.position_avg_price - sl_points * syminfo.mintick,
+                  limit=strategy.position_avg_price + tp3_points * syminfo.mintick,
+                  comment="TP/SL Long")
+
+if strategy.position_size < 0  // Short position
+    strategy.exit("close_short", "short",
+                  stop=strategy.position_avg_price + sl_points * syminfo.mintick,
+                  limit=strategy.position_avg_price - tp3_points * syminfo.mintick,
+                  comment="TP/SL Short")
+
+// Forced flat at cutoff time
+if is_time_to_close() and strategy.position_size != 0
+    strategy.close_all(comment="Forced Flat at 11:00 ET")
+
+// ============================================================================
+// PLOTTING
+// ============================================================================
+
+// ORB levels
+plot(orb_high, title="ORB High", color=color.new(color.green, 50), linewidth=2)
+plot(orb_low, title="ORB Low", color=color.new(color.red, 50), linewidth=2)
+plot(orb_mid, title="ORB Mid", color=color.new(color.blue, 50), linewidth=1, style=plot.style_dashed)
+
+// VWAP
+plot(vwap_line, title="VWAP", color=color.new(color.orange, 50), linewidth=1)
+
+// Signals
+plotshape(breakout_long, title="Long Signal", location=location.belowbar, color=color.green, shape=shape.triangleup, size=size.small)
+plotshape(breakout_short, title="Short Signal", location=location.abovebar, color=color.red, shape=shape.triangledown, size=size.small)
+
+// ============================================================================
+// ALERTS
+// ============================================================================
+
+alertcondition(breakout_long, title="ORB Breakout Long", message="ORB Breakout Long - Enter at market")
+alertcondition(breakout_short, title="ORB Breakout Short", message="ORB Breakout Short - Enter at market")
