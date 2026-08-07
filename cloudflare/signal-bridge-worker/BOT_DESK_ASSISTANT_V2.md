@@ -33,7 +33,7 @@ Desk dispatch cron:
 Current desk windows:
 - **08:45 ET** — Pre-market Desk: session brief + news/calendar state.
 - **09:25 ET** — Opening Bell Pulse: only posts when session data exists.
-- **11:05 ET** — NY-AM Session Recap: only posts when session data exists.
+- **11:10 ET** — NY-AM Session Recap: waits for the 11:00 Pine SESSION_CLOSE event to persist before reading the day.
 
 A durable `bot_dispatch_log` record prevents duplicate scheduled posts if Cloudflare retries an invocation or overlapping cron activity occurs.
 
@@ -53,10 +53,10 @@ This allows the same Signal Bridge app to later route intelligence into a dedica
 - Setup Readiness is a transparent count of stored conditions: ORB, bias, setup, actionable side, and target.
 - Scheduled open/recap messages skip when no real session lifecycle exists.
 
-## Next dependency: Pine lifecycle output
+## Pine lifecycle source
 
-The hosted intelligence layer is ready for the indicator to send:
+`ES_ORB_Indicator_v1_2_SESSION_BRIDGE.pine` is the first chart-side session sensor. It preserves the v1.1 signal logic while emitting:
 
 `PREMARKET -> ORB_FORMED -> PREOPEN -> OPEN_SNAPSHOT -> SETUP / WAIT -> SESSION_CLOSE`
 
-Once those events are emitted by the Pine indicator, the website Morning Desk and Discord assistant will read the same durable session object.
+The website Morning Desk and Discord assistant read the same durable session object created by those events.
