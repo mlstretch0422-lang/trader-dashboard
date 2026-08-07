@@ -26,7 +26,9 @@ function dispatchSpec(parts) {
   const minute = Number(parts.minute);
   if (hour === 8 && minute === 45) return { kind: "PREMARKET", label: "PRE-MARKET DESK" };
   if (hour === 9 && minute === 25) return { kind: "OPEN_PULSE", label: "OPENING BELL PULSE" };
-  if (hour === 11 && minute === 5) return { kind: "SESSION_RECAP", label: "NY-AM SESSION RECAP" };
+  // The Pine SESSION_CLOSE snapshot begins at 11:00 ET. Waiting ten minutes gives
+  // TradingView + the Worker time to persist the close before the recap reads it.
+  if (hour === 11 && minute === 10) return { kind: "SESSION_RECAP", label: "NY-AM SESSION RECAP" };
   return null;
 }
 
