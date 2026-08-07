@@ -5,6 +5,13 @@ const RESPONSE_CHANNEL_MESSAGE = 4;
 const RESPONSE_DEFERRED_CHANNEL_MESSAGE = 5;
 export const INTELLIGENCE_COMMANDS = new Set(["status", "orb", "brief", "news"]);
 
+const COMMAND_STYLE = {
+  status: { title: "SIGNAL BRIDGE · SYSTEM STATUS", color: 0x5ce0aa },
+  orb: { title: "SIGNAL BRIDGE · ORB", color: 0x65d9ff },
+  brief: { title: "SIGNAL BRIDGE · SESSION BRIEF", color: 0x9b7cff },
+  news: { title: "SIGNAL BRIDGE · MARKET INTELLIGENCE", color: 0xd9a441 },
+};
+
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -46,12 +53,32 @@ function invokingUserId(interaction) {
   return interaction?.member?.user?.id || interaction?.user?.id || null;
 }
 
-async function editOriginal(interaction, content) {
+function cleanBuilderHeader(text) {
+  return String(text || "").replace(/^.*\*\*SIGNAL BRIDGE[^\n]*\*\*\s*/i, "").trim();
+}
+
+function commandPayload(command, text, options = {}) {
+  const style = COMMAND_STYLE[command] || COMMAND_STYLE.status;
+  const symbol = String(options.symbol || "").toUpperCase().slice(0, 32);
+  return {
+    content: "",
+    embeds: [{
+      title: symbol && ["orb", "brief"].includes(command) ? `${style.title} · ${symbol}` : style.title,
+      description: cleanBuilderHeader(text).slice(0, 3900) || "No data available.",
+      color: style.color,
+      footer: { text: "Signal Bridge · hosted trading desk" },
+      timestamp: new Date().toISOString(),
+    }],
+    allowed_mentions: { parse: [] },
+  };
+}
+
+async function editOriginal(interaction, payload) {
   const endpoint = `https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`;
   const response = await fetch(endpoint, {
     method: "PATCH",
-    headers: { "content-type": "application/json", "user-agent": "SignalBridgeIntelligenceBot/1.0" },
-    body: JSON.stringify({ content: String(content || "Signal Bridge completed the request.").slice(0, 1950), allowed_mentions: { parse: [] } }),
+    headers: { "content-type": "application/json", "user-agent": "SignalBridgeIntelligenceBot/2.0" },
+    body: JSON.stringify(payload),
   });
   if (!response.ok) throw new Error(`discord_edit_${response.status}`);
 }
@@ -89,23 +116,35 @@ async function logFinish(log, status, errorCode, env) {
 async function runCommand(interaction, command, env) {
   const options = optionMap(interaction);
   const symbol = String(options.symbol || "MES").toUpperCase().slice(0, 32);
-  if (command === "status") return buildStatusText(env);
-  if (command === "orb") return buildOrbText(env, symbol);
-  if (command === "brief") return buildBriefText(env, symbol);
-  if (command === "news") return buildNewsText(env, options.refresh === true);
-  throw new Error("unknown_intelligence_command");
+  let text;
+  if (command === "status") text = await buildStatusText(env);
+  else if (command === "orb") text = await buildOrbText(env, symbol);
+  else if (command === "brief") text = await buildBriefText(env, symbol);
+  else if (command === "news") text = await buildNewsText(env, options.refresh === true);
+  else throw new Error("unknown_intelligence_command");
+  return commandPayload(command, text, { ...options, symbol });
 }
 
 async function completeDeferred(interaction, command, env) {
   const log = await logStart(interaction, command, env);
   try {
-    const content = await runCommand(interaction, command, env);
-    await editOriginal(interaction, content);
+    const payload = await runCommand(interaction, command, env);
+    await editOriginal(interaction, payload);
     await logFinish(log, "SUCCESS", null, env);
   } catch (error) {
     const code = String(error?.message || "intelligence_error").slice(0, 120);
     try {
-      await editOriginal(interaction, "Signal Bridge could not load that intelligence view right now. The backend failure was logged for review.");
+      await editOriginal(interaction, {
+        content: "",
+        embeds: [{
+          title: "SIGNAL BRIDGE · DATA UNAVAILABLE",
+          description: "That desk view could not load right now. The backend failure was logged for review instead of returning invented market state.",
+          color: 0xef6262,
+          footer: { text: "Signal Bridge · hosted trading desk" },
+          timestamp: new Date().toISOString(),
+        }],
+        allowed_mentions: { parse: [] },
+      });
     } catch {
       // Discord may have discarded the token; the interaction log still captures the backend failure.
     }
