@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Signal Bridge | Content Status</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/brand/signal-bridge-favicon.svg" />
+  <link rel="stylesheet" href="./assets/css/content-status.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <h1>Strategy Evidence Registry</h1>
+        <p>What is accepted, implemented, being tested, untested, or retired.</p>
+      </div>
+      <a class="backLink" href="./index.html">Back to Signal Bridge</a>
+    </header>
+
+    <section class="summary">
+      <article class="panel">
+        <h2>Truth policy</h2>
+        <p id="promotionRule">Loading promotion policy...</p>
+        <p id="performanceRule">Loading performance policy...</p>
+        <ul class="policyList">
+          <li><strong>VERIFIED</strong> can mean an accepted project rule. It does not automatically mean statistically proven edge.</li>
+          <li><strong>IMPLEMENTED</strong> means code exists. It does not mean the rule should be marketed as validated.</li>
+          <li>Any performance claim must name its source file, period, sample size, test type, costs, and acceptance decision.</li>
+        </ul>
+      </article>
+
+      <article class="panel">
+        <h3>Registry snapshot</h3>
+        <div class="countGrid" id="countGrid"></div>
+        <p>Schema <strong id="schemaVersion">--</strong><br />Updated <strong id="updatedAt">--</strong></p>
+      </article>
+    </section>
+
+    <section class="controls" aria-label="Registry filters">
+      <input id="searchInput" type="search" placeholder="Search claims, rules, code, or sources" />
+      <select id="statusFilter">
+        <option value="ALL">All statuses</option>
+        <option value="VERIFIED">Verified</option>
+        <option value="TESTING">Testing</option>
+        <option value="UNTESTED">Untested</option>
+        <option value="RETIRED">Retired</option>
+      </select>
+      <select id="categoryFilter">
+        <option value="ALL">All categories</option>
+      </select>
+    </section>
+
+    <p class="footerNote" id="resultCount">Loading registry...</p>
+    <section class="registry" id="registry" aria-live="polite">
+      <div class="empty">Loading evidence records...</div>
+    </section>
+  </main>
+
+  <script src="./assets/js/content-status.js" defer></script>
+</body>
+</html>
