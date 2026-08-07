@@ -1,0 +1,246 @@
+{
+  "schema_version": "1.0.0",
+  "updated_at": "2026-08-06",
+  "policy": {
+    "status_values": ["VERIFIED", "TESTING", "UNTESTED", "RETIRED"],
+    "evidence_levels": [
+      "PROJECT_RULE",
+      "IMPLEMENTED",
+      "BACKTESTED",
+      "ISOLATED_ATTRIBUTION",
+      "WALK_FORWARD",
+      "PAPER_FORWARD",
+      "LIVE"
+    ],
+    "promotion_rule": "Implementation alone never proves edge. A trading component may be presented as validated only when its evidence record names the test type, date range, sample size, costs, result file, and acceptance decision.",
+    "performance_rule": "Historical, replay, paper, funded-evaluation, and live results must remain separate. No blended performance claims."
+  },
+  "items": [
+    {
+      "id": "market-mes-es",
+      "name": "Primary market: MES / ES",
+      "status": "VERIFIED",
+      "evidence_level": "PROJECT_RULE",
+      "category": "scope",
+      "claim": "The project is designed around MES/ES rather than a multi-market strategy.",
+      "sources": [
+        "strat/STRATEGY_SOURCE_OF_TRUTH.md",
+        "strat/AUDIT_CURRENT_STATE.md",
+        "ES_ORB_Indicator_v1_1_FIXED.txt",
+        "ES_ORB_Strategy_v1_1_FIXED.txt"
+      ],
+      "note": "Verified as an accepted project constraint, not as proof that MES/ES is more profitable than another market."
+    },
+    {
+      "id": "orb-0800-0815",
+      "name": "Reference ORB: 08:00–08:15 New York",
+      "status": "VERIFIED",
+      "evidence_level": "PROJECT_RULE",
+      "category": "session",
+      "claim": "The current project direction uses the 08:00–08:15 New York range as a reference level.",
+      "sources": [
+        "ES_ORB_Indicator_v1_1_FIXED.txt",
+        "strat/AUDIT_CURRENT_STATE.md"
+      ],
+      "note": "Accepted current reference window. Its standalone edge versus 09:30 variants remains unproven and must be tested separately."
+    },
+    {
+      "id": "entry-window",
+      "name": "Primary new-entry window: 09:30–10:30 New York",
+      "status": "VERIFIED",
+      "evidence_level": "PROJECT_RULE",
+      "category": "risk",
+      "claim": "The primary operating model stops initiating new trades after 10:30 New York time.",
+      "sources": [
+        "MECHANICAL_STRATEGY_RESEARCH_BRIEF.md",
+        "CONTENT_STATUS_AUDIT.md"
+      ],
+      "note": "Accepted risk constraint. The exact cutoff still requires isolated performance attribution."
+    },
+    {
+      "id": "force-flat-1100",
+      "name": "Force flat by 11:00 New York",
+      "status": "VERIFIED",
+      "evidence_level": "PROJECT_RULE",
+      "category": "risk",
+      "claim": "The primary model closes remaining exposure by 11:00 New York time.",
+      "sources": [
+        "MECHANICAL_STRATEGY_RESEARCH_BRIEF.md",
+        "CONTENT_STATUS_AUDIT.md"
+      ],
+      "note": "Accepted operating rule, not yet isolated as an edge contributor."
+    },
+    {
+      "id": "one-trade-day",
+      "name": "Maximum one planned trade per day",
+      "status": "VERIFIED",
+      "evidence_level": "PROJECT_RULE",
+      "category": "risk",
+      "claim": "The primary model permits one planned trade per day.",
+      "sources": [
+        "MECHANICAL_STRATEGY_RESEARCH_BRIEF.md",
+        "CONTENT_STATUS_AUDIT.md"
+      ],
+      "note": "Accepted operating rule. A second-trade model remains a separate experiment."
+    },
+    {
+      "id": "breakout-retest",
+      "name": "ORB breakout → retest → continuation",
+      "status": "TESTING",
+      "evidence_level": "IMPLEMENTED",
+      "category": "entry",
+      "claim": "The current Pine files implement a breakout-retest continuation state machine.",
+      "sources": [
+        "ES_ORB_Indicator_v1_1_FIXED.txt",
+        "ES_ORB_Strategy_v1_1_FIXED.txt"
+      ],
+      "test_requirements": [
+        "Exact date range",
+        "Trade count",
+        "Commission and slippage",
+        "Immediate breakout comparison",
+        "Boundary versus midpoint retest comparison",
+        "Walk-forward holdout"
+      ]
+    },
+    {
+      "id": "liquidity-sweep-reclaim",
+      "name": "Liquidity sweep → reclaim/rejection → continuation",
+      "status": "TESTING",
+      "evidence_level": "PROJECT_RULE",
+      "category": "entry",
+      "claim": "This is the preferred research direction for translating Mason's discretionary process into mechanical logic.",
+      "sources": [
+        "MECHANICAL_STRATEGY_RESEARCH_BRIEF.md",
+        "CONTENT_STATUS_AUDIT.md"
+      ],
+      "note": "Preferred hypothesis, not validated production logic."
+    },
+    {
+      "id": "vwap-filter",
+      "name": "VWAP directional alignment",
+      "status": "TESTING",
+      "evidence_level": "IMPLEMENTED",
+      "category": "filter",
+      "claim": "Long signals require price above VWAP and short signals require price below VWAP when enabled.",
+      "sources": [
+        "ES_ORB_Indicator_v1_1_FIXED.txt",
+        "ES_ORB_Strategy_v1_1_FIXED.txt"
+      ],
+      "note": "The repository contains claims that VWAP adds edge, but no accepted isolated attribution record has been located."
+    },
+    {
+      "id": "ema-filter",
+      "name": "EMA directional alignment",
+      "status": "UNTESTED",
+      "evidence_level": "IMPLEMENTED",
+      "category": "filter",
+      "claim": "EMA alignment exists as an optional code toggle.",
+      "sources": [
+        "ES_ORB_Indicator_v1_1_FIXED.txt",
+        "ES_ORB_Strategy_v1_1_FIXED.txt"
+      ],
+      "note": "Implementation is not validation. Keep out of the active Trade Bible until isolated testing is accepted."
+    },
+    {
+      "id": "displacement-threshold",
+      "name": "35% ORB-body or 0.75× ATR displacement gate",
+      "status": "TESTING",
+      "evidence_level": "IMPLEMENTED",
+      "category": "trigger",
+      "claim": "The current Pine implementation accepts either threshold as displacement confirmation.",
+      "sources": [
+        "ES_ORB_Indicator_v1_1_FIXED.txt",
+        "ES_ORB_Strategy_v1_1_FIXED.txt"
+      ],
+      "note": "The thresholds require head-to-head sensitivity testing and out-of-sample confirmation."
+    },
+    {
+      "id": "orb-range-filter",
+      "name": "ORB range gate: 5–50 points",
+      "status": "TESTING",
+      "evidence_level": "IMPLEMENTED",
+      "category": "filter",
+      "claim": "The current Pine files reject ORB ranges outside the configured minimum and maximum.",
+      "sources": [
+        "ES_ORB_Indicator_v1_1_FIXED.txt",
+        "ES_ORB_Strategy_v1_1_FIXED.txt"
+      ],
+      "note": "These defaults must be validated for instrument, contract, data feed, and volatility regime."
+    },
+    {
+      "id": "midpoint-retest",
+      "name": "ORB midpoint retest",
+      "status": "TESTING",
+      "evidence_level": "IMPLEMENTED",
+      "category": "entry",
+      "claim": "Midpoint is the current default retest selection in the v1.1 Pine implementation.",
+      "sources": [
+        "ES_ORB_Indicator_v1_1_FIXED.txt",
+        "ES_ORB_Strategy_v1_1_FIXED.txt"
+      ],
+      "note": "Default input does not establish superiority."
+    },
+    {
+      "id": "news-filter",
+      "name": "Red-news proximity block",
+      "status": "UNTESTED",
+      "evidence_level": "PROJECT_RULE",
+      "category": "filter",
+      "claim": "A news filter is requested in the research design but no production implementation and accepted test record are present.",
+      "sources": [
+        "MECHANICAL_STRATEGY_RESEARCH_BRIEF.md",
+        "CONTENT_STATUS_AUDIT.md"
+      ]
+    },
+    {
+      "id": "fvg-required",
+      "name": "FVG as a required confluence",
+      "status": "UNTESTED",
+      "evidence_level": "PROJECT_RULE",
+      "category": "filter",
+      "claim": "FVG appears as a candidate setup variable, not an accepted mandatory rule.",
+      "sources": [
+        "MECHANICAL_STRATEGY_RESEARCH_BRIEF.md",
+        "CONTENT_STATUS_AUDIT.md"
+      ]
+    },
+    {
+      "id": "second-trade-after-loss",
+      "name": "Second trade after a first loss",
+      "status": "UNTESTED",
+      "evidence_level": "PROJECT_RULE",
+      "category": "risk",
+      "claim": "A second-trade model may be researched only as a separate configuration with a hard daily stop.",
+      "sources": [
+        "MECHANICAL_STRATEGY_RESEARCH_BRIEF.md",
+        "CONTENT_STATUS_AUDIT.md"
+      ]
+    },
+    {
+      "id": "blind-breakout",
+      "name": "Blind ORB breakout entry",
+      "status": "RETIRED",
+      "evidence_level": "PROJECT_RULE",
+      "category": "entry",
+      "claim": "An ORB break alone is not sufficient authorization to enter.",
+      "sources": [
+        "MECHANICAL_STRATEGY_RESEARCH_BRIEF.md",
+        "CONTENT_STATUS_AUDIT.md"
+      ]
+    },
+    {
+      "id": "net-profit-ranking",
+      "name": "Rank candidates by net profit alone",
+      "status": "RETIRED",
+      "evidence_level": "PROJECT_RULE",
+      "category": "validation",
+      "claim": "Candidate ranking must prioritize survival, drawdown, consistency, and validation quality before total profit.",
+      "sources": [
+        "MECHANICAL_STRATEGY_RESEARCH_BRIEF.md",
+        "CONTENT_STATUS_AUDIT.md"
+      ]
+    }
+  ],
+  "metrics": []
+}
