@@ -37,7 +37,11 @@ jobs:
             trading_os/src/integrations/cron_runner.py
 
       - name: Check hosted Worker syntax
-        run: node --check cloudflare/signal-bridge-worker/src/index.js
+        run: |
+          node --check cloudflare/signal-bridge-worker/src/index.js
+          node --check cloudflare/signal-bridge-worker/src/discord_interactions.js
+          node --check cloudflare/signal-bridge-worker/src/entry.js
+          node --check cloudflare/signal-bridge-worker/register_discord_commands.mjs
 
       - name: Validate D1 migration SQL
         run: |
@@ -58,7 +62,9 @@ jobs:
           journal_columns = [row[1] for row in db.execute("PRAGMA table_info(journal_entries)")]
           journal_required = {
               "id", "created_at", "raw_text", "result", "source",
-              "visibility", "review_status", "signal_event_id"
+              "visibility", "review_status", "signal_event_id",
+              "discord_guild_id", "discord_channel_id", "discord_message_id",
+              "discord_author_id", "discord_interaction_id"
           }
           journal_missing = sorted(journal_required - set(journal_columns))
           if journal_missing:
