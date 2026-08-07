@@ -5,46 +5,94 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#060a11" />
   <title>Signal Bridge — Trading OS</title>
-  <meta name="description" content="Signal Bridge connects strategy research, chart tools, live signals, Discord journaling, and review into one trading operating system." />
+  <meta name="description" content="Signal Bridge connects strategy research, chart tools, live signals, Discord journaling, session intelligence, and review into one trading operating system." />
   <link rel="icon" href="assets/brand/signal-bridge-favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="app.css" />
   <link rel="stylesheet" href="polish.css" />
 </head>
 <body>
+  <div class="welcome-gate" id="welcomeGate" hidden aria-modal="true" role="dialog" aria-labelledby="welcomeTitle">
+    <div class="welcome-backdrop"></div>
+    <div class="welcome-card">
+      <div class="welcome-mark"><img src="assets/brand/signal-bridge-mark-blue.svg" alt="" /></div>
+      <span class="eyebrow">Welcome to Signal Bridge</span>
+      <h2 id="welcomeTitle">How do you want to enter?</h2>
+      <p>Same platform. Different amount of guidance. You can change this anytime.</p>
+      <div class="welcome-paths">
+        <button class="welcome-path beginner" type="button" data-mode="beginner">
+          <span class="path-icon">01</span>
+          <strong>I’m new / still learning</strong>
+          <small>Plain-English setup explanations, a first-session path, glossary, and guided workflow.</small>
+          <b>Start guided →</b>
+        </button>
+        <button class="welcome-path experienced" type="button" data-mode="experienced">
+          <span class="path-icon">02</span>
+          <strong>I’m experienced</strong>
+          <small>Go straight to the operating system: morning desk, signals, strategy tools, journal, and research.</small>
+          <b>Open the desk →</b>
+        </button>
+      </div>
+      <button class="welcome-skip" id="welcomeSkip" type="button">Explore without choosing</button>
+    </div>
+  </div>
+
   <header class="topbar">
     <div class="shell topbar-inner">
       <a class="brand" href="index.html"><img src="assets/brand/signal-bridge-mark-blue.svg" alt="Signal Bridge" /><span class="brand-copy"><strong>SIGNAL BRIDGE</strong><span>Trading OS</span></span></a>
       <nav class="nav" aria-label="Main navigation"><a class="active" href="index.html">Home</a><a href="signals.html">Signals</a><a href="strategies.html">Strategies</a><a href="indicators.html">Indicators</a><a href="journal.html">Journal</a><a href="mason.html">Mason</a></nav>
-      <span class="beta-pill">Premium OS · Beta</span>
+      <button class="mode-switch" id="modeSwitch" type="button" title="Change experience">Choose view</button>
     </div>
   </header>
 
   <main>
-    <section class="shell hero">
+    <section class="shell hero home-hero">
       <div>
         <span class="eyebrow">Trading intelligence built around the full process</span>
         <h1><span class="gradient-text">Research it. Trade it. Record it. Improve it.</span></h1>
-        <p>Signal Bridge connects strategy research, chart tools, live alerts, journaling, and review into one operating system. Explore the Signal Bridge playbook and live research, then use the same workflow to organize and improve your own trading process.</p>
+        <p id="heroDescription">Signal Bridge connects strategy research, chart tools, live alerts, journaling, and review into one operating system. Explore the playbook and live research, then use the same workflow to organize and improve your own trading process.</p>
         <div class="hero-actions">
-          <a class="btn primary" href="#member-os">Explore Signal Bridge Premium →</a>
-          <a class="btn secondary" href="strategies.html">Strategy Playbook</a>
-          <a class="btn secondary" href="signals.html">Live Signals</a>
-          <a class="btn secondary" href="journal.html">Journal Intelligence</a>
+          <a class="btn primary" href="signals.html#morning-desk">Open the Morning Desk →</a>
+          <a class="btn secondary" href="#member-os">Signal Bridge Premium</a>
+          <a class="btn secondary beginner-hero-action" href="#beginner-start">Start learning</a>
+          <a class="btn secondary experienced-hero-action" href="journal.html">Journal Intelligence</a>
         </div>
       </div>
       <aside class="hero-console" aria-label="Signal Bridge system status">
         <div class="console-head"><span>System Status</span><span class="live-dot">Hosted</span></div>
         <div class="console-grid">
           <div class="console-stat"><span>Alert Bridge</span><strong>Online</strong><small>TradingView → Worker → Discord + history</small></div>
-          <div class="console-stat"><span>Discord Journal</span><strong>Live</strong><small>/journal + message capture → private D1</small></div>
-          <div class="console-stat"><span>Primary Market</span><strong>MES / ES</strong><small>Flagship research and signal focus</small></div>
-          <div class="console-stat"><span>Platform Stage</span><strong>Beta</strong><small>Member experience expanding</small></div>
+          <div class="console-stat"><span>Discord Journal</span><strong>Live</strong><small>Private capture + member journal backend</small></div>
+          <div class="console-stat"><span>Session Intelligence</span><strong>Ready</strong><small>Premarket → ORB → setup → close lifecycle</small></div>
+          <div class="console-stat"><span>Market Intel</span><strong>Hosted</strong><small>Headlines live · calendar fails closed</small></div>
         </div>
       </aside>
     </section>
 
+    <section class="shell section beginner-section" id="beginner-start">
+      <div class="beginner-stage">
+        <div class="beginner-intro">
+          <span class="eyebrow">New to the desk?</span>
+          <h2>Learn the process in the same order you’ll use it.</h2>
+          <p>You do not need to understand every acronym before Signal Bridge is useful. Start with four ideas: where price is, what the market is doing there, what confirms the setup, and what proves it wrong.</p>
+          <div class="hero-actions"><a class="btn primary" href="strategies.html">Open Strategy Playbook →</a><a class="btn secondary" href="mason.html">Study a real model</a></div>
+        </div>
+        <div class="learning-path">
+          <div class="learning-step"><span>01</span><div><strong>Map the market</strong><small>Sessions, prior highs/lows, opening range, and obvious liquidity.</small></div></div>
+          <div class="learning-step"><span>02</span><div><strong>Wait for a setup</strong><small>Location first. Context second. Confirmation third.</small></div></div>
+          <div class="learning-step"><span>03</span><div><strong>Control the risk</strong><small>Know the invalidation and size before the trade becomes emotional.</small></div></div>
+          <div class="learning-step"><span>04</span><div><strong>Review the session</strong><small>Trade or no trade, save what happened so the strategy can learn from it.</small></div></div>
+        </div>
+      </div>
+      <div class="quick-glossary" aria-label="Trading glossary">
+        <div><b>ORB</b><span>Opening range high, low, and midpoint used as session structure.</span></div>
+        <div><b>Liquidity</b><span>Areas around obvious highs/lows where orders and stops may cluster.</span></div>
+        <div><b>Reclaim</b><span>Price trades back through a level and begins holding on the intended side.</span></div>
+        <div><b>Invalidation</b><span>The condition or price level that proves the trade idea wrong.</span></div>
+      </div>
+    </section>
+
     <section class="shell section" id="member-os">
-      <div class="section-head"><div><span class="eyebrow">Signal Bridge Premium</span><h2>Bring your own trading into the system.</h2></div><p>Flagship strategies and research are part of the value. The bigger product is the private operating layer around your own execution: journal records, strategy versions, indicator workspace, signal history, and the review loop connecting them.</p></div>
+      <div class="section-head"><div><span class="eyebrow">Signal Bridge Premium</span><h2>Bring your own trading into the system.</h2></div><p>Flagship strategies and research are part of the value. The bigger product is the private operating layer around your execution: journal records, strategy versions, indicator workspace, signals, and the review loop connecting them.</p></div>
       <div class="premium-grid">
         <a class="premium-card featured interactive-surface" href="journal.html" aria-label="Open Journal Intelligence">
           <div class="premium-top"><span class="chip green">Core live</span><span>01 ↗</span></div>
@@ -54,38 +102,51 @@
         </a>
         <a class="premium-card interactive-surface" href="signals.html" aria-label="Open Live Signals">
           <div class="premium-top"><span class="chip green">Feed live</span><span>02 ↗</span></div>
-          <h3>Live Signals</h3>
-          <p>Hosted TradingView events delivered to Discord and stored on the website with event history, filters, strategy labels, and a path to direct journal linkage.</p>
-          <div class="premium-detail"><b>Member access</b><span>Follow supported strategy feeds, review prior events, and connect signal history to your own notes and decisions.</span></div>
+          <h3>Live Signals + Morning Desk</h3>
+          <p>Hosted strategy events, current session state, setup readiness, market context, and event history tied into the same durable session record.</p>
+          <div class="premium-detail"><b>More than alerts</b><span>See what the day is doing before, during, and after a setup — including no-trade sessions.</span></div>
         </a>
         <a class="premium-card interactive-surface" href="strategies.html#strategy-lab" aria-label="Open Strategy Lab">
-          <div class="premium-top"><span class="chip purple">Next layer</span><span>03 ↗</span></div>
+          <div class="premium-top"><span class="chip purple">Building</span><span>03 ↗</span></div>
           <h3>Strategy Lab</h3>
           <p>Turn a trading idea into a versioned system: rules, setup definitions, imported backtests, evidence stage, changes between versions, and forward-review notes in one place.</p>
-          <div class="premium-detail"><b>Build without losing history</b><span>Keep the strategy, tests, changes, and journal evidence connected from one version to the next.</span></div>
+          <div class="premium-detail"><b>Strategy DNA</b><span>Keep every version, rule change, indicator setting, and observation attached to the results it actually produced.</span></div>
         </a>
         <a class="premium-card interactive-surface" href="indicators.html#premium-workspace" aria-label="Open Indicator Workspace">
-          <div class="premium-top"><span class="chip purple">Next layer</span><span>04 ↗</span></div>
+          <div class="premium-top"><span class="chip purple">Building</span><span>04 ↗</span></div>
           <h3>Indicator Workspace</h3>
-          <p>Signal Bridge indicator access, configurable modules and presets, strategy-linked settings, alert configuration, and eventually a structured build/test queue for personal tools.</p>
-          <div class="premium-detail"><b>One chart-tool record</b><span>Keep indicator settings and alerts connected to the strategy they support instead of maintaining disconnected scripts and notes.</span></div>
+          <p>Signal Bridge indicator access, configurable modules and presets, strategy-linked settings, alert configuration, and a structured build/test queue for personal tools.</p>
+          <div class="premium-detail"><b>One chart-tool record</b><span>Keep indicator settings connected to the strategy version they support instead of maintaining disconnected scripts.</span></div>
         </a>
       </div>
-      <div class="premium-banner"><strong>Signal Bridge Premium:</strong><span>the system connecting strategy development, execution, journaling, signals, and improvement — with your own trading process at the center.</span></div>
+      <div class="premium-banner"><strong>Signal Bridge difference:</strong><span>not just a journal and not just a signal room — the full life of a trading idea, from research and rules to live session behavior, execution, review, and the next version.</span></div>
     </section>
 
     <section class="shell section">
-      <div class="section-head"><div><span class="eyebrow">Explore</span><h2>Public playbook, flagship desk, and community.</h2></div><p>The premium cards above are the operating-system features. These links are the public/reference side of Signal Bridge, so the homepage no longer repeats the same product feature twice.</p></div>
+      <div class="section-head"><div><span class="eyebrow">One Trading Day</span><h2>A session should tell a story.</h2></div><p>This is the product direction that makes the pieces work together: one timeline that remembers what the market did, what the system saw, what you did, and what changed afterward.</p></div>
+      <div class="session-story-preview">
+        <div class="story-stop"><i></i><span>Pre-market</span><strong>Levels · bias · news</strong></div>
+        <div class="story-stop"><i></i><span>ORB formed</span><strong>High · low · midpoint · range</strong></div>
+        <div class="story-stop"><i></i><span>NY open</span><strong>Location · sweep · acceptance</strong></div>
+        <div class="story-stop"><i></i><span>Setup</span><strong>Readiness · trigger · signal / pass</strong></div>
+        <div class="story-stop"><i></i><span>Journal</span><strong>Screenshot · execution · notes</strong></div>
+        <div class="story-stop"><i></i><span>Review</span><strong>Outcome · lesson · next version</strong></div>
+      </div>
+      <div class="hero-actions"><a class="btn primary" href="signals.html#morning-desk">See the live Morning Desk →</a><a class="btn secondary" href="journal.html">Open Journal</a></div>
+    </section>
+
+    <section class="shell section">
+      <div class="section-head"><div><span class="eyebrow">Explore</span><h2>Playbook, flagship desk, and community.</h2></div><p>Use the public/reference side to learn concepts and inspect a real strategy build. Use Premium as the operating layer around your own process.</p></div>
       <div class="grid-4 explore-grid">
-        <a class="card interactive-surface" href="strategies.html"><div class="card-icon">01</div><h3>Strategy Playbook</h3><p>Setup families, market frameworks, confluence roles, entry logic, invalidation, targeting, and strategy-building structure.</p><div class="card-meta"><span class="chip blue">Reference library</span></div></a>
-        <a class="card interactive-surface" href="strategies.html#confluence-stack"><div class="card-icon">02</div><h3>Confluence Guide</h3><p>What liquidity, FVGs, MSS/displacement, VWAP, EMA, session levels, and confirmation candles actually contribute to a setup.</p><div class="card-meta"><span class="chip purple">Reference guide</span></div></a>
-        <a class="card interactive-surface" href="mason.html"><div class="card-icon">03</div><h3>Mason · Strategy &amp; Research</h3><p>The flagship desk: Mason ORB, Trade Bible, historical lineage, backtests, research sources, current tests, and the live build behind Signal Bridge.</p><div class="card-meta"><span class="chip yellow">Flagship desk</span></div></a>
+        <a class="card interactive-surface" href="strategies.html"><div class="card-icon">01</div><h3>Strategy Playbook</h3><p>Setup families, confluence roles, entry logic, invalidation, targeting, and strategy-building structure.</p><div class="card-meta"><span class="chip blue">Reference library</span></div></a>
+        <a class="card interactive-surface" href="strategies.html#confluence-stack"><div class="card-icon">02</div><h3>Confluence Guide</h3><p>What liquidity, FVGs, MSS/displacement, VWAP, EMA, session levels, and confirmation actually contribute.</p><div class="card-meta"><span class="chip purple">Reference guide</span></div></a>
+        <a class="card interactive-surface" href="mason.html"><div class="card-icon">03</div><h3>Mason · Strategy &amp; Research</h3><p>The flagship desk: Mason ORB, Trade Bible, historical lineage, backtests, current tests, and research sources.</p><div class="card-meta"><span class="chip yellow">Flagship desk</span></div></a>
         <a class="card interactive-surface" href="https://discord.com/channels/1520334916334915665" target="_blank" rel="noopener"><div class="card-icon">04</div><h3>Discord Community</h3><p>Alerts, journal capture, market discussion, member updates, and the community layer connected to Signal Bridge.</p><div class="card-meta"><span class="chip green">Connected</span></div></a>
       </div>
     </section>
 
     <section class="shell section">
-      <div class="section-head"><div><span class="eyebrow">System Loop</span><h2>The product should learn from the trading.</h2></div><p>Market events create records, records create review, review creates research questions, research changes the tools, and the next market session creates new evidence.</p></div>
+      <div class="section-head"><div><span class="eyebrow">System Loop</span><h2>The product should learn from the trading.</h2></div><p>Market events create records, records create review, review creates research questions, research changes the tools, and the next session creates new evidence.</p></div>
       <div class="flow">
         <div class="flow-step"><b>Market / Pine</b><span>Structure, levels, setup states</span></div>
         <div class="flow-step"><b>Signal Bridge</b><span>Route + store durable events</span></div>
@@ -96,14 +157,57 @@
     </section>
 
     <section class="shell section">
-      <div class="section-head"><div><span class="eyebrow">Community</span><h2>Trade, review, and build with Signal Bridge connected.</h2></div><p>Discord is the community layer for alerts, fast journal capture, setup discussion, product updates, and premium access as member features come online.</p></div>
+      <div class="section-head"><div><span class="eyebrow">Community</span><h2>Trade, review, and build with Signal Bridge connected.</h2></div><p>Discord is the fast interaction layer for alerts, journal capture, setup discussion, product updates, and member access. The website is the durable memory and analysis layer.</p></div>
       <div class="connect-grid compact-connect">
         <div class="connect-card"><b>Stretch Trading Discord</b><p>Receive Signal Bridge alerts, capture journal entries without leaving Discord, discuss the market, and follow new tools as they are released.</p><a href="https://discord.com/channels/1520334916334915665" target="_blank" rel="noopener">Open member Discord ↗</a></div>
-        <div class="connect-card"><b>Explore the flagship desk</b><p>See the strategy, research history, testing archive, and decision process currently powering the first Signal Bridge model.</p><a href="mason.html">Open Mason · Strategy &amp; Research →</a></div>
+        <div class="connect-card"><b>Explore the flagship desk</b><p>See the strategy, research history, testing archive, and decision process powering the first Signal Bridge model.</p><a href="mason.html">Open Mason · Strategy &amp; Research →</a></div>
       </div>
     </section>
   </main>
 
   <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Trading OS</strong><span>Strategy · tools · signals · journal · research.</span></div></footer>
+
+  <script>
+    const gate = document.getElementById('welcomeGate');
+    const switcher = document.getElementById('modeSwitch');
+    const heroDescription = document.getElementById('heroDescription');
+    const beginnerCopy = 'Signal Bridge can teach the workflow while you use it: map the market, understand the setup, control the risk, record the session, then review what happened.';
+    const experiencedCopy = 'Signal Bridge connects strategy research, chart tools, live session intelligence, alerts, private journaling, and review into one operating system built around the full life of a trading idea.';
+
+    function applyMode(mode) {
+      document.body.dataset.experience = mode || 'explore';
+      if (mode === 'beginner') {
+        switcher.textContent = 'Guided view';
+        heroDescription.textContent = beginnerCopy;
+      } else if (mode === 'experienced') {
+        switcher.textContent = 'Trader view';
+        heroDescription.textContent = experiencedCopy;
+      } else {
+        switcher.textContent = 'Choose view';
+      }
+    }
+
+    function closeGate(mode) {
+      if (mode) localStorage.setItem('signalBridgeExperience', mode);
+      gate.hidden = true;
+      document.body.classList.remove('welcome-open');
+      applyMode(mode || localStorage.getItem('signalBridgeExperience'));
+      if (mode === 'beginner') document.getElementById('beginner-start')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (mode === 'experienced') document.getElementById('member-os')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function openGate() {
+      gate.hidden = false;
+      document.body.classList.add('welcome-open');
+    }
+
+    document.querySelectorAll('[data-mode]').forEach((button) => button.addEventListener('click', () => closeGate(button.dataset.mode)));
+    document.getElementById('welcomeSkip').addEventListener('click', () => closeGate(null));
+    switcher.addEventListener('click', openGate);
+
+    const savedMode = localStorage.getItem('signalBridgeExperience');
+    applyMode(savedMode);
+    if (!savedMode) openGate();
+  </script>
 </body>
 </html>
