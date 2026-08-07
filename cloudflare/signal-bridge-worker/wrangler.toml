@@ -1,0 +1,7 @@
+name = "signal-bridge-webhook"
+main = "src/index.js"
+compatibility_date = "2026-08-07"
+workers_dev = true
+
+[secrets]
+required = ["DISCORD_WEBHOOK_URL", "SIGNAL_BRIDGE_TEST_TOKEN"]
