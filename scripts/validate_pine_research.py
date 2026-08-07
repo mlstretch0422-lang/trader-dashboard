@@ -40,12 +40,13 @@ def main() -> int:
     required_snippets = {
         "Pine v6 declaration": "//@version=6",
         "research labeling": "RESEARCH",
-        "10:30 entry cutoff": 'i_tradeEnd   = input.string("1030"',
-        "11:00 force-flat input": 'i_flatTime   = input.string("1100"',
+        "10:30 entry cutoff": 'i_tradeEnd = input.string("1030"',
+        "11:00 force-flat input": 'i_flatTime = input.string("1100"',
         "date-range lock": "i_testStart = input.time(",
         "environment lock": "i_enforceEnvironment = input.bool(true",
         "future-bar retest": "bar_index > setupBar",
         "opposite-side invalidation": "i_invalidateOnOppositeClose",
+        "close-time source": "hour(time_close, i_timezone)",
         "close-time force-flat state": "pastFlatOnClose = closeMins >= flatMins",
         "force-flat transition": "forceFlatHit = pastFlatOnClose",
         "immediate force close": "strategy.close_all(immediately=true",
@@ -62,6 +63,7 @@ def main() -> int:
 
     forbidden_snippets = {
         "known broken equal-start/end force-flat helper": "f_inWindow(i_flatTime, i_flatTime",
+        "Pine v6 bool-NA regression": "na(pastFlatOnClose[1])",
         "staircase management in entry attribution harness": "i_useStaircase",
         "partial target 1 in entry attribution harness": "TP1 Qty %",
         "partial target 2 in entry attribution harness": "TP2 Qty %",
