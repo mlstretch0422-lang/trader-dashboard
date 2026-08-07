@@ -88,40 +88,63 @@ jobs:
           test -s _site/signals.html
           test -s _site/signals.css
           test -s _site/strategies.html
-          test -s _site/mason-orb.html
-          test -s _site/strategy.css
+          test -s _site/indicators.html
           test -s _site/journal.html
           test -s _site/journal.css
-          test -s _site/indicators.html
+          test -s _site/mason.html
+          test -s _site/mason-orb.html
+          test -s _site/trade-bible.html
           test -s _site/evidence.html
-          test -s _site/reports.html
-          test -s _site/dashboard.html
+          test -s _site/strategy.css
           test -s _site/research.css
           test -s _site/polish.css
+          test -s _site/reports.html
+          test -s _site/dashboard.html
           test -s _site/report.json
+
           grep -q "Research it. Trade it. Record it. Improve it." _site/index.html
           grep -q "Signal Bridge Premium" _site/index.html
           grep -q "Bring your own trading into the system" _site/index.html
-          grep -q "Strategy Lab" _site/index.html
-          grep -q "Indicator Workspace" _site/index.html
-          ! grep -q "The project behind the product" _site/index.html
+          grep -q "Mason · Strategy &amp; Research" _site/index.html
+          grep -q "Trade, review, and build with Signal Bridge connected" _site/index.html
+          ! grep -q "The beta already has a live home" _site/index.html
           grep -q "legal-disclaimer" _site/index.html
-          grep -q "Research & Evidence" _site/evidence.html
+
+          grep -q "Strategy Playbook" _site/strategies.html
+          grep -q "Setup Library" _site/strategies.html
+          grep -q "Sweep + Reclaim" _site/strategies.html
+          grep -q "Confluence Dictionary" _site/strategies.html
+          grep -q "Strategy Lab" _site/strategies.html
+          ! grep -q "Historical Strategy Lineage" _site/strategies.html
+          ! grep -q "Current Flagship" _site/strategies.html
+
+          grep -q "Indicator Workspace" _site/indicators.html
+          grep -q "Module Library" _site/indicators.html
+          grep -q "Premium Workspace" _site/indicators.html
+          grep -q "Decision Panel" _site/indicators.html
+          ! grep -q "Current Code Lineage" _site/indicators.html
+          ! grep -q "External Design Research" _site/indicators.html
+
+          grep -q "Mason · Strategy &amp; Research" _site/mason.html
+          grep -q "Mason ORB" _site/mason.html
+          grep -q "Mason Trade Bible" _site/mason.html
+          grep -q "Research &amp; Evidence" _site/mason.html
+          grep -q "Strategy Lineage" _site/mason.html
+          grep -q "PF 1.78" _site/mason.html
+          grep -q "V6" _site/mason.html
+
+          grep -q "Research &amp; Evidence" _site/evidence.html
           grep -q "External Research Stack" _site/evidence.html
           grep -q "Intraday liquidity dynamics" _site/evidence.html
           grep -q "Research Stages" _site/evidence.html
           grep -q "PF 1.78" _site/evidence.html
           grep -q "V6 ORB Midpoint Continuation" _site/evidence.html
-          grep -q "Strategy Playbook" _site/strategies.html
-          grep -q "Liquidity Sweep + Reclaim" _site/strategies.html
-          grep -q "ICT-style concept" _site/strategies.html
-          grep -q "Confluence Dictionary" _site/strategies.html
-          grep -q "Indicator Stack" _site/indicators.html
-          grep -q "Target Chart Stack" _site/indicators.html
-          grep -q "Decision Panel" _site/indicators.html
+
           grep -q "Current Strategy Framework" _site/mason-orb.html
           grep -q "Setup Anatomy" _site/mason-orb.html
           grep -q "Break → retest → reclaim" _site/mason-orb.html
+          grep -q "Mason’s actual decision process" _site/trade-bible.html
+
           grep -q "url=evidence.html" _site/reports.html
           grep -q "url=evidence.html" _site/dashboard.html
           grep -q "polish.css" _site/trade-bible.html
@@ -129,8 +152,6 @@ jobs:
           grep -q "Premium Signal Layer" _site/signals.html
           grep -q "/events" _site/signals.html
           grep -q "href=\"journal.html\"" _site/signals.html
-          grep -q "href=\"strategies.html\"" _site/trade-bible.html
-          grep -q "href=\"journal.html\"" _site/evidence.html
           grep -q "Journal Intelligence" _site/journal.html
           grep -q "/journal" _site/journal.html
           grep -q "Private-first by design" _site/journal.html
@@ -139,3 +160,9 @@ jobs:
           grep -q "Capture to Journal" _site/journal.html
           grep -q "legal-disclaimer" _site/signals.html
           grep -q "legal-disclaimer" _site/journal.html
+
+          grep -q 'href="mason.html">Mason</a>' _site/index.html
+          grep -q 'class="active" href="mason.html">Mason</a>' _site/mason.html
+          grep -q 'class="active" href="mason.html">Mason</a>' _site/evidence.html
+          grep -q 'class="active" href="mason.html">Mason</a>' _site/trade-bible.html
+          grep -q 'class="active" href="mason.html">Mason</a>' _site/mason-orb.html

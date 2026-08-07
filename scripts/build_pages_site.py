@@ -29,9 +29,10 @@ NAV_ITEMS = [
     ("strategies.html", "Strategies"),
     ("indicators.html", "Indicators"),
     ("journal.html", "Journal"),
-    ("trade-bible.html", "Trade Bible"),
-    ("evidence.html", "Evidence"),
+    ("mason.html", "Mason"),
 ]
+
+MASON_SECTION_PAGES = {"mason.html", "mason-orb.html", "trade-bible.html", "evidence.html"}
 
 LEGAL_NOTE = (
     '<div class="legal-disclaimer"><div class="shell">'
@@ -61,7 +62,11 @@ def apply_native_shell(path: Path) -> None:
 
     links = []
     for href, label in NAV_ITEMS:
-        active = ' class="active"' if path.name == href else ""
+        if href == "mason.html":
+            is_active = path.name in MASON_SECTION_PAGES
+        else:
+            is_active = path.name == href
+        active = ' class="active"' if is_active else ""
         links.append(f'        <a{active} href="{href}">{label}</a>')
     nav_html = '<nav class="nav" aria-label="Main navigation">\n' + "\n".join(links) + "\n      </nav>"
 
@@ -69,6 +74,16 @@ def apply_native_shell(path: Path) -> None:
     # Redirect compatibility pages intentionally have no navigation.
     if count == 0 and path.name not in {"dashboard.html", "reports.html"}:
         raise RuntimeError(f"Could not normalize navigation in {path}")
+
+    mason_breadcrumbs = {
+        "mason-orb.html": '<div class="breadcrumb"><a href="index.html">Signal Bridge</a> / <a href="mason.html">Mason</a> / Mason ORB</div>',
+        "trade-bible.html": '<div class="breadcrumb"><a href="index.html">Signal Bridge</a> / <a href="mason.html">Mason</a> / Trade Bible</div>',
+        "evidence.html": '<div class="breadcrumb"><a href="index.html">Signal Bridge</a> / <a href="mason.html">Mason</a> / Research &amp; Evidence</div>',
+    }
+    if path.name in mason_breadcrumbs:
+        text, breadcrumb_count = re.subn(r'<div class="breadcrumb">.*?</div>', mason_breadcrumbs[path.name], text, count=1, flags=re.DOTALL)
+        if breadcrumb_count == 0:
+            raise RuntimeError(f"Could not normalize Mason breadcrumb in {path}")
 
     if "legal-disclaimer" not in text and "</body>" in text:
         text = text.replace("</body>", f"  {LEGAL_NOTE}\n</body>", 1)
@@ -103,6 +118,7 @@ def main() -> int:
 
     required = [
         SITE / "index.html",
+        SITE / "mason.html",
         SITE / "trade-bible.html",
         SITE / "evidence.html",
         SITE / "signals.html",

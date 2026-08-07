@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#060a11" />
+  <title>Mason — Strategy & Research | Signal Bridge</title>
+  <meta name="description" content="Mason's flagship Signal Bridge desk: Mason ORB, Trade Bible, historical strategy lineage, backtests, research sources, and the current testing roadmap." />
+  <link rel="icon" href="assets/brand/signal-bridge-favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="app.css" />
+  <link rel="stylesheet" href="strategy.css" />
+  <link rel="stylesheet" href="research.css" />
+</head>
+<body>
+  <header class="topbar"><div class="shell topbar-inner">
+    <a class="brand" href="index.html"><img src="assets/brand/signal-bridge-mark-blue.svg" alt="Signal Bridge" /><span class="brand-copy"><strong>SIGNAL BRIDGE</strong><span>Trading OS</span></span></a>
+    <nav class="nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="signals.html">Signals</a><a href="strategies.html">Strategies</a><a href="indicators.html">Indicators</a><a href="journal.html">Journal</a><a class="active" href="mason.html">Mason</a></nav>
+    <span class="beta-pill">Premium OS · Beta</span>
+  </div></header>
+
+  <main>
+    <section class="shell page-hero research-hero">
+      <div class="breadcrumb"><a href="index.html">Signal Bridge</a> / Mason</div>
+      <span class="eyebrow" style="margin-top:25px">Flagship strategy · research · build history</span>
+      <h1><span class="gradient-text">Mason · Strategy &amp; Research.</span></h1>
+      <p>This is the flagship trading desk inside Signal Bridge: the current Mason ORB framework, the full decision process behind it, historical versions and backtests, external research, research gaps, and the testing path feeding the next indicator and strategy builds.</p>
+      <div class="hero-kicker"><span class="chip green">Current framework</span><span class="chip blue">Trade Bible</span><span class="chip purple">Research archive</span><span class="chip yellow">Pine development</span></div>
+    </section>
+
+    <section class="shell section" style="padding-top:10px">
+      <div class="grid-3">
+        <a class="card" href="mason-orb.html"><span class="chip green">Current model</span><h3>Mason ORB</h3><p>The live flagship framework: session map, 8:00–8:15 opening range, retest/reclaim/rejection behavior, confluence, liquidity objectives, and the Signal Bridge event lifecycle.</p></a>
+        <a class="card" href="trade-bible.html"><span class="chip blue">Decision process</span><h3>Mason Trade Bible</h3><p>The full desk process in plain English: map structure, build the ORB, read pre-New-York behavior, evaluate retests, stack confluence, define liquidity targets, and manage risk.</p></a>
+        <a class="card" href="evidence.html"><span class="chip purple">Research room</span><h3>Research &amp; Evidence</h3><p>Historical backtests, reconstructed trade studies, research inventory, outside sources, configuration comparisons, research stages, and the next questions to isolate.</p></a>
+      </div>
+    </section>
+
+    <section class="shell section">
+      <div class="section-head"><div><span class="eyebrow">Current Framework</span><h2>The morning model in one pass.</h2></div><p>The details live in Mason ORB and the Trade Bible. This is the top-level map connecting them.</p></div>
+      <div class="model-flow">
+        <div class="model-node"><span>01</span><b>Map Asia, London, prior-day and overnight structure</b></div>
+        <div class="model-node"><span>02</span><b>Build the 8:00–8:15 ORB high, low and midpoint</b></div>
+        <div class="model-node"><span>03</span><b>Read the pre-NY break, sweep, hold or failure</b></div>
+        <div class="model-node"><span>04</span><b>Wait for location + retest / reclaim / rejection</b></div>
+        <div class="model-node"><span>05</span><b>Use HTF, VWAP, EMA, FVG and participation as context</b></div>
+        <div class="model-node"><span>06</span><b>Target the next plausible liquidity objective</b></div>
+        <div class="model-node"><span>07</span><b>Journal the trade or pass and feed the next review</b></div>
+      </div>
+      <div class="hero-actions"><a class="btn primary" href="mason-orb.html">Open Mason ORB →</a><a class="btn secondary" href="trade-bible.html">Open Trade Bible</a></div>
+    </section>
+
+    <section class="shell section">
+      <div class="section-head"><div><span class="eyebrow">Strategy Lineage</span><h2>The versions that changed the desk.</h2></div><p>Each version stays attached to its own sample and rules. The point is to see how the system evolved, not merge unlike tests into one performance number.</p></div>
+      <div class="lineage-grid">
+        <article class="lineage-card"><div class="lineage-top"><span class="chip blue">Reconstructed V1</span><span>38 trades</span></div><h3>Simple ORB baseline</h3><p>PF 1.78, +$2,381.25 net and +$62.66 expectancy/trade in the reconstructed study. A small but useful sample that kept the ORB branch alive.</p></article>
+        <article class="lineage-card"><div class="lineage-top"><span class="chip red">R1.2</span><span>82 trades</span></div><h3>Adaptive second-trade model</h3><p>43.9% win rate, PF 0.949 and -$203.75. More flexibility and a higher hit rate did not improve the configuration.</p></article>
+        <article class="lineage-card"><div class="lineage-top"><span class="chip yellow">R1.3</span><span>74 reported</span></div><h3>Retest + confluence</h3><p>PF 1.284 and +$546.25. The historical export returned positive while keeping a three-outcome trade-count mismatch flagged for cleanup.</p></article>
+        <article class="lineage-card"><div class="lineage-top"><span class="chip green">V6</span><span>156 trades</span></div><h3>Midpoint continuation</h3><p>PF 1.431, +$32,750 and 39.1% win rate in the largest checked-in ES historical configuration.</p></article>
+      </div>
+      <div class="hero-actions"><a class="btn secondary" href="evidence.html">Open the full research record →</a></div>
+    </section>
+
+    <section class="shell section">
+      <div class="section-head"><div><span class="eyebrow">What The Research Is Doing Now</span><h2>Turn the discretionary edge into cleaner questions.</h2></div><p>The current work is less about adding more confluences and more about defining which pieces actually improve the same opportunity set.</p></div>
+      <div class="matrix">
+        <div class="matrix-row"><strong>ORB clock / range quality</strong><span class="chip yellow">Testing</span><p>Compare range definitions and filters on matched dates, timeframe, costs, position size, and exit logic.</p></div>
+        <div class="matrix-row"><strong>Entry mode</strong><span class="chip yellow">Testing</span><p>Immediate breakout versus boundary retest versus midpoint retest on the same underlying opportunities.</p></div>
+        <div class="matrix-row"><strong>Context filters</strong><span class="chip purple">Attribution</span><p>HTF structure, VWAP, EMA, displacement, FVG, range, volume, and liquidity need defined jobs and isolated on/off tests.</p></div>
+        <div class="matrix-row"><strong>Risk / exits</strong><span class="chip purple">Reconcile</span><p>Lock costs, sizing, stop logic, target model, break-even behavior, and forced-flat timing before comparing strategy variants.</p></div>
+        <div class="matrix-row"><strong>Forward session data</strong><span class="chip green">Building</span><p>Signals and journals are becoming durable records so no-trade days, setup states, outcomes, and post-session behavior can be studied later.</p></div>
+      </div>
+    </section>
+
+    <section class="shell section">
+      <div class="section-head"><div><span class="eyebrow">From Mason To Signal Bridge</span><h2>The flagship desk is the first full example of the product loop.</h2></div><p>The same structure can later support a member’s own strategy, indicators, signals, and journal without mixing their records into Mason’s research.</p></div>
+      <div class="flow">
+        <div class="flow-step"><b>Strategy</b><span>Rules · setup · version</span></div>
+        <div class="flow-step"><b>Indicator</b><span>Levels · context · state</span></div>
+        <div class="flow-step"><b>Signal</b><span>Durable market event</span></div>
+        <div class="flow-step"><b>Journal</b><span>Trade / pass / screenshot</span></div>
+        <div class="flow-step"><b>Research</b><span>Review · compare · next version</span></div>
+      </div>
+    </section>
+  </main>
+  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Mason</strong><span>Flagship strategy · decision process · research · development.</span></div></footer>
+</body>
+</html>
