@@ -39,6 +39,23 @@ jobs:
       - name: Check hosted Worker syntax
         run: node --check cloudflare/signal-bridge-worker/src/index.js
 
+      - name: Validate D1 migration SQL
+        run: |
+          python - <<'PY'
+          import sqlite3
+          from pathlib import Path
+
+          sql = Path("cloudflare/signal-bridge-worker/migrations/0001_signal_events.sql").read_text()
+          db = sqlite3.connect(":memory:")
+          db.executescript(sql)
+          columns = [row[1] for row in db.execute("PRAGMA table_info(signal_events)")]
+          required = {"id", "received_at", "symbol", "side", "event", "strategy", "note", "source"}
+          missing = sorted(required - set(columns))
+          if missing:
+              raise SystemExit(f"signal_events migration missing columns: {missing}")
+          print("D1 migration schema OK")
+          PY
+
       - name: Test Discord bridge
         env:
           PYTHONPATH: trading_os
@@ -50,4 +67,8 @@ jobs:
       - name: Verify website output
         run: |
           test -s _site/index.html
+          test -s _site/signals.html
+          test -s _site/signals.css
           test -s _site/report.json
+          grep -q "Live Signal History" _site/signals.html
+          grep -q "/events" _site/signals.html
