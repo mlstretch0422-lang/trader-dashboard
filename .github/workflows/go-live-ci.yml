@@ -98,25 +98,28 @@ jobs:
           test -s _site/dashboard.html
           test -s _site/research.css
           test -s _site/polish.css
-          test -s _site/assets/research/mes-study-01.png
-          test -s _site/assets/research/mes-study-02.png
-          test -s _site/assets/research/mes-study-03.png
-          test -s _site/assets/research/mes-study-04.png
-          test -s _site/assets/research/helper-panel-01.png
-          test -s _site/assets/research/helper-panel-02.png
           test -s _site/report.json
           grep -q "Research it. Trade it. Record it. Improve it." _site/index.html
           grep -q "Built around Mason" _site/index.html
+          grep -q "Strategy Playbook" _site/index.html
+          ! grep -q "Current Snapshot" _site/index.html
           grep -q "Research & Evidence" _site/evidence.html
+          grep -q "External Research Stack" _site/evidence.html
+          grep -q "Intraday liquidity dynamics" _site/evidence.html
           grep -q "PF 1.78" _site/evidence.html
           grep -q "V6 ORB Midpoint Continuation" _site/evidence.html
-          grep -q "Strategy Library" _site/strategies.html
-          grep -q "Adaptive Second-Trade Model" _site/strategies.html
-          grep -q "Indicator Library" _site/indicators.html
-          grep -q "ORB V2 Decision Dashboard" _site/indicators.html
-          grep -q "Mechanical Attribution Harness" _site/indicators.html
+          grep -q "Strategy Playbook" _site/strategies.html
+          grep -q "Liquidity Sweep + Reclaim" _site/strategies.html
+          grep -q "ICT-style concept" _site/strategies.html
+          grep -q "Confluence Dictionary" _site/strategies.html
+          ! grep -q "Live profitability claims" _site/strategies.html
+          grep -q "Indicator Stack" _site/indicators.html
+          grep -q "Target Chart Stack" _site/indicators.html
+          grep -q "Decision Panel" _site/indicators.html
+          grep -q "Tools, not strategies" _site/index.html
           grep -q "Current Strategy Framework" _site/mason-orb.html
-          grep -q "156 trades" _site/mason-orb.html
+          grep -q "Setup Anatomy" _site/mason-orb.html
+          grep -q "Break → retest → reclaim" _site/mason-orb.html
           grep -q "url=evidence.html" _site/reports.html
           grep -q "url=evidence.html" _site/dashboard.html
           grep -q "polish.css" _site/trade-bible.html
@@ -131,3 +134,4 @@ jobs:
           grep -q "Discord Capture" _site/journal.html
           grep -q "discord_capture_configured" _site/journal.html
           grep -q "Capture to Journal" _site/journal.html
+          grep -q "TRADE REVIEW" _site/journal.css
