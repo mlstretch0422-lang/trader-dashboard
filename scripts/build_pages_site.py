@@ -75,6 +75,16 @@ def apply_native_shell(path: Path) -> None:
     if count == 0 and path.name not in {"dashboard.html", "reports.html"}:
         raise RuntimeError(f"Could not normalize navigation in {path}")
 
+    mason_breadcrumbs = {
+        "mason-orb.html": '<div class="breadcrumb"><a href="index.html">Signal Bridge</a> / <a href="mason.html">Mason</a> / Mason ORB</div>',
+        "trade-bible.html": '<div class="breadcrumb"><a href="index.html">Signal Bridge</a> / <a href="mason.html">Mason</a> / Trade Bible</div>',
+        "evidence.html": '<div class="breadcrumb"><a href="index.html">Signal Bridge</a> / <a href="mason.html">Mason</a> / Research &amp; Evidence</div>',
+    }
+    if path.name in mason_breadcrumbs:
+        text, breadcrumb_count = re.subn(r'<div class="breadcrumb">.*?</div>', mason_breadcrumbs[path.name], text, count=1, flags=re.DOTALL)
+        if breadcrumb_count == 0:
+            raise RuntimeError(f"Could not normalize Mason breadcrumb in {path}")
+
     if "legal-disclaimer" not in text and "</body>" in text:
         text = text.replace("</body>", f"  {LEGAL_NOTE}\n</body>", 1)
 
