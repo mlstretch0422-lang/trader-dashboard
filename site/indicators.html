@@ -5,86 +5,63 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#060a11" />
   <title>Indicator Library — Signal Bridge</title>
-  <meta name="description" content="Signal Bridge indicator library with implementation status, research role, lineage, and evidence stage." />
+  <meta name="description" content="Signal Bridge Pine and indicator library: current alert source, decision dashboard, strategy harnesses, historical versions, and research modules." />
   <link rel="icon" href="assets/brand/signal-bridge-favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="app.css" />
-  <link rel="stylesheet" href="polish.css" />
+  <link rel="stylesheet" href="strategy.css" />
+  <link rel="stylesheet" href="research.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="shell topbar-inner">
-      <a class="brand" href="index.html"><img src="assets/brand/signal-bridge-mark-blue.svg" alt="Signal Bridge" /><span class="brand-copy"><strong>SIGNAL BRIDGE</strong><span>Trading OS</span></span></a>
-      <nav class="nav" aria-label="Main navigation">
-        <a href="index.html">Home</a>
-        <a href="signals.html">Signals</a>
-        <a href="strategies.html">Strategies</a>
-        <a class="active" href="indicators.html">Indicators</a>
-        <a href="journal.html">Journal</a>
-        <a href="reports.html">Reports</a>
-        <a href="dashboard.html">Workspace</a>
-      </nav>
-      <span class="beta-pill">Premium OS · Beta</span>
-    </div>
-  </header>
+  <header class="topbar"><div class="shell topbar-inner">
+    <a class="brand" href="index.html"><img src="assets/brand/signal-bridge-mark-blue.svg" alt="Signal Bridge" /><span class="brand-copy"><strong>SIGNAL BRIDGE</strong><span>Trading OS</span></span></a>
+    <nav class="nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="signals.html">Signals</a><a href="strategies.html">Strategies</a><a class="active" href="indicators.html">Indicators</a><a href="journal.html">Journal</a><a href="trade-bible.html">Trade Bible</a><a href="evidence.html">Evidence</a></nav>
+    <span class="beta-pill">Premium OS · Beta</span>
+  </div></header>
 
   <main>
-    <section class="shell page-hero">
+    <section class="shell page-hero research-hero">
       <div class="breadcrumb"><a href="index.html">Signal Bridge</a> / Indicator Library</div>
-      <span class="eyebrow" style="margin-top:25px">Implementation Lineage</span>
-      <h1><span class="gradient-text">Tools are versioned. Evidence is earned.</span></h1>
-      <p>This library separates code that exists from code that has demonstrated edge. Indicators can be useful for visualization, alerts, and research long before every internal module is statistically validated.</p>
-    </section>
-
-    <section class="shell section" style="padding-top:12px">
-      <div class="kpi-row">
-        <div class="kpi"><span>Current integration source</span><strong>1</strong><small>ORB Indicator v1.1 FIXED</small></div>
-        <div class="kpi"><span>Historical indicator versions</span><strong>2+</strong><small>Preserved for lineage and comparison</small></div>
-        <div class="kpi"><span>Validated live edge</span><strong>0</strong><small>Infrastructure success is not edge proof</small></div>
-        <div class="kpi"><span>Primary market</span><strong>MES / ES</strong><small>Current development focus</small></div>
+      <span class="eyebrow" style="margin-top:25px">Pine + Decision Support</span>
+      <h1><span class="gradient-text">The tools that came out of the research.</span></h1>
+      <p>The repo already contains a real indicator lineage: current alert code, strategy code, a decision dashboard, older versions, complete and skeleton strategy harnesses, plus helper-panel visual work. The library tracks what each tool is for instead of pretending every file is a separate product.</p>
+      <div class="research-kpis">
+        <div class="research-kpi"><span>Checked-in Pine assets</span><strong>8</strong><small>Current, historical, complete, and skeleton implementations</small></div>
+        <div class="research-kpi"><span>Hosted alert source</span><strong>1 live</strong><small>ORB Indicator v1.1 FIXED → Signal Bridge</small></div>
+        <div class="research-kpi"><span>Decision-support dashboards</span><strong>2+</strong><small>Pine dashboard + archived helper-panel iterations</small></div>
+        <div class="research-kpi"><span>Next code priority</span><strong>Attribution</strong><small>Test components before feature accumulation</small></div>
       </div>
     </section>
 
     <section class="shell section">
-      <div class="section-head"><div><span class="eyebrow">Current Tools</span><h2>What is actually in the project.</h2></div><p>These entries are based on checked-in project assets. Labels describe present role and evidence state, not marketing confidence.</p></div>
-      <div class="library-grid">
-        <article class="library-card">
-          <div class="card-meta"><span class="chip blue">Implemented</span><span class="chip yellow">Testing</span><span class="chip green">Alert source verified</span></div>
-          <h3>ES/MES ORB Retest Indicator v1.1 FIXED</h3>
-          <p>The current Pine v6 integration source feeding Signal Bridge alerts. It uses the 8:00–8:15 ET range, tracks high/low/midpoint, supports retest logic and optional filters, and enforces one-signal-per-day state. Its ability to produce hosted alerts is verified; its strategy components remain research subjects.</p>
-          <div class="library-meta"><div><span>Role</span><strong>Live integration source</strong></div><div><span>Clock</span><strong>8:00–8:15 ET</strong></div><div><span>Evidence</span><strong>Implementation + infrastructure</strong></div><div><span>Promotion gate</span><strong>Attribution + forward evidence</strong></div></div>
-        </article>
-        <article class="library-card">
-          <div class="card-meta"><span class="chip purple">Historical</span><span class="chip yellow">Reconcile</span></div>
-          <h3>ES ORB Indicator v1.0</h3>
-          <p>An earlier implementation preserved in the strategy archive. It is useful for understanding how the project evolved, but should not silently override the current decision process or be treated as independent confirmation of the latest model.</p>
-          <div class="library-meta"><div><span>Role</span><strong>Historical lineage</strong></div><div><span>Status</span><strong>Superseded / research</strong></div><div><span>Use</span><strong>Compare rule evolution</strong></div><div><span>Evidence</span><strong>Not live validation</strong></div></div>
-        </article>
-        <article class="library-card">
-          <div class="card-meta"><span class="chip purple">Prototype</span><span class="chip">Untested</span></div>
-          <h3>ORB Indicator Skeleton</h3>
-          <p>A Trading OS Pine skeleton exists as an implementation scaffold. It belongs to the build history and can inform future modularization, but the existence of a skeleton is not evidence that its logic should be promoted.</p>
-          <div class="library-meta"><div><span>Role</span><strong>Development scaffold</strong></div><div><span>Status</span><strong>Prototype</strong></div><div><span>Use</span><strong>Architecture reference</strong></div><div><span>Evidence</span><strong>Untested</strong></div></div>
-        </article>
-        <article class="library-card">
-          <div class="card-meta"><span class="chip blue">Next build</span><span class="chip yellow">Research governed</span></div>
-          <h3>Mechanical Attribution Strategy</h3>
-          <p>The next serious Pine phase is not “make the indicator smarter” by intuition. It is a controlled strategy harness that can compare ORB clocks, entry modes, filters, costs, risk models, and exit behavior on matched data before anything earns promotion.</p>
-          <div class="library-meta"><div><span>Role</span><strong>Research harness</strong></div><div><span>Priority</span><strong>After product polish freeze</strong></div><div><span>Goal</span><strong>Isolated attribution</strong></div><div><span>Evidence</span><strong>Pending controlled tests</strong></div></div>
-        </article>
+      <div class="section-head"><div><span class="eyebrow">Current Production Tool</span><h2>ORB Indicator v1.1 FIXED.</h2></div><p>This is the integration source currently connected to the hosted Signal Bridge alert path.</p></div>
+      <article class="strategy-feature">
+        <div><div class="card-meta"><span class="chip green">Hosted alerts verified</span><span class="chip blue">Pine v6</span><span class="chip yellow">Strategy logic testing</span></div><h2>ES/MES ORB Retest Indicator v1.1</h2><p>Builds the 8:00–8:15 ET range, tracks high / low / midpoint, supports retest logic and optional filters, controls one-signal-per-day state, and exposes Long Setup Ready / Short Setup Ready alerts. Its current production job is dependable event generation — not a profitability claim.</p><div class="hero-actions"><a class="btn primary" href="signals.html">View Signal Bridge events →</a><a class="btn secondary" href="mason-orb.html">See strategy context</a></div></div>
+        <aside class="strategy-feature-side"><div class="mini-spec"><span>Role</span><strong>Live integration source</strong></div><div class="mini-spec"><span>ORB clock</span><strong>8:00–8:15 ET</strong></div><div class="mini-spec"><span>Alerts</span><strong>Long / Short setup ready</strong></div><div class="mini-spec"><span>Evidence</span><strong>Implementation + infrastructure</strong></div></aside>
+      </article>
+    </section>
+
+    <section class="shell section">
+      <div class="section-head"><div><span class="eyebrow">Tool Library</span><h2>Current and historical build assets.</h2></div></div>
+      <div class="tool-grid">
+        <article class="tool-card"><div class="card-meta"><span class="chip blue">Decision support</span><span class="chip yellow">Research</span></div><h3>ORB V2 Decision Dashboard</h3><p>A Pine dashboard implementation built to surface ORB validity, filters, and decision-state information directly on chart. Useful UI lineage for the future professional indicator, while the underlying filter claims still require controlled attribution.</p><div class="tool-specs"><div><span>Type</span><strong>Pine dashboard</strong></div><div><span>Role</span><strong>On-chart decision support</strong></div><div><span>Status</span><strong>Implemented</strong></div><div><span>Promotion gate</span><strong>Filter attribution</strong></div></div></article>
+        <article class="tool-card"><div class="card-meta"><span class="chip blue">Strategy harness</span><span class="chip yellow">Historical</span></div><h3>ORB Strategy v1.0 COMPLETE</h3><p>A complete Pine strategy harness exists in the Trading OS lineage alongside skeleton versions. This gives the project a reusable starting point for matched-data backtests instead of rebuilding strategy plumbing every time.</p><div class="tool-specs"><div><span>Type</span><strong>Pine strategy</strong></div><div><span>Role</span><strong>Backtest harness</strong></div><div><span>Status</span><strong>Implemented</strong></div><div><span>Next use</span><strong>Controlled attribution</strong></div></div></article>
+        <article class="tool-card"><div class="card-meta"><span class="chip blue">Strategy source</span><span class="chip yellow">Testing</span></div><h3>ES ORB Strategy v1.1 FIXED</h3><p>The current-generation strategy source sits beside the v1.1 indicator. It is useful for translating alert logic into strategy orders and for future attribution work, but it is not treated as a production trading bot.</p><div class="tool-specs"><div><span>Type</span><strong>Pine strategy source</strong></div><div><span>Role</span><strong>Research / comparison</strong></div><div><span>Status</span><strong>Implemented</strong></div><div><span>Evidence</span><strong>Testing</strong></div></div></article>
+        <article class="tool-card"><div class="card-meta"><span class="chip purple">Historical</span></div><h3>ES ORB Indicator v1.0</h3><p>An earlier full indicator implementation preserved for logic comparison. The project can trace how the current visual and rule set changed instead of losing the old code when a new version is created.</p><div class="tool-specs"><div><span>Type</span><strong>Indicator source</strong></div><div><span>Role</span><strong>Version lineage</strong></div><div><span>Status</span><strong>Superseded</strong></div><div><span>Use</span><strong>Diff / regression reference</strong></div></div></article>
+        <article class="tool-card"><div class="card-meta"><span class="chip purple">Scaffold</span></div><h3>ORB Indicator + Strategy Skeletons</h3><p>Lightweight Pine skeletons remain in the Trading OS package as architectural scaffolding. They are useful when separating display logic from strategy logic or rebuilding a clean test harness.</p><div class="tool-specs"><div><span>Assets</span><strong>2 skeletons</strong></div><div><span>Role</span><strong>Architecture reference</strong></div><div><span>Status</span><strong>Prototype</strong></div><div><span>Evidence</span><strong>Not applicable</strong></div></div></article>
+        <article class="tool-card"><div class="card-meta"><span class="chip green">Next build</span><span class="chip blue">Core priority</span></div><h3>Mechanical Attribution Harness</h3><p>The next Pine phase will compare ORB clocks, immediate breakout vs boundary/midpoint retest, filters, costs, stops, targets, and time rules on matched data. This is the bridge from “interesting indicator” to professional research instrument.</p><div class="tool-specs"><div><span>Type</span><strong>Research strategy</strong></div><div><span>Role</span><strong>Isolated testing</strong></div><div><span>Status</span><strong>Queued</strong></div><div><span>Output</span><strong>Evidence-ready comparisons</strong></div></div></article>
       </div>
     </section>
 
     <section class="shell section">
-      <div class="section-head"><div><span class="eyebrow">Indicator Standard</span><h2>Every future tool should answer four questions.</h2></div></div>
-      <div class="grid-4">
-        <div class="card"><span class="chip blue">Purpose</span><h3>What job does it do?</h3><p>Visualization, alerting, research, execution support, or strategy testing should be explicit.</p></div>
-        <div class="card"><span class="chip yellow">Version</span><h3>What exact logic?</h3><p>Clock, entry definition, filters, risk, exits, and defaults need a reproducible version.</p></div>
-        <div class="card"><span class="chip purple">Evidence</span><h3>What has actually been tested?</h3><p>Implementation, backtest, attribution, walk-forward, paper-forward, and live are separate stages.</p></div>
-        <div class="card"><span class="chip green">Provenance</span><h3>Where did it come from?</h3><p>Every promoted rule should trace back to source material and preserved research decisions.</p></div>
+      <div class="section-head"><div><span class="eyebrow">UI Lineage</span><h2>The chart interface has been iterated too.</h2></div><p>These helper-panel captures are useful design inputs for the next indicator pass: what should be visible, what should be simplified, and how to keep the chart readable on a real morning session.</p></div>
+      <div class="archive-grid">
+        <figure class="archive-shot"><img src="assets/research/helper-panel-01.png" alt="Signal Bridge helper panel research capture" /><figcaption>Early helper-panel capture from the project archive.</figcaption></figure>
+        <figure class="archive-shot"><img src="assets/research/helper-panel-02.png" alt="Signal Bridge helper panel research capture 2" /><figcaption>Second helper-panel iteration preserved for visual comparison and future UI cleanup.</figcaption></figure>
       </div>
     </section>
+
+    <section class="shell section"><div class="section-head"><div><span class="eyebrow">Build Rule</span><h2>Tools can mature faster than claims.</h2></div><p>An indicator can become beautiful, reliable, and useful before every internal component is proven. Signal Bridge keeps purpose, version, implementation status, and evidence status separate so product polish does not outrun research truth.</p></div></section>
   </main>
-
-  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Indicator Library</strong><span>Build tools aggressively. Promote claims conservatively.</span></div></footer>
+  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Indicator Library</strong><span>Pine tools, decision support, and research harnesses.</span></div></footer>
 </body>
 </html>

@@ -5,120 +5,81 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#060a11" />
   <title>Strategy Library — Signal Bridge</title>
-  <meta name="description" content="Versioned Signal Bridge strategy dossiers, evidence stages, implementation status, and research lineage." />
+  <meta name="description" content="Signal Bridge strategy library: current framework, historical ORB variants, backtest lineage, retired experiments, and research queue." />
   <link rel="icon" href="assets/brand/signal-bridge-favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="app.css" />
   <link rel="stylesheet" href="strategy.css" />
+  <link rel="stylesheet" href="research.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="shell topbar-inner">
-      <a class="brand" href="index.html">
-        <img src="assets/brand/signal-bridge-mark-blue.svg" alt="Signal Bridge" />
-        <span class="brand-copy"><strong>SIGNAL BRIDGE</strong><span>Trading OS</span></span>
-      </a>
-      <nav class="nav" aria-label="Main navigation">
-        <a href="index.html">Home</a>
-        <a href="signals.html">Signals</a>
-        <a class="active" href="strategies.html">Strategies</a>
-        <a href="journal.html">Journal</a>
-        <a href="trade-bible.html">Trade Bible</a>
-        <a href="evidence.html">Evidence</a>
-        <a href="dashboard.html">Dashboard</a>
-      </nav>
-      <span class="beta-pill">Premium OS · Beta</span>
-    </div>
-  </header>
+  <header class="topbar"><div class="shell topbar-inner">
+    <a class="brand" href="index.html"><img src="assets/brand/signal-bridge-mark-blue.svg" alt="Signal Bridge" /><span class="brand-copy"><strong>SIGNAL BRIDGE</strong><span>Trading OS</span></span></a>
+    <nav class="nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="signals.html">Signals</a><a class="active" href="strategies.html">Strategies</a><a href="indicators.html">Indicators</a><a href="journal.html">Journal</a><a href="trade-bible.html">Trade Bible</a><a href="evidence.html">Evidence</a></nav>
+    <span class="beta-pill">Premium OS · Beta</span>
+  </div></header>
 
   <main>
-    <section class="shell page-hero library-hero">
+    <section class="shell page-hero research-hero">
       <div class="breadcrumb"><a href="index.html">Signal Bridge</a> / Strategy Library</div>
-      <span class="eyebrow" style="margin-top:25px">Versioned Research Models</span>
-      <h1><span class="gradient-text">Strategies without mystery sauce.</span></h1>
-      <p>Every model gets a dossier: what the idea is, how it is actually used, what is implemented, what has historical evidence, what is still discretionary, and what must be tested before a claim is promoted. The library preserves the evolution of the work instead of turning source personalities or borrowed terminology into branding.</p>
-      <div class="hero-kicker"><span class="chip green">Source traceable</span><span class="chip yellow">Evidence staged</span><span class="chip blue">Versioned</span><span class="chip purple">Research first</span></div>
-    </section>
-
-    <section class="shell library-stats" aria-label="Strategy library status">
-      <div class="library-stat"><span>Indexed models</span><strong>1</strong><small>Mason ORB is the first full strategy dossier.</small></div>
-      <div class="library-stat"><span>Live alert sources</span><strong>1</strong><small>ORB v1.1 currently supplies integration alerts.</small></div>
-      <div class="library-stat"><span>Validated live strategies</span><strong>0</strong><small>No live profitability claim is being published.</small></div>
-      <div class="library-stat"><span>Research standard</span><strong>Traceable</strong><small>Implementation, backtest, forward, and live evidence stay separate.</small></div>
+      <span class="eyebrow" style="margin-top:25px">Versioned Strategy Lineage</span>
+      <h1><span class="gradient-text">One trading process. Several tested versions.</span></h1>
+      <p>The library now reflects the strategy work that actually exists: simple baselines, adaptive experiments, retest/confluence variants, midpoint continuation, the current Mason ORB framework, and research branches that have not earned promotion yet.</p>
+      <div class="research-kpis">
+        <div class="research-kpi"><span>Documented strategy branches</span><strong>6</strong><small>Current, historical, retired, and research models</small></div>
+        <div class="research-kpi"><span>Largest backtest export</span><strong>156 trades</strong><small>V6 ORB Midpoint Continuation</small></div>
+        <div class="research-kpi"><span>Current operating model</span><strong>Mason ORB</strong><small>Hybrid process · mechanical attribution in progress</small></div>
+        <div class="research-kpi"><span>Live profitability claims</span><strong>0</strong><small>Historical evidence remains labeled as historical</small></div>
+      </div>
     </section>
 
     <section class="shell section">
-      <div class="section-head">
-        <div><span class="eyebrow">Primary Model</span><h2>The strategy currently being built.</h2></div>
-        <p>The first dossier is built from the raw decision-process document, the simplified strategy specification, the project audit, historical backtest exports, and the current alert integration source.</p>
-      </div>
+      <div class="section-head"><div><span class="eyebrow">Current Model</span><h2>Mason ORB.</h2></div><p>The strategy currently being translated from discretionary chart reading into measurable components and durable session data.</p></div>
       <article class="strategy-feature">
         <div>
-          <div class="card-meta"><span class="chip yellow">Testing</span><span class="chip blue">MES / ES</span><span class="chip purple">Hybrid discretionary + mechanical</span></div>
-          <h2>Mason ORB</h2>
-          <p>Map overnight structure, frame a local opening range, read pre-New York behavior, wait for a retest or acceptance response, stack contextual evidence, and trade toward a plausible liquidity objective. The research goal is to separate the measurable pieces from the discretionary judgment and discover which pieces actually add edge.</p>
-          <div class="hero-actions">
-            <a class="btn primary" href="mason-orb.html">Open strategy dossier →</a>
-            <a class="btn secondary" href="trade-bible.html">Read decision process</a>
-            <a class="btn secondary" href="evidence.html">Review historical evidence</a>
-          </div>
+          <div class="card-meta"><span class="chip yellow">Testing</span><span class="chip blue">MES / ES</span><span class="chip green">Signal infrastructure live</span></div>
+          <h2>Liquidity + ORB continuation framework</h2>
+          <p>Map Asia, London, and previous-day structure; build a local ORB; read pre-New-York behavior; wait for acceptance, rejection, or a retest; then participate only when the price-action case and liquidity objective line up. The current research job is to isolate which measurable pieces deserve to survive.</p>
+          <div class="hero-actions"><a class="btn primary" href="mason-orb.html">Open Mason ORB →</a><a class="btn secondary" href="trade-bible.html">Read the Trade Bible</a><a class="btn secondary" href="evidence.html">Research archive</a></div>
         </div>
         <aside class="strategy-feature-side">
-          <div class="mini-spec"><span>Primary market</span><strong>MES / ES</strong></div>
-          <div class="mini-spec"><span>Session focus</span><strong>New York morning</strong></div>
-          <div class="mini-spec"><span>Core entry idea</span><strong>Break → retest / acceptance → continuation</strong></div>
-          <div class="mini-spec"><span>Current evidence label</span><strong>TESTING · not a profitability claim</strong></div>
+          <div class="mini-spec"><span>Trading window</span><strong>NY morning</strong></div>
+          <div class="mini-spec"><span>Reference structure</span><strong>Sessions + ORB + liquidity</strong></div>
+          <div class="mini-spec"><span>Preferred trigger family</span><strong>Retest / acceptance / rejection</strong></div>
+          <div class="mini-spec"><span>Next proof</span><strong>Clock + entry + filter attribution</strong></div>
         </aside>
       </article>
     </section>
 
     <section class="shell section">
-      <div class="section-head">
-        <div><span class="eyebrow">Future Library</span><h2>Organize models by framework, not personalities.</h2></div>
-        <p>Outside concepts can be studied, adapted, compared, or rejected, but the library should name the actual framework being researched rather than turning an influencer, mentor, Discord member, or source person into the product label.</p>
+      <div class="section-head"><div><span class="eyebrow">Historical Models</span><h2>The versions that got us here.</h2></div><p>Results are shown as the exact evidence class they came from. A good historical run earns a place in the library; it does not automatically become the current strategy.</p></div>
+      <div class="lineage-grid">
+        <article class="lineage-card"><div class="lineage-top"><span class="chip green">Historical leader</span><span>V6</span></div><h3>ORB Midpoint Continuation</h3><p>ES 15-minute continuation model using the 8:00–8:15 ORB. This is the strongest configuration in the checked-in TradingView comparison export and the largest sample in that file.</p><div class="metric-row"><div><span>Trades</span><strong>156</strong></div><div><span>PF</span><strong>1.431</strong></div><div><span>Net</span><strong>+$32,750</strong></div><div><span>WR</span><strong>39.1%</strong></div></div></article>
+        <article class="lineage-card"><div class="lineage-top"><span class="chip yellow">Historical test</span><span>R1.3</span></div><h3>ORB Retest + Confluence</h3><p>MES 5-minute retest/confluence branch. Positive in its historical export, but the reported total-trade count does not reconcile with classified wins/losses and still needs cleaning.</p><div class="metric-row"><div><span>Reported</span><strong>74</strong></div><div><span>PF</span><strong>1.284</strong></div><div><span>Net</span><strong>+$546.25</strong></div><div><span>WR</span><strong>40.54%</strong></div></div></article>
+        <article class="lineage-card"><div class="lineage-top"><span class="chip blue">Reconstructed study</span><span>V1</span></div><h3>Simple ORB Baseline</h3><p>A separate reconstructed 38-trade sample was used to study profitability, stop behavior, breakout/retest tags, and whether the simple system was worth forward testing.</p><div class="metric-row"><div><span>Trades</span><strong>38</strong></div><div><span>PF</span><strong>1.78</strong></div><div><span>Net</span><strong>+$2,381</strong></div><div><span>Expectancy</span><strong>+$62.66</strong></div></div></article>
+        <article class="lineage-card"><div class="lineage-top"><span class="chip red">Retired</span><span>R1.2</span></div><h3>Adaptive Second-Trade Model</h3><p>MES 15-minute branch that allowed a more adaptive / second-trade approach. Despite a 43.9% win rate, the historical export finished negative with PF below 1, so it stays as preserved negative evidence.</p><div class="metric-row"><div><span>Trades</span><strong>82</strong></div><div><span>PF</span><strong>0.949</strong></div><div><span>Net</span><strong>-$203.75</strong></div><div><span>WR</span><strong>43.9%</strong></div></div></article>
       </div>
+    </section>
+
+    <section class="shell section">
+      <div class="section-head"><div><span class="eyebrow">Research Branches</span><h2>Ideas that are real, but not promoted.</h2></div><p>These branches have code, docs, or experiment scaffolding in the project, but not enough controlled evidence to sit beside the historical result cards as validated configurations.</p></div>
       <div class="strategy-grid">
-        <div class="strategy-card placeholder">
-          <div class="card-meta"><span class="chip purple">Future research family</span></div>
-          <h3>Opening-range variants</h3>
-          <p>Alternative ORB clocks, cash-open ranges, midpoint models, boundary retests, and other opening-range structures can enter the library once their exact definitions and evidence packages are indexed.</p>
-        </div>
-        <div class="strategy-card placeholder">
-          <div class="card-meta"><span class="chip">Future research family</span></div>
-          <h3>Liquidity &amp; price-action frameworks</h3>
-          <p>Concept families such as liquidity sweeps, imbalance / FVG logic, institutional-style price-action models, or other defined methodologies can be represented by their mechanics and lineage — not by a personality name.</p>
-        </div>
+        <div class="strategy-card"><div class="card-meta"><span class="chip purple">Research</span></div><h3>Sweep / rejection variant</h3><p>A defined research sprint explores liquidity sweeps and rejection behavior as an alternative entry family. It remains a hypothesis until the matched-data tests are run.</p></div>
+        <div class="strategy-card"><div class="card-meta"><span class="chip purple">Research</span></div><h3>Expectation / context engine</h3><p>Experiment code studies session context, market regime, expectation discovery, and decision-engine behavior. It is research infrastructure, not a separate marketed strategy.</p></div>
       </div>
     </section>
 
     <section class="shell section">
-      <div class="section-head">
-        <div><span class="eyebrow">Research Pipeline</span><h2>How a strategy earns its way forward.</h2></div>
-        <p>Signal Bridge treats strategy development like a pipeline instead of a binary “works / does not work” label.</p>
-      </div>
-      <div class="pipeline">
-        <div class="pipeline-step"><b>01 · Raw process</b><span>Capture how the trade is actually seen and executed.</span></div>
-        <div class="pipeline-step"><b>02 · Mechanical definition</b><span>Translate objective pieces into precise rules.</span></div>
-        <div class="pipeline-step"><b>03 · Implementation</b><span>Code the rule without pretending code equals edge.</span></div>
-        <div class="pipeline-step"><b>04 · Attribution</b><span>Isolate clocks, filters, entries, stops, and exits.</span></div>
-        <div class="pipeline-step"><b>05 · Forward evidence</b><span>Replay, paper, and walk-forward behavior under version control.</span></div>
-        <div class="pipeline-step"><b>06 · Live evidence</b><span>Only real live history can support a live-performance claim.</span></div>
-      </div>
-    </section>
-
-    <section class="shell section">
-      <div class="section-head">
-        <div><span class="eyebrow">Library Rules</span><h2>The labels mean something.</h2></div>
-        <p>Member-facing status describes where an idea sits in the project. It does not let a convenient word such as “verified” silently become “statistically proven.”</p>
-      </div>
-      <div class="grid-4">
-        <div class="card"><span class="chip green">Verified</span><h3>Accepted project rule</h3><p>An explicitly accepted operating or governance rule. Statistical evidence must still be stated separately.</p></div>
-        <div class="card"><span class="chip yellow">Testing</span><h3>Under evaluation</h3><p>Coded, observed, or historically profitable does not automatically mean isolated edge.</p></div>
-        <div class="card"><span class="chip purple">Untested</span><h3>Hypothesis</h3><p>A useful idea or module that has not yet earned controlled evidence.</p></div>
-        <div class="card"><span class="chip red">Retired</span><h3>Negative evidence kept</h3><p>Failed and superseded versions remain part of the research record.</p></div>
+      <div class="section-head"><div><span class="eyebrow">Version Rail</span><h2>How the thinking changed.</h2></div></div>
+      <div class="version-rail">
+        <div class="version-row"><span>Baseline</span><div><h3>Simple ORB</h3><p>Reduce complexity enough to measure something cleanly.</p></div><span class="chip blue">Reconstructed</span></div>
+        <div class="version-row"><span>R1.2</span><div><h3>Adaptive / second trade</h3><p>More flexibility increased complexity without producing positive historical net results in the export.</p></div><span class="chip red">Retired</span></div>
+        <div class="version-row"><span>R1.3</span><div><h3>Retest + confluence</h3><p>More selective entry logic returned to positive historical results but still needs data reconciliation.</p></div><span class="chip yellow">Historical</span></div>
+        <div class="version-row"><span>V6</span><div><h3>Midpoint continuation</h3><p>Largest sample and strongest historical export currently checked in.</p></div><span class="chip green">Historical leader</span></div>
+        <div class="version-row"><span>Current</span><div><h3>Mason ORB process model</h3><p>Re-centers the system on how the market is actually read, then isolates objective components instead of adding filters blindly.</p></div><span class="chip yellow">Testing</span></div>
+        <div class="version-row"><span>Next</span><div><h3>Attribution harness</h3><p>Matched-data Pine strategy comparing clocks, entry modes, filters, costs, risk, and exits one question at a time.</p></div><span class="chip purple">Queued</span></div>
       </div>
     </section>
   </main>
-
-  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Strategy Library</strong><span>Research, education, and tooling — not trade authorization.</span></div></footer>
+  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Strategy Library</strong><span>Versioned models, exact evidence classes, preserved failures.</span></div></footer>
 </body>
 </html>
