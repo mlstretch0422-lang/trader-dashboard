@@ -1,0 +1,314 @@
+//@version=6
+strategy(
+     "ES/MES ORB Attribution Strategy v1.2 RESEARCH",
+     overlay=true,
+     initial_capital=50000,
+     currency=currency.USD,
+     default_qty_type=strategy.fixed,
+     default_qty_value=1,
+     commission_type=strategy.commission.cash_per_contract,
+     commission_value=1.2,
+     slippage=2,
+     process_orders_on_close=true,
+     calc_on_order_fills=false,
+     pyramiding=0,
+     max_lines_count=100,
+     max_labels_count=100
+)
+
+// RESEARCH STATUS
+// This script is an attribution baseline, not validated production logic.
+// Defaults intentionally remove optional filters and complex management so
+// entry-mode and session tests can be compared with fewer moving parts.
+
+//──────────────────────────────────────────────────────────────────────
+// Time settings
+//──────────────────────────────────────────────────────────────────────
+grpTime = "01. Time Settings"
+i_timezone   = input.string("America/New_York", "Timezone", options=["America/New_York", "America/Chicago", "UTC"], group=grpTime)
+i_orbStart   = input.string("0800", "ORB Start (HHMM)", group=grpTime)
+i_orbEnd     = input.string("0815", "ORB End (HHMM)", group=grpTime)
+i_tradeStart = input.string("0930", "Trade Start (HHMM)", group=grpTime)
+i_tradeEnd   = input.string("1030", "No New Entries After (HHMM)", group=grpTime)
+i_flatTime   = input.string("1100", "Force Flat At/After (HHMM)", group=grpTime)
+
+//──────────────────────────────────────────────────────────────────────
+// Entry attribution settings
+//──────────────────────────────────────────────────────────────────────
+grpEntry = "02. Entry Attribution"
+i_enableLongs   = input.bool(true, "Enable Longs", group=grpEntry)
+i_enableShorts  = input.bool(true, "Enable Shorts", group=grpEntry)
+i_entryMode     = input.string("Midpoint", "Entry Mode", options=["Breakout", "Boundary", "Midpoint"], group=grpEntry)
+i_retestTimeout = input.int(60, "Retest Timeout Bars", minval=1, maxval=300, group=grpEntry)
+i_invalidateOnOppositeClose = input.bool(true, "Invalidate On Close Through Opposite ORB Side", group=grpEntry)
+
+//──────────────────────────────────────────────────────────────────────
+// Filter attribution settings
+//──────────────────────────────────────────────────────────────────────
+grpFilters = "03. Filter Attribution"
+i_displacementMode = input.string("Off", "Displacement Mode", options=["Off", "ORB Body", "ATR", "Either"], group=grpFilters)
+i_bodyMinPct        = input.float(0.35, "Min Body % of ORB Range", minval=0.0, maxval=2.0, step=0.05, group=grpFilters)
+i_bodyMinAtr        = input.float(0.75, "Min Body × ATR", minval=0.0, maxval=5.0, step=0.05, group=grpFilters)
+i_atrLen            = input.int(14, "ATR Length", minval=1, group=grpFilters)
+i_useVWAP           = input.bool(false, "Use VWAP Alignment", group=grpFilters)
+i_useEMA            = input.bool(false, "Use EMA Alignment", group=grpFilters)
+i_emaLen            = input.int(50, "EMA Length", minval=1, group=grpFilters)
+i_useRangeFilter    = input.bool(false, "Use ORB Range Filter", group=grpFilters)
+i_minRange          = input.float(5.0, "Min ORB Range Points", minval=0.25, step=0.25, group=grpFilters)
+i_maxRange          = input.float(50.0, "Max ORB Range Points", minval=1.0, step=0.5, group=grpFilters)
+
+//──────────────────────────────────────────────────────────────────────
+// Simple risk attribution settings
+//──────────────────────────────────────────────────────────────────────
+grpRisk = "04. Risk Attribution"
+i_stopMethod     = input.string("Opposite", "Stop Method", options=["Opposite", "Midpoint", "Fixed Points"], group=grpRisk)
+i_fixedStopPts   = input.float(10.0, "Fixed Stop Points", minval=0.25, step=0.25, group=grpRisk)
+i_targetR        = input.float(2.0, "Single Target R", minval=0.25, step=0.25, group=grpRisk)
+i_maxStopPts     = input.float(40.0, "Maximum Allowed Stop Points", minval=0.25, step=0.25, group=grpRisk)
+
+//──────────────────────────────────────────────────────────────────────
+// Display
+//──────────────────────────────────────────────────────────────────────
+grpDisplay = "05. Display"
+i_showDashboard = input.bool(true, "Show Research Dashboard", group=grpDisplay)
+i_showMarkers   = input.bool(true, "Show Setup Markers", group=grpDisplay)
+
+//──────────────────────────────────────────────────────────────────────
+// Helpers
+//──────────────────────────────────────────────────────────────────────
+f_timeToMins(string hhmm) =>
+    float h = str.tonumber(str.substring(hhmm, 0, 2))
+    float m = str.tonumber(str.substring(hhmm, 2, 4))
+    int(h * 60 + m)
+
+f_curMins() =>
+    hour(time, i_timezone) * 60 + minute(time, i_timezone)
+
+f_inWindow(string startHHMM, string endHHMM) =>
+    int curMins = f_curMins()
+    int startMins = f_timeToMins(startHHMM)
+    int endMins = f_timeToMins(endHHMM)
+    startMins < endMins ? (curMins >= startMins and curMins < endMins) : (curMins >= startMins or curMins < endMins)
+
+f_newDay() =>
+    ta.change(dayofmonth(time, i_timezone)) != 0
+
+//──────────────────────────────────────────────────────────────────────
+// Session state
+//──────────────────────────────────────────────────────────────────────
+newDay = f_newDay()
+curMins = f_curMins()
+inOrbWindow = f_inWindow(i_orbStart, i_orbEnd)
+inTradeWindow = f_inWindow(i_tradeStart, i_tradeEnd)
+flatMins = f_timeToMins(i_flatTime)
+pastFlat = curMins >= flatMins
+forceFlatHit = pastFlat and not pastFlat[1]
+
+var float orbHigh = na
+var float orbLow = na
+var float orbMid = na
+var bool orbDone = false
+var bool tradeTakenToday = false
+
+if newDay
+    orbHigh := na
+    orbLow := na
+    orbMid := na
+    orbDone := false
+    tradeTakenToday := false
+
+if inOrbWindow and not orbDone
+    orbHigh := na(orbHigh) ? high : math.max(orbHigh, high)
+    orbLow := na(orbLow) ? low : math.min(orbLow, low)
+
+if not inOrbWindow and not orbDone and not na(orbHigh) and not na(orbLow)
+    orbDone := true
+    orbMid := (orbHigh + orbLow) / 2.0
+
+orbRange = orbDone ? orbHigh - orbLow : na
+orbRangeOk = orbDone and (not i_useRangeFilter or (orbRange >= i_minRange and orbRange <= i_maxRange))
+
+//──────────────────────────────────────────────────────────────────────
+// Filter states
+//──────────────────────────────────────────────────────────────────────
+atrVal = ta.atr(i_atrLen)
+barBody = math.abs(close - open)
+bodyPctOfRange = orbDone and orbRange > 0 ? barBody / orbRange : 0.0
+bodyVsAtr = atrVal > 0 ? barBody / atrVal : 0.0
+orbBodyPass = bodyPctOfRange >= i_bodyMinPct
+atrBodyPass = bodyVsAtr >= i_bodyMinAtr
+
+displacementOk = switch i_displacementMode
+    "Off" => true
+    "ORB Body" => orbBodyPass
+    "ATR" => atrBodyPass
+    => orbBodyPass or atrBodyPass
+
+vwapVal = ta.vwap(hlc3)
+emaVal = ta.ema(close, i_emaLen)
+longContextOk = (not i_useVWAP or close > vwapVal) and (not i_useEMA or close > emaVal)
+shortContextOk = (not i_useVWAP or close < vwapVal) and (not i_useEMA or close < emaVal)
+
+//──────────────────────────────────────────────────────────────────────
+// Breakout -> retest attribution state machine
+//──────────────────────────────────────────────────────────────────────
+var int setupDir = 0
+var int setupBar = na
+var bool retestSeen = false
+var string resetReason = "NONE"
+
+if newDay
+    setupDir := 0
+    setupBar := na
+    retestSeen := false
+    resetReason := "NEW DAY"
+
+canSeekSetup = orbRangeOk and inTradeWindow and not tradeTakenToday and strategy.position_size == 0
+
+if canSeekSetup and setupDir == 0 and displacementOk
+    if i_enableLongs and close > orbHigh and longContextOk
+        setupDir := 1
+        setupBar := bar_index
+        retestSeen := i_entryMode == "Breakout"
+        resetReason := "LONG ARMED"
+    else if i_enableShorts and close < orbLow and shortContextOk
+        setupDir := -1
+        setupBar := bar_index
+        retestSeen := i_entryMode == "Breakout"
+        resetReason := "SHORT ARMED"
+
+setupTimedOut = setupDir != 0 and not na(setupBar) and bar_index - setupBar > i_retestTimeout
+longInvalid = setupDir == 1 and i_invalidateOnOppositeClose and close < orbLow
+shortInvalid = setupDir == -1 and i_invalidateOnOppositeClose and close > orbHigh
+
+if setupTimedOut or longInvalid or shortInvalid
+    resetReason := setupTimedOut ? "TIMEOUT" : "STRUCTURE INVALID"
+    setupDir := 0
+    setupBar := na
+    retestSeen := false
+
+longRetestLevel = i_entryMode == "Midpoint" ? orbMid : orbHigh
+shortRetestLevel = i_entryMode == "Midpoint" ? orbMid : orbLow
+futureBarAfterSetup = setupDir != 0 and not na(setupBar) and bar_index > setupBar
+
+if futureBarAfterSetup and setupDir == 1 and not retestSeen and low <= longRetestLevel
+    retestSeen := true
+    resetReason := "LONG RETEST"
+
+if futureBarAfterSetup and setupDir == -1 and not retestSeen and high >= shortRetestLevel
+    retestSeen := true
+    resetReason := "SHORT RETEST"
+
+longSig = barstate.isconfirmed and canSeekSetup and setupDir == 1 and retestSeen and close > orbHigh and displacementOk and longContextOk
+shortSig = barstate.isconfirmed and canSeekSetup and setupDir == -1 and retestSeen and close < orbLow and displacementOk and shortContextOk
+
+//──────────────────────────────────────────────────────────────────────
+// Orders: one entry, one stop, one target
+//──────────────────────────────────────────────────────────────────────
+var float plannedEntry = na
+var float plannedStop = na
+var float plannedTarget = na
+var float plannedRiskPts = na
+
+if newDay
+    plannedEntry := na
+    plannedStop := na
+    plannedTarget := na
+    plannedRiskPts := na
+
+if longSig
+    plannedEntry := close
+    plannedStop := switch i_stopMethod
+        "Opposite" => orbLow
+        "Midpoint" => orbMid
+        => plannedEntry - i_fixedStopPts
+    plannedRiskPts := plannedEntry - plannedStop
+    validRisk = plannedRiskPts > syminfo.mintick and plannedRiskPts <= i_maxStopPts
+    if validRisk
+        plannedTarget := plannedEntry + plannedRiskPts * i_targetR
+        tradeTakenToday := true
+        setupDir := 0
+        setupBar := na
+        retestSeen := false
+        resetReason := "LONG ENTERED"
+        strategy.entry("Long", strategy.long, alert_message='{"status":"research","action":"buy","symbol":"{{ticker}}"}')
+    else
+        setupDir := 0
+        setupBar := na
+        retestSeen := false
+        resetReason := "LONG RISK BLOCKED"
+
+if shortSig
+    plannedEntry := close
+    plannedStop := switch i_stopMethod
+        "Opposite" => orbHigh
+        "Midpoint" => orbMid
+        => plannedEntry + i_fixedStopPts
+    plannedRiskPts := plannedStop - plannedEntry
+    validRisk = plannedRiskPts > syminfo.mintick and plannedRiskPts <= i_maxStopPts
+    if validRisk
+        plannedTarget := plannedEntry - plannedRiskPts * i_targetR
+        tradeTakenToday := true
+        setupDir := 0
+        setupBar := na
+        retestSeen := false
+        resetReason := "SHORT ENTERED"
+        strategy.entry("Short", strategy.short, alert_message='{"status":"research","action":"sell","symbol":"{{ticker}}"}')
+    else
+        setupDir := 0
+        setupBar := na
+        retestSeen := false
+        resetReason := "SHORT RISK BLOCKED"
+
+if strategy.position_size > 0 and not na(plannedStop) and not na(plannedTarget)
+    strategy.exit("Long Exit", "Long", stop=plannedStop, limit=plannedTarget, alert_message='{"status":"research","action":"exit","side":"long"}')
+
+if strategy.position_size < 0 and not na(plannedStop) and not na(plannedTarget)
+    strategy.exit("Short Exit", "Short", stop=plannedStop, limit=plannedTarget, alert_message='{"status":"research","action":"exit","side":"short"}')
+
+if forceFlatHit and strategy.position_size != 0
+    strategy.close_all(alert_message='{"status":"research","action":"exit","reason":"force_flat"}')
+    resetReason := "FORCE FLAT"
+
+//──────────────────────────────────────────────────────────────────────
+// Display
+//──────────────────────────────────────────────────────────────────────
+plot(orbDone ? orbHigh : na, "ORB High", color=color.new(color.green, 0), linewidth=2)
+plot(orbDone ? orbLow : na, "ORB Low", color=color.new(color.red, 0), linewidth=2)
+plot(orbDone ? orbMid : na, "ORB Mid", color=color.new(color.orange, 15), linewidth=1)
+plot(i_useVWAP ? vwapVal : na, "VWAP", color=color.new(color.blue, 35), linewidth=1)
+plot(i_useEMA ? emaVal : na, "EMA", color=color.new(color.aqua, 45), linewidth=1)
+plot(strategy.position_size != 0 ? plannedStop : na, "Planned Stop", color=color.new(color.red, 0), linewidth=2)
+plot(strategy.position_size != 0 ? plannedTarget : na, "Planned Target", color=color.new(color.green, 0), linewidth=2)
+
+plotshape(i_showMarkers and setupDir == 1 and bar_index == setupBar, title="Long Setup Armed", style=shape.triangleup, location=location.belowbar, color=color.new(color.green, 25), size=size.tiny, text="ARM")
+plotshape(i_showMarkers and setupDir == -1 and bar_index == setupBar, title="Short Setup Armed", style=shape.triangledown, location=location.abovebar, color=color.new(color.red, 25), size=size.tiny, text="ARM")
+plotshape(i_showMarkers and longSig, title="Long Signal", style=shape.triangleup, location=location.belowbar, color=color.lime, size=size.small, text="LONG")
+plotshape(i_showMarkers and shortSig, title="Short Signal", style=shape.triangledown, location=location.abovebar, color=color.orange, size=size.small, text="SHORT")
+
+var table dash = table.new(position.top_right, 2, 12, border_width=1)
+if i_showDashboard and barstate.islast
+    table.cell(dash, 0, 0, "ORB ATTRIBUTION v1.2", text_color=color.white, bgcolor=color.new(color.blue, 65))
+    table.cell(dash, 1, 0, "RESEARCH", text_color=color.white, bgcolor=color.new(color.orange, 55))
+    table.cell(dash, 0, 1, "Entry Mode")
+    table.cell(dash, 1, 1, i_entryMode)
+    table.cell(dash, 0, 2, "ORB Clock")
+    table.cell(dash, 1, 2, i_orbStart + "-" + i_orbEnd)
+    table.cell(dash, 0, 3, "Entry Window")
+    table.cell(dash, 1, 3, i_tradeStart + "-" + i_tradeEnd)
+    table.cell(dash, 0, 4, "ORB Range")
+    table.cell(dash, 1, 4, orbDone ? str.tostring(orbRange, "#.##") : "na")
+    table.cell(dash, 0, 5, "Range Gate")
+    table.cell(dash, 1, 5, i_useRangeFilter ? (orbRangeOk ? "PASS" : "BLOCK") : "OFF")
+    table.cell(dash, 0, 6, "Displacement")
+    table.cell(dash, 1, 6, i_displacementMode + ": " + (displacementOk ? "PASS" : "BLOCK"))
+    table.cell(dash, 0, 7, "VWAP / EMA")
+    table.cell(dash, 1, 7, (i_useVWAP ? "V" : "-") + " / " + (i_useEMA ? "E" : "-"))
+    table.cell(dash, 0, 8, "Setup")
+    table.cell(dash, 1, 8, setupDir == 1 ? "LONG" : setupDir == -1 ? "SHORT" : "NONE")
+    table.cell(dash, 0, 9, "Retest")
+    table.cell(dash, 1, 9, retestSeen ? "SEEN" : "NO")
+    table.cell(dash, 0, 10, "Trade Taken")
+    table.cell(dash, 1, 10, tradeTakenToday ? "YES" : "NO")
+    table.cell(dash, 0, 11, "Last State")
+    table.cell(dash, 1, 11, resetReason)

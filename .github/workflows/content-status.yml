@@ -1,0 +1,41 @@
+name: Validate Strategy Evidence Registry
+
+on:
+  pull_request:
+    paths:
+      - "data/content-status.json"
+      - "CONTENT_STATUS_AUDIT.md"
+      - "experiments/phase7/**"
+      - "pine/research/**"
+      - "scripts/validate_content_status.py"
+      - "scripts/validate_pine_research.py"
+      - ".github/workflows/content-status.yml"
+  push:
+    branches:
+      - "chore/content-truth-audit"
+    paths:
+      - "data/content-status.json"
+      - "CONTENT_STATUS_AUDIT.md"
+      - "experiments/phase7/**"
+      - "pine/research/**"
+      - "scripts/validate_content_status.py"
+      - "scripts/validate_pine_research.py"
+      - ".github/workflows/content-status.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate evidence registry and experiment manifest
+        run: python scripts/validate_content_status.py
+      - name: Validate Pine research governance
+        run: python scripts/validate_pine_research.py
