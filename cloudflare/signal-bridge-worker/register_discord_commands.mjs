@@ -6,7 +6,38 @@ if (!token) throw new Error("DISCORD_BOT_TOKEN is required");
 if (!applicationId) throw new Error("DISCORD_APPLICATION_ID is required");
 if (!guildId) throw new Error("DISCORD_GUILD_ID is required");
 
+const symbolOption = {
+  name: "symbol",
+  description: "Market symbol (defaults to MES)",
+  type: 3,
+  required: false,
+  max_length: 32,
+};
+
 const commands = [
+  {
+    name: "status",
+    type: 1,
+    description: "Show Signal Bridge service status",
+    integration_types: [0],
+    contexts: [0],
+  },
+  {
+    name: "orb",
+    type: 1,
+    description: "Show the latest recorded opening range",
+    integration_types: [0],
+    contexts: [0],
+    options: [symbolOption],
+  },
+  {
+    name: "brief",
+    type: 1,
+    description: "Summarize the latest recorded session lifecycle",
+    integration_types: [0],
+    contexts: [0],
+    options: [symbolOption],
+  },
   {
     name: "journal",
     type: 1,
@@ -134,5 +165,5 @@ for (const command of commands) {
 }
 
 if (!process.exitCode) {
-  console.log("Signal Bridge Discord journal commands are registered for this server.");
+  console.log("Signal Bridge Discord commands are registered for this server.");
 }
