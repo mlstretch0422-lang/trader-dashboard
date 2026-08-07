@@ -1,0 +1,63 @@
+name: Member Journal Reliability Checks
+
+on:
+  pull_request:
+    paths:
+      - "cloudflare/signal-bridge-worker/src/member_app.js"
+      - "cloudflare/signal-bridge-worker/src/discord_member_interactions.js"
+      - "cloudflare/signal-bridge-worker/src/entry.js"
+      - "cloudflare/signal-bridge-worker/register_discord_commands.mjs"
+      - "cloudflare/signal-bridge-worker/migrations/0005_member_sessions.sql"
+      - ".github/workflows/member-journal-reliability-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-member-journal:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Check Worker syntax
+        run: |
+          node --check cloudflare/signal-bridge-worker/src/member_app.js
+          node --check cloudflare/signal-bridge-worker/src/discord_member_interactions.js
+          node --check cloudflare/signal-bridge-worker/src/entry.js
+          node --check cloudflare/signal-bridge-worker/register_discord_commands.mjs
+
+      - name: Validate member migration
+        run: |
+          python - <<'PY'
+          import sqlite3
+          from pathlib import Path
+
+          db = sqlite3.connect(":memory:")
+          for migration in sorted(Path("cloudflare/signal-bridge-worker/migrations").glob("*.sql")):
+              db.executescript(migration.read_text())
+
+          required = {
+              "member_login_tokens": {"token_hash", "expires_at", "discord_user_id", "used_at"},
+              "member_sessions": {"session_hash", "expires_at", "discord_user_id", "can_manage_journal", "revoked_at"},
+              "discord_interaction_log": {"id", "received_at", "command_name", "status", "error_code", "duration_ms"},
+          }
+          for table, columns in required.items():
+              found = {row[1] for row in db.execute(f"PRAGMA table_info({table})")}
+              missing = sorted(columns - found)
+              if missing:
+                  raise SystemExit(f"{table} missing columns: {missing}")
+          print("member journal migration OK")
+          PY
+
+      - name: Verify reliability surfaces
+        run: |
+          grep -q 'RESPONSE_DEFERRED_CHANNEL_MESSAGE = 5' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
+          grep -q 'ctx.waitUntil' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
+          grep -q 'discord_interaction_log' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
+          grep -q 'name: "journal-login"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
+          grep -q 'createMemberLoginLink' cloudflare/signal-bridge-worker/src/member_app.js
+          grep -q 'HttpOnly; Secure; SameSite=Lax' cloudflare/signal-bridge-worker/src/member_app.js
+          grep -q 'url.pathname.startsWith("/member/")' cloudflare/signal-bridge-worker/src/entry.js
+          grep -q 'journal_table_ready' cloudflare/signal-bridge-worker/src/entry.js
+          grep -q 'member_sessions_ready' cloudflare/signal-bridge-worker/src/entry.js
