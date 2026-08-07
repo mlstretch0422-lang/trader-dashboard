@@ -1,6 +1,12 @@
 import coreWorker from "./index.js";
 import { handleDiscordInteraction } from "./discord_interactions.js";
 import { handleJournalAdminRequest } from "./journal_admin.js";
+import {
+  getSessionSummary,
+  handleTestSessionEvent,
+  handleTradingViewSessionEvent,
+  listSessionEvents,
+} from "./session_events.js";
 
 async function extendHealth(response, env) {
   if (!response.ok) return response;
@@ -15,6 +21,7 @@ async function extendHealth(response, env) {
         env.DISCORD_JOURNAL_CHANNEL_ID
       ),
       journal_admin_configured: Boolean(env.JOURNAL_ADMIN_TOKEN || env.JOURNAL_INGEST_TOKEN),
+      session_intelligence_storage: Boolean(env.DB),
     }), {
       status: response.status,
       headers: response.headers,
@@ -34,6 +41,22 @@ export default {
 
     if (url.pathname === "/journal-admin" || url.pathname.startsWith("/journal-admin/")) {
       return handleJournalAdminRequest(request, env);
+    }
+
+    if (url.pathname === "/tv-session") {
+      return handleTradingViewSessionEvent(request, env, ctx);
+    }
+
+    if (url.pathname === "/session-test") {
+      return handleTestSessionEvent(request, env, ctx);
+    }
+
+    if (request.method === "GET" && url.pathname === "/session-events") {
+      return listSessionEvents(url, env);
+    }
+
+    if (request.method === "GET" && url.pathname === "/session-summary") {
+      return getSessionSummary(url, env);
     }
 
     const response = await coreWorker.fetch(request, env, ctx);
