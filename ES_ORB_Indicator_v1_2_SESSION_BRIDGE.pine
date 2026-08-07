@@ -30,7 +30,6 @@ grpBridge = "Signal Bridge Session Lifecycle"
 i_enableSessionBridge = input.bool(true, "Enable Session Lifecycle alert() calls", group=grpBridge)
 i_premarketSnapshot    = input.string("0755", "PREMARKET Snapshot (HHMM)", group=grpBridge)
 i_preopenSnapshot      = input.string("0915", "PREOPEN Snapshot (HHMM)", group=grpBridge)
-i_bridgeNote           = input.string("Signal Bridge Session Bridge v1.2", "Lifecycle Source Label", group=grpBridge)
 
 grpDisplay = "Display"
 i_showDashboard = input.bool(true, "Show Dashboard", group=grpDisplay)
@@ -51,13 +50,18 @@ f_inWindow(string startHHMM, string endHHMM) =>
     startMins < endMins ? (curMins >= startMins and curMins < endMins) : (curMins >= startMins or curMins < endMins)
 
 // Fires on the first chart bar whose opening timestamp reaches/passes a clock time.
-// ES/MES charts include overnight data, so this remains stable across the normal session.
 f_reachedTime(string hhmm) =>
     int targetMins = f_timeToMins(hhmm)
     int curMins = f_currentMins()
     int prevMins = na(time[1]) ? curMins : hour(time[1], i_timezone) * 60 + minute(time[1], i_timezone)
     bool sameDate = not na(time[1]) and year(time, i_timezone) == year(time[1], i_timezone) and month(time, i_timezone) == month(time[1], i_timezone) and dayofmonth(time, i_timezone) == dayofmonth(time[1], i_timezone)
     sameDate and curMins >= targetMins and prevMins < targetMins
+
+f_pad2(int value) =>
+    value < 10 ? "0" + str.tostring(value) : str.tostring(value)
+
+f_sessionDate() =>
+    str.tostring(year(time, i_timezone)) + "-" + f_pad2(month(time, i_timezone)) + "-" + f_pad2(dayofmonth(time, i_timezone))
 
 f_numOrNull(float value) =>
     na(value) ? "null" : str.tostring(value, "#.####")
@@ -75,24 +79,26 @@ f_firstBreakLabel(int code) =>
     code == 1 ? "HIGH_FIRST" : code == -1 ? "LOW_FIRST" : code == 2 ? "BOTH_OR_SAME_BAR" : "NONE"
 
 f_payload(string stage, string side, string note, string setup, string target, string outcome, string bias, float price, float highLevel, float lowLevel, float midLevel, float rangePoints) =>
-    "{" +
-      "\"symbol\":" + f_text(syminfo.ticker) + "," +
-      "\"stage\":" + f_text(stage) + "," +
-      "\"side\":" + f_nullableText(side) + "," +
-      "\"price\":" + f_numOrNull(price) + "," +
-      "\"strategy\":" + f_text("ES/MES ORB Indicator v1.2 Session Bridge") + "," +
-      "\"note\":" + f_text(note) + "," +
-      "\"timeframe\":" + f_text(timeframe.period) + "," +
-      "\"orb_high\":" + f_numOrNull(highLevel) + "," +
-      "\"orb_low\":" + f_numOrNull(lowLevel) + "," +
-      "\"orb_mid\":" + f_numOrNull(midLevel) + "," +
-      "\"range_points\":" + f_numOrNull(rangePoints) + "," +
-      "\"bias\":" + f_nullableText(bias) + "," +
-      "\"setup\":" + f_nullableText(setup) + "," +
-      "\"target\":" + f_nullableText(target) + "," +
-      "\"outcome\":" + f_nullableText(outcome) + "," +
-      "\"event_time\":" + str.tostring(time) +
-    "}"
+    string payload = "{"
+    payload += "\"session_date\":" + f_text(f_sessionDate()) + ","
+    payload += "\"symbol\":" + f_text(syminfo.root) + ","
+    payload += "\"stage\":" + f_text(stage) + ","
+    payload += "\"side\":" + f_nullableText(side) + ","
+    payload += "\"price\":" + f_numOrNull(price) + ","
+    payload += "\"strategy\":" + f_text("ES/MES ORB Indicator v1.2 Session Bridge") + ","
+    payload += "\"note\":" + f_text(note) + ","
+    payload += "\"timeframe\":" + f_text(timeframe.period) + ","
+    payload += "\"orb_high\":" + f_numOrNull(highLevel) + ","
+    payload += "\"orb_low\":" + f_numOrNull(lowLevel) + ","
+    payload += "\"orb_mid\":" + f_numOrNull(midLevel) + ","
+    payload += "\"range_points\":" + f_numOrNull(rangePoints) + ","
+    payload += "\"bias\":" + f_nullableText(bias) + ","
+    payload += "\"setup\":" + f_nullableText(setup) + ","
+    payload += "\"target\":" + f_nullableText(target) + ","
+    payload += "\"outcome\":" + f_nullableText(outcome) + ","
+    payload += "\"event_time\":" + str.tostring(time)
+    payload += "}"
+    payload
 
 f_emit(string stage, string side, string note, string setup, string target, string outcome, string bias, float price, float highLevel, float lowLevel, float midLevel, float rangePoints) =>
     if i_enableSessionBridge
@@ -108,13 +114,15 @@ var float orbMid = na
 var bool orbDone = false
 var bool signalToday = false
 var int signalDirToday = 0
-var int firstOrbBreak = 0
 
-var bool sentPremarket = false
-var bool sentOrbFormed = false
-var bool sentPreopen = false
-var bool sentOpen = false
-var bool sentSessionClose = false
+// varip is intentional for lifecycle flags: indicators recalculate on realtime ticks.
+// These values must survive Pine's intrabar rollback so one snapshot cannot fire repeatedly.
+varip int firstOrbBreak = 0
+varip bool sentPremarket = false
+varip bool sentOrbFormed = false
+varip bool sentPreopen = false
+varip bool sentOpen = false
+varip bool sentSessionClose = false
 var int sentSetupBar = na
 
 if newDay
@@ -155,8 +163,8 @@ longContextOk = (not i_useVWAP or close > vwapVal) and (not i_useEMA or close > 
 shortContextOk = (not i_useVWAP or close < vwapVal) and (not i_useEMA or close < emaVal)
 contextLabel = f_contextLabel(longContextOk, shortContextOk)
 
-// Track which ORB side actually traded first in realtime. If a historical bar spans
-// both sides, record it as ambiguous rather than pretending the OHLC data proves order.
+// In realtime, varip preserves the first side observed across ticks. On historical bars
+// where both sides are contained inside one OHLC bar, sequence is deliberately ambiguous.
 if orbDone and firstOrbBreak == 0 and not inOrbWindow
     bool brokeHigh = high > orbHigh
     bool brokeLow = low < orbLow
@@ -167,11 +175,11 @@ if orbDone and firstOrbBreak == 0 and not inOrbWindow
     else if brokeLow
         firstOrbBreak := -1
 
-// Session lifecycle snapshots. Time events are emitted at the first new chart bar
-// reaching each clock. event_time is the chart epoch; the Worker normalizes it to ISO.
+// Session lifecycle snapshots. event_time is Pine's UNIX epoch milliseconds; the Worker
+// converts it to ISO before D1 storage.
 if barstate.isnew and not sentPremarket and f_reachedTime(i_premarketSnapshot)
     sentPremarket := true
-    f_emit("PREMARKET", "", i_bridgeNote + " · pre-ORB snapshot", "", "", "", contextLabel, close, na, na, na, na)
+    f_emit("PREMARKET", "", "Session Bridge online · pre-ORB snapshot", "", "", "", contextLabel, close, na, na, na, na)
 
 if orbDone and not sentOrbFormed
     sentOrbFormed := true
@@ -238,10 +246,11 @@ if barstate.isconfirmed and setupDir != 0 and not na(setupBar) and (na(sentSetup
 
 if longSig or shortSig
     signalToday := true
-    signalDirToday := longSig ? 1 : -1
+    if barstate.isconfirmed
+        signalDirToday := longSig ? 1 : -1
     setupDir := 0
 
-// The session close is a state record, even when no signal occurred.
+// The session close is a state record even when there was no signal.
 if barstate.isnew and not sentSessionClose and f_reachedTime(i_tradeEnd)
     sentSessionClose := true
     string closeSide = signalDirToday == 1 ? "LONG" : signalDirToday == -1 ? "SHORT" : "WAIT"
