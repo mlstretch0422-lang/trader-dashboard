@@ -5,8 +5,10 @@ on:
     paths:
       - "data/content-status.json"
       - "CONTENT_STATUS_AUDIT.md"
-      - "experiments/phase7/experiment_manifest.json"
+      - "experiments/phase7/**"
+      - "pine/research/**"
       - "scripts/validate_content_status.py"
+      - "scripts/validate_pine_research.py"
       - ".github/workflows/content-status.yml"
   push:
     branches:
@@ -14,8 +16,10 @@ on:
     paths:
       - "data/content-status.json"
       - "CONTENT_STATUS_AUDIT.md"
-      - "experiments/phase7/experiment_manifest.json"
+      - "experiments/phase7/**"
+      - "pine/research/**"
       - "scripts/validate_content_status.py"
+      - "scripts/validate_pine_research.py"
       - ".github/workflows/content-status.yml"
 
 permissions:
@@ -33,3 +37,5 @@ jobs:
           python-version: "3.12"
       - name: Validate evidence registry and experiment manifest
         run: python scripts/validate_content_status.py
+      - name: Validate Pine research governance
+        run: python scripts/validate_pine_research.py
