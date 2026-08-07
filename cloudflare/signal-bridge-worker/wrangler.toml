@@ -4,13 +4,12 @@ compatibility_date = "2026-08-07"
 workers_dev = true
 
 # Keep market/news context warm without relying on the local Mac.
-# The calendar provider fails closed when TRADING_ECONOMICS_API_KEY is absent.
+# The second trigger runs every five minutes across the U.S. morning in UTC;
+# bot_scheduler.js converts scheduledTime to America/New_York and only posts
+# at the exact desk windows, so DST is handled in code rather than hard-coded UTC.
 [triggers]
-crons = ["*/15 * * * *"]
+crons = ["*/15 * * * *", "*/5 12-17 * * 1-5"]
 
-# Wrangler 4.45+ can provision this D1 resource on deploy when the account does
-# not already have the binding. The generated resource ID stays account-side and
-# must never be treated as a trading credential.
 [[d1_databases]]
 binding = "DB"
 migrations_dir = "migrations"
@@ -26,5 +25,6 @@ required = [
   "DISCORD_JOURNAL_CHANNEL_ID",
 ]
 
-# Optional future production provider secret:
+# Optional production secrets:
 # TRADING_ECONOMICS_API_KEY
+# DISCORD_INTELLIGENCE_WEBHOOK_URL (falls back to DISCORD_WEBHOOK_URL)
