@@ -105,9 +105,13 @@ jobs:
           grep -q "Research it. Trade it. Record it. Improve it." _site/index.html
           grep -q "Signal Bridge Premium" _site/index.html
           grep -q "Bring your own trading into the system" _site/index.html
+          grep -q "Public playbook, flagship desk, and community" _site/index.html
           grep -q "Mason · Strategy &amp; Research" _site/index.html
           grep -q "Trade, review, and build with Signal Bridge connected" _site/index.html
           ! grep -q "The beta already has a live home" _site/index.html
+          test "$(grep -o '<h3>Strategy Lab</h3>' _site/index.html | wc -l | tr -d ' ')" = "1"
+          test "$(grep -o '<h3>Indicator Workspace</h3>' _site/index.html | wc -l | tr -d ' ')" = "1"
+          grep -q "interactive-surface" _site/index.html
           grep -q "legal-disclaimer" _site/index.html
 
           grep -q "Strategy Playbook" _site/strategies.html
@@ -158,6 +162,9 @@ jobs:
           grep -q "Private member workspace" _site/journal.html
           grep -q "discord_capture_configured" _site/journal.html
           grep -q "Capture to Journal" _site/journal.html
+          grep -q "Publish to Journal" _site/journal.html
+          grep -q "journal-entry-media" _site/journal.html
+          grep -q "journal-entry-media" _site/journal.css
           grep -q "legal-disclaimer" _site/signals.html
           grep -q "legal-disclaimer" _site/journal.html
 
@@ -166,3 +173,8 @@ jobs:
           grep -q 'class="active" href="mason.html">Mason</a>' _site/evidence.html
           grep -q 'class="active" href="mason.html">Mason</a>' _site/trade-bible.html
           grep -q 'class="active" href="mason.html">Mason</a>' _site/mason-orb.html
+
+          grep -q 'name: "Publish to Journal"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
+          grep -q 'name: "publish"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
+          grep -q 'commandName === "publish to journal"' cloudflare/signal-bridge-worker/src/discord_interactions.js
+          grep -q 'visibility: publishRequested ? "PUBLISHED" : "PRIVATE"' cloudflare/signal-bridge-worker/src/discord_interactions.js

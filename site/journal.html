@@ -23,8 +23,7 @@
         <a href="strategies.html">Strategies</a>
         <a href="indicators.html">Indicators</a>
         <a class="active" href="journal.html">Journal</a>
-        <a href="trade-bible.html">Trade Bible</a>
-        <a href="evidence.html">Evidence</a>
+        <a href="mason.html">Mason</a>
       </nav>
       <span class="beta-pill">Premium OS · Beta</span>
     </div>
@@ -40,7 +39,7 @@
         <span class="chip green">Discord capture live</span>
         <span class="chip blue">Durable D1 storage</span>
         <span class="chip yellow">Private first</span>
-        <span class="chip purple">Member workspaces next</span>
+        <span class="chip green">Selected publish live</span>
       </div>
     </section>
 
@@ -48,23 +47,23 @@
       <div class="journal-status-card"><span>Journal Storage</span><strong id="journalStorage">Checking…</strong><small>D1 durable journal ledger</small></div>
       <div class="journal-status-card"><span>Capture API</span><strong id="journalIngest">Checking…</strong><small>Authenticated direct ingestion</small></div>
       <div class="journal-status-card"><span>Discord Capture</span><strong id="discordCapture">Checking…</strong><small>Signed interaction endpoint</small></div>
-      <div class="journal-status-card"><span>Published Entries</span><strong id="journalCount">—</strong><small>Reviewed public entries</small></div>
+      <div class="journal-status-card"><span>Published Entries</span><strong id="journalCount">—</strong><small>Selected website entries</small></div>
       <div class="journal-status-card"><span>Last Refresh</span><strong id="journalRefresh">—</strong><small>Auto-refreshes every 45 seconds</small></div>
     </section>
 
     <section class="shell section">
       <div class="section-head">
         <div><span class="eyebrow">Capture Architecture</span><h2>Write once. Reuse everywhere.</h2></div>
-        <p>The live workflow is intentionally fast enough for an actual trading morning: journal in Discord, preserve the original note, structure it later, connect it to Signal Bridge events, and turn it into review data.</p>
+        <p>The live workflow is fast enough for an actual trading morning: journal in Discord, preserve the original note, structure it later, connect it to Signal Bridge events, and decide whether it stays private or becomes a public case study.</p>
       </div>
       <div class="journal-flow">
         <div class="journal-flow-step"><span>01</span><b>Discord journal post</b><small>Fast note while the trade and decision are still fresh.</small></div>
-        <div class="journal-flow-step"><span>02</span><b>Private capture</b><small>Signed Discord interaction stores the raw note and provenance in D1.</small></div>
+        <div class="journal-flow-step"><span>02</span><b>Private capture</b><small>Signed Discord interaction stores the raw note, screenshot reference, and provenance in D1.</small></div>
         <div class="journal-flow-step"><span>03</span><b>Structure</b><small>Symbol, direction, setup, result, tags, screenshot, and signal link become fields.</small></div>
-        <div class="journal-flow-step"><span>04</span><b>Review</b><small>Compare what was seen, what was done, and how the trade actually developed.</small></div>
-        <div class="journal-flow-step"><span>05</span><b>Research</b><small>Patterns across entries can become strategy questions, education, and future tests.</small></div>
+        <div class="journal-flow-step"><span>04</span><b>Review / Publish</b><small>Keep it private, or deliberately publish a selected entry to the website.</small></div>
+        <div class="journal-flow-step"><span>05</span><b>Research</b><small>Patterns across entries become strategy questions, education, and future tests.</small></div>
       </div>
-      <div class="privacy-callout"><strong>Private-first by design.</strong> Discord captures currently default to <code>PRIVATE</code> + <code>RAW</code>. Public journal entries only appear after review and an explicit publish state.</div>
+      <div class="privacy-callout"><strong>Private-first by design.</strong> <code>Capture to Journal</code> and normal <code>/journal</code> entries remain private. Server managers can deliberately use <code>Publish to Journal</code> or <code>publish:true</code> to move a selected note/screenshot onto this public page.</div>
     </section>
 
     <section class="shell section">
@@ -82,8 +81,8 @@
 
     <section class="shell section journal-section">
       <div class="section-head">
-        <div><span class="eyebrow">Published Journal</span><h2>Reviewed trade-learning entries.</h2></div>
-        <p>This public layer can hold selected reviewed examples and lessons. Private member records remain inside the member workspace unless intentionally shared.</p>
+        <div><span class="eyebrow">Published Journal</span><h2>Selected trade-learning entries.</h2></div>
+        <p>Published Discord entries can now render their chart/screenshot directly with the note. Private captures stay out of this feed until deliberately shared.</p>
       </div>
 
       <div class="journal-toolbar">
@@ -115,13 +114,14 @@
     <section class="shell section">
       <div class="section-head">
         <div><span class="eyebrow">Live Capture Layer</span><h2>Discord is the fastest journal input.</h2></div>
-        <p>Signal Bridge currently has two hosted capture paths in the configured trade-journal channel. Both preserve the original record privately and feed the same durable journal ledger.</p>
+        <p>The configured trade-journal channel now has a private workflow and an explicit publish workflow. Nothing has to become public just because it was captured.</p>
       </div>
       <div class="grid-3">
-        <div class="card"><span class="chip green">Live</span><h3>/journal</h3><p>Structured Discord capture for note, symbol, side, result, setup, strategy/version, P&amp;L, R multiple, and an optional chart attachment.</p></div>
-        <div class="card"><span class="chip green">Live</span><h3>Capture to Journal</h3><p>Use the message context command on a normal Discord journal post to preserve the original text, message provenance, and first attachment without retyping it.</p></div>
-        <div class="card"><span class="chip purple">Next</span><h3>Normalization + review</h3><p>Turn private raw records into structured summaries, member statistics, recurring themes, and strategy research while keeping the original record intact.</p></div>
+        <div class="card"><span class="chip green">Live</span><h3>/journal</h3><p>Structured capture for note, symbol, side, result, setup, strategy/version, P&amp;L, R multiple, and chart. Leave Publish off for private capture; server managers can set it true for a selected website entry.</p></div>
+        <div class="card"><span class="chip green">Live</span><h3>Capture to Journal</h3><p>Use the message context command on a normal Discord post to preserve the original text, provenance, and first attachment privately without retyping it.</p></div>
+        <div class="card"><span class="chip green">Live</span><h3>Publish to Journal</h3><p>Server managers can right-click a selected journal message and publish it. If that message was already captured privately, Signal Bridge promotes the existing record instead of duplicating it.</p></div>
       </div>
+      <div class="notice journal-media-note"><strong>Screenshot storage note:</strong> published Discord attachment URLs can render now, but Discord CDN links are not the long-term archive. Durable member media storage is part of the account/auth layer so screenshots remain available independently of Discord.</div>
     </section>
   </main>
 
@@ -145,6 +145,16 @@
       return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
     }
 
+    function safeHttpUrl(value) {
+      if (!value) return "";
+      try {
+        const url = new URL(String(value));
+        return url.protocol === "https:" || url.protocol === "http:" ? url.toString() : "";
+      } catch {
+        return "";
+      }
+    }
+
     function formatTime(value) {
       if (!value) return "Time unavailable";
       const date = new Date(value);
@@ -162,7 +172,7 @@
     function renderEntries(entries) {
       count.textContent = String(entries.length);
       if (!entries.length) {
-        list.innerHTML = '<div class="journal-empty"><strong>No published journal entries yet.</strong><span>Discord capture is active. Reviewed entries can be published here when they are ready to become part of the shared learning library.</span></div>';
+        list.innerHTML = '<div class="journal-empty"><strong>No published journal entries yet.</strong><span>Private Discord capture is active. Server managers can deliberately publish a selected text/screenshot entry when it is ready for the shared learning feed.</span></div>';
         return;
       }
 
@@ -170,6 +180,10 @@
         const tags = Array.isArray(entry.tags) ? entry.tags : [];
         const pnl = entry.pnl === null || entry.pnl === undefined ? "" : `<span>P&amp;L ${Number(entry.pnl) >= 0 ? "+" : ""}${escapeHtml(entry.pnl)}</span>`;
         const rr = entry.rr === null || entry.rr === undefined ? "" : `<span>${escapeHtml(entry.rr)}R</span>`;
+        const imageUrl = safeHttpUrl(entry.image_url);
+        const media = imageUrl
+          ? `<a class="journal-entry-media" href="${escapeHtml(imageUrl)}" target="_blank" rel="noopener"><img src="${escapeHtml(imageUrl)}" alt="Published trade journal chart" loading="lazy" /><span>Open chart ↗</span></a>`
+          : "";
         return `
           <article class="journal-entry">
             <div class="journal-entry-head">
@@ -179,6 +193,7 @@
               </div>
               <code>${escapeHtml(String(entry.id).slice(0, 8))}</code>
             </div>
+            ${media}
             <p>${escapeHtml(entry.summary || entry.raw_text)}</p>
             <div class="journal-tags">${tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>
             <div class="journal-foot"><span>${escapeHtml(entry.strategy || "Unassigned strategy")}</span><span>${escapeHtml(entry.setup || "Setup not normalized")}</span><span>${escapeHtml(entry.review_status || "RAW")}</span></div>

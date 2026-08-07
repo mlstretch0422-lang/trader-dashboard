@@ -85,10 +85,22 @@ const commands = [
         type: 11,
         required: false,
       },
+      {
+        name: "publish",
+        description: "Publish this entry to the website (server managers only)",
+        type: 5,
+        required: false,
+      },
     ],
   },
   {
     name: "Capture to Journal",
+    type: 3,
+    integration_types: [0],
+    contexts: [0],
+  },
+  {
+    name: "Publish to Journal",
     type: 3,
     integration_types: [0],
     contexts: [0],

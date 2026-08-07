@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Signal Bridge Journal Intelligence can capture trade-journal content from Discord without running an always-on Mac bot or requesting the privileged Message Content gateway intent.
+Signal Bridge Journal Intelligence captures trade-journal content from Discord without running an always-on Mac bot or requesting the privileged Message Content gateway intent.
 
 The hosted Worker exposes:
 
@@ -10,12 +10,13 @@ The hosted Worker exposes:
 
 Discord interactions are verified with the application's Ed25519 public key before anything is written to D1.
 
-Two capture surfaces are registered for the configured server:
+Three capture/publish surfaces are registered for the configured server:
 
-1. `/journal` — structured trade journaling directly in Discord.
+1. `/journal` — structured trade journaling directly in Discord. Private by default; server managers can set `publish:true` for a selected public entry.
 2. `Capture to Journal` — a message context command that saves an existing trade-journal message privately into Signal Bridge.
+3. `Publish to Journal` — a server-manager-only message context action that publishes a selected message to the website. If that message was already captured privately, Signal Bridge promotes the existing D1 record rather than duplicating it.
 
-Every Discord-captured entry is stored as `PRIVATE` + `RAW` by default. The public website continues to return only entries explicitly marked `PUBLISHED`.
+Normal Discord capture remains `PRIVATE` + `RAW` by default. The public website returns only entries explicitly marked `PUBLISHED`.
 
 ## Why interactions instead of a gateway listener
 
@@ -25,7 +26,7 @@ A true automatic listener for every normal channel message would require a gatew
 
 ## Discord application values
 
-Create or reuse a dedicated Discord application for Signal Bridge and keep these values in `.env.local` only:
+Create or reuse the dedicated Signal Bridge application and keep these values in `.env.local` only:
 
 ```text
 DISCORD_BOT_TOKEN=
@@ -53,7 +54,7 @@ DISCORD_JOURNAL_CHANNEL_ID=
 https://signal-bridge-webhook.airy-iris.workers.dev/discord-interactions
 ```
 
-Discord will send a signed PING during endpoint validation; the Worker returns PONG after verifying the signature.
+Discord sends a signed PING during endpoint validation; the Worker returns PONG after verifying the signature.
 
 ## IDs
 
@@ -87,7 +88,7 @@ From the repository root after loading `.env.local`:
 node cloudflare/signal-bridge-worker/register_discord_commands.mjs
 ```
 
-The script uses guild-scoped command registration so the test commands update immediately in the configured server.
+The script uses guild-scoped command registration so command changes appear immediately in the configured server.
 
 ## Capture behavior
 
@@ -104,21 +105,30 @@ The command accepts:
 - optional dollar P&L
 - optional R multiple
 - optional chart attachment
+- optional `publish` boolean
 
-The Worker stores the entry privately and posts a structured receipt in the Discord channel for accountability.
+With `publish` omitted/false, the Worker stores the entry privately and posts the normal structured receipt in Discord. When `publish:true` is requested by a server member with Administrator or Manage Server permission, the Worker stores the entry as `PUBLISHED` + `REVIEWED` and it becomes eligible for the public Journal feed.
 
 ### `Capture to Journal`
 
 Write a normal short-form journal message in the configured Discord channel. Then use the message's Apps/context menu -> `Capture to Journal`.
 
-The Worker stores the original message text, provenance, and first attachment URL as a private raw journal entry. The capture confirmation is ephemeral so the original message remains the visible journal record.
+The Worker stores the original message text, provenance, and first attachment URL as a private raw journal entry. The confirmation is ephemeral so the original message remains the visible Discord journal record.
 
-The message ID and interaction ID are uniquely indexed to prevent duplicate capture.
+### `Publish to Journal`
+
+For a selected note/chart that should appear on the website, a server manager can use the message's Apps/context menu -> `Publish to Journal`.
+
+- If the message was never captured, Signal Bridge creates a public reviewed journal record.
+- If the same Discord message already exists privately, Signal Bridge updates that existing record to `PUBLISHED` + `REVIEWED` instead of creating a duplicate.
+- The first attachment URL is kept as `image_url`, and the public Journal renders it with the entry while the URL remains valid.
+
+The message ID and interaction ID remain uniquely indexed to prevent duplicate capture.
 
 ## Media boundary
 
-Discord attachment URLs are useful source references but should not be treated as permanent archive storage. A later Signal Bridge media phase should copy approved screenshots to durable object storage before relying on them for long-term website display.
+Discord attachment URLs now support immediate published screenshot rendering, but they should not be treated as permanent archive storage. The member/auth phase should copy approved screenshots to durable object storage so public and private journal media remain available independently of Discord CDN URLs.
 
 ## Evidence boundary
 
-Discord journal records are execution/process evidence. Capturing more notes improves the research dataset, but journal observations alone do not prove strategy edge or validate a Pine component.
+Discord journal records are execution/process evidence. They improve the research dataset and the review loop, but historical/backtest/forward evidence classes remain separate inside Signal Bridge.
