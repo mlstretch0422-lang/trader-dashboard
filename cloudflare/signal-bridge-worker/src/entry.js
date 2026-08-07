@@ -1,5 +1,6 @@
 import coreWorker from "./index.js";
 import { handleDiscordInteraction } from "./discord_interactions.js";
+import { handleDiscordIntelligenceInteraction } from "./discord_intelligence_interactions.js";
 import { handleJournalAdminRequest } from "./journal_admin.js";
 import {
   getSessionSummary,
@@ -7,6 +8,18 @@ import {
   handleTradingViewSessionEvent,
   listSessionEvents,
 } from "./session_events.js";
+
+const INTELLIGENCE_COMMANDS = new Set(["status", "orb", "brief"]);
+
+async function discordCommandName(request) {
+  if (request.method !== "POST") return "";
+  try {
+    const payload = JSON.parse(await request.clone().text());
+    return String(payload?.data?.name || "").toLowerCase();
+  } catch {
+    return "";
+  }
+}
 
 async function extendHealth(response, env) {
   if (!response.ok) return response;
@@ -36,6 +49,10 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === "/discord-interactions") {
+      const command = await discordCommandName(request);
+      if (INTELLIGENCE_COMMANDS.has(command)) {
+        return handleDiscordIntelligenceInteraction(request, env);
+      }
       return handleDiscordInteraction(request, env);
     }
 
