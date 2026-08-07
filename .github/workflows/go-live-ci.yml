@@ -109,8 +109,8 @@ jobs:
           grep -q "Mason · Strategy &amp; Research" _site/index.html
           grep -q "Trade, review, and build with Signal Bridge connected" _site/index.html
           ! grep -q "The beta already has a live home" _site/index.html
-          test "$(grep -o 'Strategy Lab' _site/index.html | wc -l | tr -d ' ')" = "1"
-          test "$(grep -o 'Indicator Workspace' _site/index.html | wc -l | tr -d ' ')" = "1"
+          test "$(grep -o '<h3>Strategy Lab</h3>' _site/index.html | wc -l | tr -d ' ')" = "1"
+          test "$(grep -o '<h3>Indicator Workspace</h3>' _site/index.html | wc -l | tr -d ' ')" = "1"
           grep -q "interactive-surface" _site/index.html
           grep -q "legal-disclaimer" _site/index.html
 
