@@ -1,8 +1,9 @@
 import coreWorker from "./index.js";
 import { handleDiscordInteraction } from "./discord_interactions.js";
-import { handleDiscordIntelligenceInteraction } from "./discord_intelligence_interactions.js";
+import { handleDiscordIntelligenceInteraction, INTELLIGENCE_COMMANDS } from "./discord_intelligence_interactions.js";
 import { handleDiscordMemberInteraction, MEMBER_COMMANDS } from "./discord_member_interactions.js";
 import { handleJournalAdminRequest } from "./journal_admin.js";
+import { getMarketIntelligenceResponse, refreshMarketIntelligence } from "./market_intelligence.js";
 import { handleMemberRequest } from "./member_app.js";
 import {
   getSessionSummary,
@@ -10,8 +11,6 @@ import {
   handleTradingViewSessionEvent,
   listSessionEvents,
 } from "./session_events.js";
-
-const INTELLIGENCE_COMMANDS = new Set(["status", "orb", "brief"]);
 
 async function discordCommandName(request) {
   if (request.method !== "POST") return "";
@@ -35,19 +34,42 @@ async function tableReady(env, tableName) {
   }
 }
 
+function bearerToken(request) {
+  const auth = request.headers.get("authorization") || "";
+  return auth.startsWith("Bearer ") ? auth.slice(7) : "";
+}
+
+function json(body, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
+  });
+}
+
 async function extendHealth(response, env) {
   if (!response.ok) return response;
   try {
     const data = await response.clone().json();
-    const [journalTable, sessionTable, memberSessions, interactionLog] = await Promise.all([
+    const [
+      journalTable,
+      sessionTable,
+      memberSessions,
+      interactionLog,
+      intelRuns,
+      calendarTable,
+      headlinesTable,
+    ] = await Promise.all([
       tableReady(env, "journal_entries"),
       tableReady(env, "session_events"),
       tableReady(env, "member_sessions"),
       tableReady(env, "discord_interaction_log"),
+      tableReady(env, "market_intelligence_runs"),
+      tableReady(env, "economic_calendar_events"),
+      tableReady(env, "market_headlines"),
     ]);
     return new Response(JSON.stringify({
       ...data,
-      worker_release: "member-journal-reliability-v1",
+      worker_release: "bot-intelligence-news-v1",
       discord_capture_configured: Boolean(
         env.DISCORD_PUBLIC_KEY &&
         env.DISCORD_APPLICATION_ID &&
@@ -60,6 +82,8 @@ async function extendHealth(response, env) {
       member_sessions_ready: memberSessions,
       interaction_diagnostics_ready: interactionLog,
       session_intelligence_storage: Boolean(env.DB) && sessionTable,
+      market_intelligence_ready: intelRuns && calendarTable && headlinesTable,
+      economic_calendar_provider_configured: Boolean(env.TRADING_ECONOMICS_API_KEY),
     }), {
       status: response.status,
       headers: response.headers,
@@ -79,7 +103,7 @@ export default {
         return handleDiscordMemberInteraction(request, env, ctx);
       }
       if (INTELLIGENCE_COMMANDS.has(command)) {
-        return handleDiscordIntelligenceInteraction(request, env);
+        return handleDiscordIntelligenceInteraction(request, env, ctx);
       }
       return handleDiscordInteraction(request, env, ctx);
     }
@@ -108,10 +132,26 @@ export default {
       return getSessionSummary(url, env);
     }
 
+    if (request.method === "GET" && url.pathname === "/market-intelligence") {
+      return getMarketIntelligenceResponse(env);
+    }
+
+    if (request.method === "POST" && url.pathname === "/market-intelligence/refresh") {
+      if (!env.SIGNAL_BRIDGE_TEST_TOKEN || bearerToken(request) !== env.SIGNAL_BRIDGE_TEST_TOKEN) {
+        return json({ ok: false, error: "unauthorized" }, 401);
+      }
+      const result = await refreshMarketIntelligence(env);
+      return json({ ok: true, results: result });
+    }
+
     const response = await coreWorker.fetch(request, env, ctx);
     if (request.method === "GET" && url.pathname === "/health") {
       return extendHealth(response, env);
     }
     return response;
+  },
+
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(refreshMarketIntelligence(env));
   },
 };
