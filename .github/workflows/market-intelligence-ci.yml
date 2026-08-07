@@ -6,11 +6,14 @@ on:
       - "cloudflare/signal-bridge-worker/src/market_intelligence.js"
       - "cloudflare/signal-bridge-worker/src/discord_intelligence.js"
       - "cloudflare/signal-bridge-worker/src/discord_intelligence_interactions.js"
+      - "cloudflare/signal-bridge-worker/src/bot_scheduler.js"
       - "cloudflare/signal-bridge-worker/src/entry.js"
       - "cloudflare/signal-bridge-worker/register_discord_commands.mjs"
       - "cloudflare/signal-bridge-worker/migrations/0006_market_intelligence.sql"
+      - "cloudflare/signal-bridge-worker/migrations/0007_bot_dispatch_log.sql"
       - "cloudflare/signal-bridge-worker/wrangler.toml"
       - "cloudflare/signal-bridge-worker/MARKET_INTELLIGENCE_V1.md"
+      - "cloudflare/signal-bridge-worker/BOT_DESK_ASSISTANT_V2.md"
       - ".github/workflows/market-intelligence-ci.yml"
 
 permissions:
@@ -28,10 +31,11 @@ jobs:
           node --check cloudflare/signal-bridge-worker/src/market_intelligence.js
           node --check cloudflare/signal-bridge-worker/src/discord_intelligence.js
           node --check cloudflare/signal-bridge-worker/src/discord_intelligence_interactions.js
+          node --check cloudflare/signal-bridge-worker/src/bot_scheduler.js
           node --check cloudflare/signal-bridge-worker/src/entry.js
           node --check cloudflare/signal-bridge-worker/register_discord_commands.mjs
 
-      - name: Validate intelligence migration
+      - name: Validate intelligence migrations
         run: |
           python - <<'PY'
           import sqlite3
@@ -45,13 +49,14 @@ jobs:
               "market_intelligence_runs": {"provider", "data_type", "status", "item_count", "error_code"},
               "economic_calendar_events": {"provider_event_id", "event_time", "event_name", "importance", "actual", "previous", "forecast", "provider_forecast", "fetched_at"},
               "market_headlines": {"provider_item_id", "published_at", "title", "publisher", "url", "fetched_at"},
+              "bot_dispatch_log": {"dispatch_key", "kind", "session_date", "scheduled_for", "status", "error_code"},
           }
           for table, columns in required.items():
               found = {row[1] for row in db.execute(f"PRAGMA table_info({table})")}
               missing = sorted(columns - found)
               if missing:
                   raise SystemExit(f"{table} missing columns: {missing}")
-          print("market intelligence migration OK")
+          print("market intelligence + bot scheduler migrations OK")
           PY
 
       - name: Verify fail-closed and hosted surfaces
@@ -60,10 +65,15 @@ jobs:
           grep -q 'TRADING_ECONOMICS_API_KEY' cloudflare/signal-bridge-worker/src/market_intelligence.js
           grep -q 'importance=3' cloudflare/signal-bridge-worker/src/market_intelligence.js
           grep -q 'Calendar: \*\*UNAVAILABLE\*\*' cloudflare/signal-bridge-worker/src/discord_intelligence.js
+          grep -q 'Setup readiness:' cloudflare/signal-bridge-worker/src/discord_intelligence.js
           grep -q 'name: "news"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
           grep -q 'RESPONSE_DEFERRED_CHANNEL_MESSAGE = 5' cloudflare/signal-bridge-worker/src/discord_intelligence_interactions.js
+          grep -q 'embeds:' cloudflare/signal-bridge-worker/src/discord_intelligence_interactions.js
           grep -q 'url.pathname === "/market-intelligence"' cloudflare/signal-bridge-worker/src/entry.js
           grep -q 'url.pathname === "/market-intelligence/refresh"' cloudflare/signal-bridge-worker/src/entry.js
-          grep -q 'async scheduled' cloudflare/signal-bridge-worker/src/entry.js
-          grep -q 'crons = \["\*/15 \* \* \* \*"\]' cloudflare/signal-bridge-worker/wrangler.toml
+          grep -q 'dispatchScheduledDesk' cloudflare/signal-bridge-worker/src/entry.js
+          grep -q '8 && minute === 45' cloudflare/signal-bridge-worker/src/bot_scheduler.js
+          grep -q '9 && minute === 25' cloudflare/signal-bridge-worker/src/bot_scheduler.js
+          grep -q '11 && minute === 5' cloudflare/signal-bridge-worker/src/bot_scheduler.js
+          grep -Fq 'crons = ["*/15 * * * *", "*/5 12-17 * * 1-5"]' cloudflare/signal-bridge-worker/wrangler.toml
           grep -q 'Fail-closed rule' cloudflare/signal-bridge-worker/MARKET_INTELLIGENCE_V1.md
