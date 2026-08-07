@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#060a11" />
-  <title>Indicator Stack — Signal Bridge</title>
-  <meta name="description" content="Signal Bridge indicator stack: ORB structure, sessions, liquidity, higher-timeframe context, VWAP/EMA, confirmation markers, decision panel, and hosted alerts." />
+  <title>Indicator Workspace — Signal Bridge</title>
+  <meta name="description" content="Signal Bridge indicator workspace: configurable chart modules for ranges, sessions, liquidity, higher-timeframe context, VWAP/EMA, confirmation, decision support, presets, and alerts." />
   <link rel="icon" href="assets/brand/signal-bridge-favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="app.css" />
   <link rel="stylesheet" href="strategy.css" />
@@ -14,81 +14,74 @@
 <body>
   <header class="topbar"><div class="shell topbar-inner">
     <a class="brand" href="index.html"><img src="assets/brand/signal-bridge-mark-blue.svg" alt="Signal Bridge" /><span class="brand-copy"><strong>SIGNAL BRIDGE</strong><span>Trading OS</span></span></a>
-    <nav class="nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="signals.html">Signals</a><a href="strategies.html">Strategies</a><a class="active" href="indicators.html">Indicators</a><a href="journal.html">Journal</a><a href="trade-bible.html">Trade Bible</a><a href="evidence.html">Evidence</a></nav>
+    <nav class="nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="signals.html">Signals</a><a href="strategies.html">Strategies</a><a class="active" href="indicators.html">Indicators</a><a href="journal.html">Journal</a><a href="mason.html">Mason</a></nav>
     <span class="beta-pill">Premium OS · Beta</span>
   </div></header>
 
   <main>
     <section class="shell page-hero research-hero">
-      <div class="breadcrumb"><a href="index.html">Signal Bridge</a> / Indicator Stack</div>
-      <span class="eyebrow" style="margin-top:25px">What the chart should show</span>
-      <h1><span class="gradient-text">One clean execution overlay instead of seven stacked indicators.</span></h1>
-      <p>The Strategy Playbook explains how setups are traded. This page is different: it defines the chart tools that measure and display the information — ORB structure, sessions, liquidity, HTF context, VWAP/EMA, confirmation markers, the decision panel, and Signal Bridge alerts.</p>
-      <div class="hero-kicker"><span class="chip green">Execution support</span><span class="chip blue">Modular</span><span class="chip purple">Configurable</span><span class="chip yellow">Pine v6</span></div>
+      <div class="breadcrumb"><a href="index.html">Signal Bridge</a> / Indicator Workspace</div>
+      <span class="eyebrow" style="margin-top:25px">Chart intelligence · presets · alerts</span>
+      <h1><span class="gradient-text">Build the chart around the strategy — not the other way around.</span></h1>
+      <p>The Indicator Workspace is the tool layer of Signal Bridge. Choose the modules your strategy actually uses, keep the chart readable, save settings as presets, and connect alert output back to the strategy and journal records they support.</p>
+      <div class="hero-kicker"><span class="chip green">Execution support</span><span class="chip blue">Modular</span><span class="chip purple">Configurable</span><span class="chip yellow">Preset ready</span></div>
     </section>
 
     <section class="shell section">
       <div class="tool-vs-strategy">
         <div><span class="eyebrow">Strategy</span><h3>“When would I act?”</h3><p>Rules, setup location, confirmation, invalidation, targets, risk, and the decision to trade or pass.</p><a href="strategies.html">Open Strategy Playbook →</a></div>
-        <div><span class="eyebrow">Indicator</span><h3>“What should I see?”</h3><p>Measured levels, session zones, context, state changes, clean markers, and alerts that support the decision without making it for you.</p></div>
+        <div><span class="eyebrow">Indicator</span><h3>“What should I see?”</h3><p>Measured levels, session zones, context, state changes, clean markers, and alerts that support the decision without replacing it.</p></div>
       </div>
     </section>
 
     <section class="shell section">
-      <div class="section-head"><div><span class="eyebrow">Target Chart Stack</span><h2>The final overlay is a set of transparent modules.</h2></div><p>The visual research pack says price must remain the star. Structure stays visible, labels stay sparse, and every module can be toggled because every module has a specific job.</p></div>
+      <div class="section-head"><div><span class="eyebrow">Module Library</span><h2>Use only the information your rules need.</h2></div><p>Each module has one job and can be configured independently. A member workspace should be able to save a lean execution preset without forcing every Signal Bridge feature onto the same chart.</p></div>
       <div class="module-grid">
-        <article class="module-card"><div class="module-icon">OR</div><h3>Opening-Range Structure</h3><p>8:00–8:15 range box with ORH, ORL, ORM, range size, historical ranges, optional labels, custom session/timezone, and an oversized-range filter.</p><ul><li>Frozen range after build</li><li>Historical ORs preserved</li><li>Box + extension lines</li><li>Range validity separate from trade validity</li></ul><span class="chip green">Core</span></article>
-        <article class="module-card"><div class="module-icon">SE</div><h3>Session / Killzone Map</h3><p>Asia, London, New York AM, lunch, and PM context with light boxes, session highs/lows, optional pivots, and drawing limits so the chart stays readable.</p><ul><li>Custom sessions</li><li>Low-opacity zones</li><li>Pivots extend until invalidated/cutoff</li><li>Labels reduced by default</li></ul><span class="chip blue">Context</span></article>
-        <article class="module-card"><div class="module-icon">HTF</div><h3>Higher-Timeframe Context</h3><p>1H / 4H boundaries, recent highs/lows, optional equilibrium references, and a simple bull / bear / neutral state without opening extra charts.</p><ul><li>1H / 4H references</li><li>Directional context</li><li>Optional candle boundaries</li><li>Stops tiny signals from becoming the thesis</li></ul><span class="chip purple">Next layer</span></article>
-        <article class="module-card"><div class="module-icon">LQ</div><h3>Liquidity Map</h3><p>Prior-day highs/lows, overnight/session extremes, equal highs/lows, and sweep/reclaim state so likely liquidity locations remain visible.</p><ul><li>BSL / SSL references</li><li>Equal highs / lows</li><li>Session liquidity</li><li>Sweep status</li></ul><span class="chip purple">Context</span></article>
-        <article class="module-card"><div class="module-icon">MA</div><h3>VWAP + EMA Context</h3><p>A clean session VWAP plus independently toggleable 20 / 50 / 100 / 200 EMAs. No extra bands or clutter unless they earn a real job.</p><ul><li>VWAP from chart price source</li><li>Each EMA individually toggleable</li><li>Current chart color language preserved</li><li>Context, not automatic signal</li></ul><span class="chip blue">Overlay</span></article>
-        <article class="module-card"><div class="module-icon">PA</div><h3>Confirmation Sequence</h3><p>Sparse fixed markers for the sequence the research keeps returning to: breakout → displacement → pullback → reclaim/reject trigger.</p><ul><li>BRK</li><li>DISP</li><li>PB</li><li>LONG / SHORT / near-ready state</li></ul><span class="chip yellow">Testing</span></article>
-        <article class="module-card"><div class="module-icon">✓</div><h3>Decision Panel</h3><p>A corner checklist that says which module passed or failed instead of hiding everything behind one mystery confidence score.</p><ul><li>ORB valid?</li><li>Location valid?</li><li>Context aligned?</li><li>Trigger confirmed?</li></ul><span class="chip green">Keep</span></article>
-        <article class="module-card"><div class="module-icon">↗</div><h3>Signal Bridge Alerts</h3><p>Durable event output for setup state and, later, the full session lifecycle: premarket snapshot, ORB formed, NY-open state, setup/wait/entry, and post-session outcome.</p><ul><li>Hosted webhook path</li><li>Discord delivery</li><li>D1 event history</li><li>Future session-state events</li></ul><span class="chip green">Live plumbing</span></article>
+        <article class="module-card"><div class="module-icon">OR</div><h3>Opening Range</h3><p>Custom range session with high, low, midpoint, size, optional history, labels, extensions, and configurable timezone.</p><ul><li>Custom build window</li><li>High / low / midpoint</li><li>Historical range toggle</li><li>Range-size filters</li></ul><span class="chip green">Structure</span></article>
+        <article class="module-card"><div class="module-icon">SE</div><h3>Session Map</h3><p>Asia, London, New York, lunch, PM, or any custom market window with light session zones and session highs/lows.</p><ul><li>Custom sessions</li><li>High / low references</li><li>Low-opacity zones</li><li>Drawing limits</li></ul><span class="chip blue">Context</span></article>
+        <article class="module-card"><div class="module-icon">HTF</div><h3>Higher-Timeframe Levels</h3><p>Recent 1H / 4H or user-selected structure references, directional state, boundaries, and equilibrium markers without opening extra charts.</p><ul><li>Selectable timeframe</li><li>Recent high / low</li><li>Directional state</li><li>Optional equilibrium</li></ul><span class="chip purple">Context</span></article>
+        <article class="module-card"><div class="module-icon">LQ</div><h3>Liquidity Map</h3><p>Prior-day levels, overnight/session extremes, equal highs/lows, and sweep-state markers for traders who structure decisions around liquidity.</p><ul><li>PDH / PDL</li><li>Session liquidity</li><li>Equal highs / lows</li><li>Sweep status</li></ul><span class="chip purple">Location</span></article>
+        <article class="module-card"><div class="module-icon">MA</div><h3>VWAP + EMA</h3><p>Session VWAP and independently toggleable moving averages for trend, pullback, or mean-reference context.</p><ul><li>VWAP</li><li>Custom EMA lengths</li><li>Individual visibility</li><li>No forced signal logic</li></ul><span class="chip blue">Overlay</span></article>
+        <article class="module-card"><div class="module-icon">PA</div><h3>Price-Action Markers</h3><p>Optional breakout, displacement, pullback, reclaim, rejection, or structure-shift markers tied to a strategy’s own definitions.</p><ul><li>Breakout state</li><li>Pullback state</li><li>Reclaim / reject</li><li>Long / short / wait markers</li></ul><span class="chip yellow">Confirmation</span></article>
+        <article class="module-card"><div class="module-icon">✓</div><h3>Decision Panel</h3><p>A compact checklist showing which conditions are currently satisfied so the trader can see the state without decoding a mystery score.</p><ul><li>Location</li><li>Context</li><li>Trigger</li><li>Risk / pass state</li></ul><span class="chip green">Decision support</span></article>
+        <article class="module-card"><div class="module-icon">↗</div><h3>Signal Bridge Alerts</h3><p>Structured alert output routed to the hosted Signal Bridge system so events can reach Discord, live history, journals, and later member-specific feeds.</p><ul><li>Hosted webhook</li><li>Discord delivery</li><li>D1 event history</li><li>Strategy / preset labels</li></ul><span class="chip green">Connected</span></article>
       </div>
     </section>
 
     <section class="shell section">
-      <div class="section-head"><div><span class="eyebrow">Visual Blueprint</span><h2>How the chart should feel.</h2></div><p>The project’s visual-source pack compared the real workspace with earlier failed rebuilds. The repeated lesson: use TradingView’s native drawing objects correctly, control history with arrays/drawing limits, keep session fills light, and let the panel be the only deliberately “custom UI” layer.</p></div>
+      <div class="section-head"><div><span class="eyebrow">Visual Blueprint</span><h2>One workspace, one visual language.</h2></div><p>Price stays primary. Structure sits behind it, confirmation markers stay sparse, and the panel is reserved for information that is faster to read as a checklist.</p></div>
       <div class="chart-blueprint">
-        <div class="blueprint-chart" aria-label="Signal Bridge chart stack illustration">
-          <div class="bp-session bp-asia"><span>ASIA</span></div>
-          <div class="bp-session bp-london"><span>LONDON</span></div>
-          <div class="bp-orb"><span>8:00 ORB</span><i class="bp-orh">ORH</i><i class="bp-orm">ORM</i><i class="bp-orl">ORL</i></div>
-          <div class="bp-liq bp-high">PDH / BSL</div>
-          <div class="bp-liq bp-low">PDL / SSL</div>
+        <div class="blueprint-chart" aria-label="Signal Bridge configurable chart stack illustration">
+          <div class="bp-session bp-asia"><span>SESSION A</span></div>
+          <div class="bp-session bp-london"><span>SESSION B</span></div>
+          <div class="bp-orb"><span>OPENING RANGE</span><i class="bp-orh">HIGH</i><i class="bp-orm">MID</i><i class="bp-orl">LOW</i></div>
+          <div class="bp-liq bp-high">PRIOR HIGH / LIQUIDITY</div>
+          <div class="bp-liq bp-low">PRIOR LOW / LIQUIDITY</div>
           <div class="bp-vwap">VWAP</div>
           <div class="bp-path"></div>
-          <div class="bp-marker m1">BRK</div><div class="bp-marker m2">PB</div><div class="bp-marker m3">LONG</div>
-          <aside class="bp-panel"><b>SETUP</b><span>ORB ✓</span><span>HTF ✓</span><span>LIQ ✓</span><span>TRIGGER ✓</span></aside>
+          <div class="bp-marker m1">BRK</div><div class="bp-marker m2">PB</div><div class="bp-marker m3">TRIGGER</div>
+          <aside class="bp-panel"><b>SETUP</b><span>LOC ✓</span><span>CTX ✓</span><span>TRG ✓</span><span>RISK ✓</span></aside>
         </div>
         <div class="blueprint-notes">
-          <div><strong>Price first</strong><span>Zones and lines sit behind candles, not on top of them.</span></div>
-          <div><strong>History stays useful</strong><span>Keep recent OR/session structure without turning the chart into a landfill.</span></div>
-          <div><strong>Labels are earned</strong><span>Session text can stay; pivot/debug text is reduced or toggleable.</span></div>
-          <div><strong>One visual language</strong><span>The overlay should look like one product even though modules remain independent internally.</span></div>
+          <div><strong>Price first</strong><span>Zones and lines sit behind candles instead of covering the market.</span></div>
+          <div><strong>Preset driven</strong><span>Save a clean module combination for each strategy instead of rebuilding the chart every morning.</span></div>
+          <div><strong>Labels are earned</strong><span>Only show markers that help make or review a decision.</span></div>
+          <div><strong>Strategy linked</strong><span>The preset should identify which strategy version and alert rules it belongs to.</span></div>
         </div>
       </div>
     </section>
 
     <section class="shell section">
-      <div class="section-head"><div><span class="eyebrow">Current Code Lineage</span><h2>The files underneath the product.</h2></div><p>Developer lineage belongs down here because these are implementations of the tool stack above — not separate trading strategies.</p></div>
-      <div class="tool-grid">
-        <article class="tool-card"><div class="card-meta"><span class="chip green">Current integration</span><span class="chip blue">Pine v6</span></div><h3>ES/MES ORB Retest Indicator v1.1</h3><p>Current TradingView alert source. Builds the 8:00–8:15 range, supports retest logic/filters, manages one-signal-per-day state, and feeds the hosted Signal Bridge path.</p><div class="tool-specs"><div><span>Role</span><strong>Live event source</strong></div><div><span>Next upgrade</span><strong>Full module stack</strong></div></div></article>
-        <article class="tool-card"><div class="card-meta"><span class="chip blue">UI lineage</span></div><h3>ORB V2 Decision Dashboard</h3><p>The Pine dashboard and helper-panel iterations established the useful corner checklist concept. The next build keeps the panel while rebuilding the chart body around the cleaner reference overlays.</p><div class="tool-specs"><div><span>Role</span><strong>Decision support</strong></div><div><span>Keep</span><strong>Explain failed module</strong></div></div></article>
-        <article class="tool-card"><div class="card-meta"><span class="chip purple">Research tooling</span></div><h3>Mechanical Attribution Harness</h3><p>Strategy-mode code remains a separate research instrument for testing clocks, entries, filters, risk, and exits. It does not belong on the live indicator screen.</p><div class="tool-specs"><div><span>Role</span><strong>Backtest components</strong></div><div><span>Product surface</span><strong>Research only</strong></div></div></article>
-        <article class="tool-card"><div class="card-meta"><span class="chip yellow">Build standard</span></div><h3>Pine v6 Preflight</h3><p>The project checklist locks common failure points: dynamic text, session resets, table handling, state sequencing, type qualifiers, drawing limits, and clean separation between indicator and strategy jobs.</p><div class="tool-specs"><div><span>Goal</span><strong>Compile cleanly</strong></div><div><span>Rule</span><strong>Rewrite cleanly when structure is wrong</strong></div></div></article>
+      <div class="section-head"><div><span class="eyebrow">Premium Workspace</span><h2>Save the tool setup with the trading model.</h2></div><p>The member-facing goal is a reusable indicator workspace rather than a gallery of one trader’s Pine files.</p></div>
+      <div class="grid-4">
+        <div class="card"><span class="chip blue">01</span><h3>Select modules</h3><p>Turn on only the ranges, sessions, context, liquidity, moving averages, and confirmations the strategy uses.</p></div>
+        <div class="card"><span class="chip purple">02</span><h3>Save a preset</h3><p>Keep timeframe, colors, sessions, thresholds, visibility, and alert settings together.</p></div>
+        <div class="card"><span class="chip yellow">03</span><h3>Link the strategy</h3><p>Attach the preset to a strategy version so chart settings do not drift away from the rules being tested.</p></div>
+        <div class="card"><span class="chip green">04</span><h3>Route the alerts</h3><p>Send supported events into Signal Bridge history, Discord, and journal review with the strategy/preset identity preserved.</p></div>
       </div>
-    </section>
-
-    <section class="shell section">
-      <div class="section-head"><div><span class="eyebrow">External Design Research</span><h2>The visual stack is grounded in the platform’s actual strengths.</h2></div><p>TradingView’s Pine documentation specifically positions lines and boxes for support/resistance, price ranges, and custom chart formations, and session inputs/time logic for defining custom market windows. Those capabilities line up directly with the OR/session architecture being built.</p></div>
-      <div class="source-cards">
-        <a class="source-card" href="https://www.tradingview.com/pine-script-docs/visuals/lines-and-boxes/" target="_blank" rel="noopener"><span>TradingView · official docs</span><h3>Lines &amp; boxes</h3><p>Reference for OR boxes, range boundaries, liquidity lines, object limits, and array-managed drawing history.</p><b>Open source ↗</b></a>
-        <a class="source-card" href="https://www.tradingview.com/pine-script-docs/v5/concepts/sessions/" target="_blank" rel="noopener"><span>TradingView · official docs</span><h3>Sessions</h3><p>Reference for user-defined session strings, session inputs, and time-based market-state logic.</p><b>Open source ↗</b></a>
-      </div>
+      <div class="hero-actions"><a class="btn secondary" href="mason.html">See the flagship indicator research inside Mason’s desk →</a></div>
     </section>
   </main>
-  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Indicator Stack</strong><span>Chart structure, context, confirmation, panel state, and alerts.</span></div></footer>
+  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Indicator Workspace</strong><span>Modules · presets · decision support · alerts.</span></div></footer>
 </body>
 </html>
