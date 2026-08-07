@@ -74,6 +74,6 @@ jobs:
           grep -q 'dispatchScheduledDesk' cloudflare/signal-bridge-worker/src/entry.js
           grep -q '8 && minute === 45' cloudflare/signal-bridge-worker/src/bot_scheduler.js
           grep -q '9 && minute === 25' cloudflare/signal-bridge-worker/src/bot_scheduler.js
-          grep -q '11 && minute === 5' cloudflare/signal-bridge-worker/src/bot_scheduler.js
+          grep -q '11 && minute === 10' cloudflare/signal-bridge-worker/src/bot_scheduler.js
           grep -Fq 'crons = ["*/15 * * * *", "*/5 12-17 * * 1-5"]' cloudflare/signal-bridge-worker/wrangler.toml
           grep -q 'Fail-closed rule' cloudflare/signal-bridge-worker/MARKET_INTELLIGENCE_V1.md

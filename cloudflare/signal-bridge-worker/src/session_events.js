@@ -46,6 +46,16 @@ function nullableNumber(value) {
   return parsed;
 }
 
+function normalizeEventTime(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const numeric = Number(value);
+  if (Number.isFinite(numeric) && numeric > 10_000_000_000) {
+    const date = new Date(numeric);
+    if (!Number.isNaN(date.getTime())) return date.toISOString();
+  }
+  return nullableText(value, 96);
+}
+
 function nyDate(date = new Date()) {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: "America/New_York",
@@ -91,7 +101,7 @@ function normalizeSessionEvent(raw, forceTest = false) {
   if (orbMid === null && orbHigh !== null && orbLow !== null) orbMid = (orbHigh + orbLow) / 2;
   if (rangePoints === null && orbHigh !== null && orbLow !== null) rangePoints = Math.abs(orbHigh - orbLow);
 
-  const eventTime = nullableText(raw.time ?? raw.event_time, 96);
+  const eventTime = normalizeEventTime(raw.time ?? raw.event_time);
   return {
     session_date: normalizeSessionDate(raw.session_date),
     event_time: eventTime,

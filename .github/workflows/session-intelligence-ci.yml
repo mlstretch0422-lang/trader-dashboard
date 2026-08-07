@@ -3,12 +3,15 @@ name: Session Intelligence Safety Checks
 on:
   pull_request:
     paths:
+      - "ES_ORB_Indicator_v1_2_SESSION_BRIDGE.pine"
       - "cloudflare/signal-bridge-worker/src/session_events.js"
       - "cloudflare/signal-bridge-worker/src/discord_intelligence.js"
       - "cloudflare/signal-bridge-worker/src/discord_intelligence_interactions.js"
+      - "cloudflare/signal-bridge-worker/src/bot_scheduler.js"
       - "cloudflare/signal-bridge-worker/src/entry.js"
       - "cloudflare/signal-bridge-worker/register_discord_commands.mjs"
       - "cloudflare/signal-bridge-worker/migrations/0004_session_events.sql"
+      - "cloudflare/signal-bridge-worker/PINE_SESSION_BRIDGE_V1.md"
       - ".github/workflows/session-intelligence-ci.yml"
 
 permissions:
@@ -26,6 +29,7 @@ jobs:
           node --check cloudflare/signal-bridge-worker/src/session_events.js
           node --check cloudflare/signal-bridge-worker/src/discord_intelligence.js
           node --check cloudflare/signal-bridge-worker/src/discord_intelligence_interactions.js
+          node --check cloudflare/signal-bridge-worker/src/bot_scheduler.js
           node --check cloudflare/signal-bridge-worker/src/entry.js
           node --check cloudflare/signal-bridge-worker/register_discord_commands.mjs
 
@@ -61,5 +65,26 @@ jobs:
           grep -q 'name: "status"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
           grep -q 'name: "orb"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
           grep -q 'name: "brief"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
-          grep -q 'ORB_FORMED' cloudflare/signal-bridge-worker/src/session_events.js
+          grep -q 'normalizeEventTime' cloudflare/signal-bridge-worker/src/session_events.js
+          grep -q 'numeric > 10_000_000_000' cloudflare/signal-bridge-worker/src/session_events.js
           grep -q 'SESSION_CLOSE' cloudflare/signal-bridge-worker/src/session_events.js
+
+      - name: Verify Pine Session Bridge contract
+        run: |
+          test -s ES_ORB_Indicator_v1_2_SESSION_BRIDGE.pine
+          grep -q '^//@version=6' ES_ORB_Indicator_v1_2_SESSION_BRIDGE.pine
+          grep -q 'Indicator v1.2 SESSION BRIDGE' ES_ORB_Indicator_v1_2_SESSION_BRIDGE.pine
+          grep -q 'Enable Session Lifecycle alert() calls' ES_ORB_Indicator_v1_2_SESSION_BRIDGE.pine
+          grep -q 'f_emit("PREMARKET"' ES_ORB_Indicator_v1_2_SESSION_BRIDGE.pine
+          grep -q 'f_emit("ORB_FORMED"' ES_ORB_Indicator_v1_2_SESSION_BRIDGE.pine
+          grep -q 'f_emit("PREOPEN"' ES_ORB_Indicator_v1_2_SESSION_BRIDGE.pine
+          grep -q 'f_emit("OPEN_SNAPSHOT"' ES_ORB_Indicator_v1_2_SESSION_BRIDGE.pine
+          grep -q 'f_emit("SETUP"' ES_ORB_Indicator_v1_2_SESSION_BRIDGE.pine
+          grep -q 'f_emit("WAIT"' ES_ORB_Indicator_v1_2_SESSION_BRIDGE.pine
+          grep -q 'f_emit("SESSION_CLOSE"' ES_ORB_Indicator_v1_2_SESSION_BRIDGE.pine
+          grep -q 'alertcondition(longSig, title="Long Setup Ready"' ES_ORB_Indicator_v1_2_SESSION_BRIDGE.pine
+          grep -q 'alertcondition(shortSig, title="Short Setup Ready"' ES_ORB_Indicator_v1_2_SESSION_BRIDGE.pine
+          grep -q 'i_orbStart   = input.string("0800"' ES_ORB_Indicator_v1_2_SESSION_BRIDGE.pine
+          grep -q 'i_orbEnd     = input.string("0815"' ES_ORB_Indicator_v1_2_SESSION_BRIDGE.pine
+          grep -q 'i_tradeStart = input.string("0930"' ES_ORB_Indicator_v1_2_SESSION_BRIDGE.pine
+          grep -q 'i_tradeEnd   = input.string("1100"' ES_ORB_Indicator_v1_2_SESSION_BRIDGE.pine
