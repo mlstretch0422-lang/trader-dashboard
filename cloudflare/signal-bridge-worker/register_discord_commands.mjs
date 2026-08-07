@@ -109,6 +109,13 @@ const commands = [
     ],
   },
   {
+    name: "journal-login",
+    type: 1,
+    description: "Open your private Signal Bridge journal workspace",
+    integration_types: [0],
+    contexts: [0],
+  },
+  {
     name: "journal-publish",
     type: 1,
     description: "Publish a stored journal record by ID (server managers only)",
