@@ -33,6 +33,13 @@ NAV_ITEMS = [
     ("evidence.html", "Evidence"),
 ]
 
+LEGAL_NOTE = (
+    '<div class="legal-disclaimer"><div class="shell">'
+    'Signal Bridge provides trading research, education, software tools, and market information. '
+    'Nothing on this site is financial advice or a guarantee of future results. Trading involves risk.'
+    '</div></div>'
+)
+
 
 def copy_if_exists(source: Path, destination: Path) -> None:
     if not source.exists():
@@ -62,6 +69,10 @@ def apply_native_shell(path: Path) -> None:
     # Redirect compatibility pages intentionally have no navigation.
     if count == 0 and path.name not in {"dashboard.html", "reports.html"}:
         raise RuntimeError(f"Could not normalize navigation in {path}")
+
+    if "legal-disclaimer" not in text and "</body>" in text:
+        text = text.replace("</body>", f"  {LEGAL_NOTE}\n</body>", 1)
+
     path.write_text(text, encoding="utf-8")
 
 
