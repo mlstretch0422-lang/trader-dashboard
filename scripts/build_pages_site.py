@@ -14,6 +14,10 @@ SITE_SOURCE = ROOT / "site"
 EXPORT_SCRIPT = ROOT / "trading_os" / "src" / "integrations" / "export_shareable_dashboard.py"
 SHAREABLE = ROOT / "share" / "signal_bridge_premium_shareable.html"
 REPORT = ROOT / "trading_os" / "src" / "integrations" / "report.json"
+RESEARCH_IMAGES = [
+    ROOT / "SPX500_2026-07-08_10-23-12.png",
+    ROOT / "Tradezella-Summary-June-26-2026.png",
+]
 
 
 def copy_if_exists(source: Path, destination: Path) -> None:
@@ -46,6 +50,9 @@ def main() -> int:
     shutil.copy2(SHAREABLE, SITE / "dashboard.html")
 
     copy_if_exists(ROOT / "assets", SITE / "assets")
+    for image in RESEARCH_IMAGES:
+        copy_if_exists(image, SITE / "assets" / "research" / image.name)
+
     copy_if_exists(ROOT / "manifest.json", SITE / "manifest.json")
     copy_if_exists(ROOT / "metadata.json", SITE / "metadata.json")
     copy_if_exists(REPORT, SITE / "report.json")
@@ -60,6 +67,11 @@ def main() -> int:
         SITE / "evidence.html",
         SITE / "signals.html",
         SITE / "signals.css",
+        SITE / "strategies.html",
+        SITE / "mason-orb.html",
+        SITE / "strategy.css",
+        SITE / "assets" / "research" / "SPX500_2026-07-08_10-23-12.png",
+        SITE / "assets" / "research" / "Tradezella-Summary-June-26-2026.png",
         SITE / "dashboard.html",
         SITE / "app.css",
         SITE / "report.json",

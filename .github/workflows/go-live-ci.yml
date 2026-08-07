@@ -69,6 +69,14 @@ jobs:
           test -s _site/index.html
           test -s _site/signals.html
           test -s _site/signals.css
+          test -s _site/strategies.html
+          test -s _site/mason-orb.html
+          test -s _site/strategy.css
+          test -s _site/assets/research/SPX500_2026-07-08_10-23-12.png
+          test -s _site/assets/research/Tradezella-Summary-June-26-2026.png
           test -s _site/report.json
           grep -q "Live Signal History" _site/signals.html
           grep -q "/events" _site/signals.html
+          grep -q "Strategy Library" _site/strategies.html
+          grep -q "The ORB clock is not settled" _site/mason-orb.html
+          grep -q "PF 1.431" _site/mason-orb.html
