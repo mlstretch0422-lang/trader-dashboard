@@ -1,0 +1,69 @@
+name: Market Intelligence Safety Checks
+
+on:
+  pull_request:
+    paths:
+      - "cloudflare/signal-bridge-worker/src/market_intelligence.js"
+      - "cloudflare/signal-bridge-worker/src/discord_intelligence.js"
+      - "cloudflare/signal-bridge-worker/src/discord_intelligence_interactions.js"
+      - "cloudflare/signal-bridge-worker/src/entry.js"
+      - "cloudflare/signal-bridge-worker/register_discord_commands.mjs"
+      - "cloudflare/signal-bridge-worker/migrations/0006_market_intelligence.sql"
+      - "cloudflare/signal-bridge-worker/wrangler.toml"
+      - "cloudflare/signal-bridge-worker/MARKET_INTELLIGENCE_V1.md"
+      - ".github/workflows/market-intelligence-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-market-intelligence:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Check Worker syntax
+        run: |
+          node --check cloudflare/signal-bridge-worker/src/market_intelligence.js
+          node --check cloudflare/signal-bridge-worker/src/discord_intelligence.js
+          node --check cloudflare/signal-bridge-worker/src/discord_intelligence_interactions.js
+          node --check cloudflare/signal-bridge-worker/src/entry.js
+          node --check cloudflare/signal-bridge-worker/register_discord_commands.mjs
+
+      - name: Validate intelligence migration
+        run: |
+          python - <<'PY'
+          import sqlite3
+          from pathlib import Path
+
+          db = sqlite3.connect(":memory:")
+          for migration in sorted(Path("cloudflare/signal-bridge-worker/migrations").glob("*.sql")):
+              db.executescript(migration.read_text())
+
+          required = {
+              "market_intelligence_runs": {"provider", "data_type", "status", "item_count", "error_code"},
+              "economic_calendar_events": {"provider_event_id", "event_time", "event_name", "importance", "actual", "previous", "forecast", "provider_forecast", "fetched_at"},
+              "market_headlines": {"provider_item_id", "published_at", "title", "publisher", "url", "fetched_at"},
+          }
+          for table, columns in required.items():
+              found = {row[1] for row in db.execute(f"PRAGMA table_info({table})")}
+              missing = sorted(columns - found)
+              if missing:
+                  raise SystemExit(f"{table} missing columns: {missing}")
+          print("market intelligence migration OK")
+          PY
+
+      - name: Verify fail-closed and hosted surfaces
+        run: |
+          grep -q 'provider_not_configured' cloudflare/signal-bridge-worker/src/market_intelligence.js
+          grep -q 'TRADING_ECONOMICS_API_KEY' cloudflare/signal-bridge-worker/src/market_intelligence.js
+          grep -q 'importance=3' cloudflare/signal-bridge-worker/src/market_intelligence.js
+          grep -q 'Calendar: \*\*UNAVAILABLE\*\*' cloudflare/signal-bridge-worker/src/discord_intelligence.js
+          grep -q 'name: "news"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
+          grep -q 'RESPONSE_DEFERRED_CHANNEL_MESSAGE = 5' cloudflare/signal-bridge-worker/src/discord_intelligence_interactions.js
+          grep -q 'url.pathname === "/market-intelligence"' cloudflare/signal-bridge-worker/src/entry.js
+          grep -q 'url.pathname === "/market-intelligence/refresh"' cloudflare/signal-bridge-worker/src/entry.js
+          grep -q 'async scheduled' cloudflare/signal-bridge-worker/src/entry.js
+          grep -q 'crons = \["\*/15 \* \* \* \*"\]' cloudflare/signal-bridge-worker/wrangler.toml
+          grep -q 'Fail-closed rule' cloudflare/signal-bridge-worker/MARKET_INTELLIGENCE_V1.md

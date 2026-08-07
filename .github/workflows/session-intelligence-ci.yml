@@ -56,7 +56,8 @@ jobs:
           grep -q 'url.pathname === "/tv-session"' cloudflare/signal-bridge-worker/src/entry.js
           grep -q 'url.pathname === "/session-events"' cloudflare/signal-bridge-worker/src/entry.js
           grep -q 'url.pathname === "/session-summary"' cloudflare/signal-bridge-worker/src/entry.js
-          grep -q 'const INTELLIGENCE_COMMANDS = new Set(\["status", "orb", "brief"\])' cloudflare/signal-bridge-worker/src/entry.js
+          grep -q 'INTELLIGENCE_COMMANDS.has(command)' cloudflare/signal-bridge-worker/src/entry.js
+          grep -q 'new Set(\["status", "orb", "brief", "news"\])' cloudflare/signal-bridge-worker/src/discord_intelligence_interactions.js
           grep -q 'name: "status"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
           grep -q 'name: "orb"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
           grep -q 'name: "brief"' cloudflare/signal-bridge-worker/register_discord_commands.mjs

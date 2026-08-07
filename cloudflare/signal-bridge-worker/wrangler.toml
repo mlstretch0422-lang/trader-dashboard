@@ -3,6 +3,11 @@ main = "src/entry.js"
 compatibility_date = "2026-08-07"
 workers_dev = true
 
+# Keep market/news context warm without relying on the local Mac.
+# The calendar provider fails closed when TRADING_ECONOMICS_API_KEY is absent.
+[triggers]
+crons = ["*/15 * * * *"]
+
 # Wrangler 4.45+ can provision this D1 resource on deploy when the account does
 # not already have the binding. The generated resource ID stays account-side and
 # must never be treated as a trading credential.
@@ -20,3 +25,6 @@ required = [
   "DISCORD_GUILD_ID",
   "DISCORD_JOURNAL_CHANNEL_ID",
 ]
+
+# Optional future production provider secret:
+# TRADING_ECONOMICS_API_KEY
