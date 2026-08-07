@@ -45,15 +45,26 @@ jobs:
           import sqlite3
           from pathlib import Path
 
-          sql = Path("cloudflare/signal-bridge-worker/migrations/0001_signal_events.sql").read_text()
           db = sqlite3.connect(":memory:")
-          db.executescript(sql)
-          columns = [row[1] for row in db.execute("PRAGMA table_info(signal_events)")]
-          required = {"id", "received_at", "symbol", "side", "event", "strategy", "note", "source"}
-          missing = sorted(required - set(columns))
-          if missing:
-              raise SystemExit(f"signal_events migration missing columns: {missing}")
-          print("D1 migration schema OK")
+          for migration in sorted(Path("cloudflare/signal-bridge-worker/migrations").glob("*.sql")):
+              db.executescript(migration.read_text())
+
+          signal_columns = [row[1] for row in db.execute("PRAGMA table_info(signal_events)")]
+          signal_required = {"id", "received_at", "symbol", "side", "event", "strategy", "note", "source"}
+          signal_missing = sorted(signal_required - set(signal_columns))
+          if signal_missing:
+              raise SystemExit(f"signal_events migration missing columns: {signal_missing}")
+
+          journal_columns = [row[1] for row in db.execute("PRAGMA table_info(journal_entries)")]
+          journal_required = {
+              "id", "created_at", "raw_text", "result", "source",
+              "visibility", "review_status", "signal_event_id"
+          }
+          journal_missing = sorted(journal_required - set(journal_columns))
+          if journal_missing:
+              raise SystemExit(f"journal_entries migration missing columns: {journal_missing}")
+
+          print("D1 migration schemas OK")
           PY
 
       - name: Test Discord bridge
@@ -72,11 +83,17 @@ jobs:
           test -s _site/strategies.html
           test -s _site/mason-orb.html
           test -s _site/strategy.css
+          test -s _site/journal.html
+          test -s _site/journal.css
           test -s _site/assets/research/SPX500_2026-07-08_10-23-12.png
           test -s _site/assets/research/Tradezella-Summary-June-26-2026.png
           test -s _site/report.json
           grep -q "Live Signal History" _site/signals.html
           grep -q "/events" _site/signals.html
           grep -q "Strategy Library" _site/strategies.html
+          grep -q "Opening-range variants" _site/strategies.html
           grep -q "The ORB clock is not settled" _site/mason-orb.html
           grep -q "PF 1.431" _site/mason-orb.html
+          grep -q "Journal Intelligence" _site/journal.html
+          grep -q "/journal" _site/journal.html
+          grep -q "Private-first by design" _site/journal.html
