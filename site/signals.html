@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#060a11" />
-  <title>Live Signals — Signal Bridge</title>
-  <meta name="description" content="Live Signal Bridge event history from TradingView through the hosted Worker." />
+  <title>Morning Desk & Live Signals — Signal Bridge</title>
+  <meta name="description" content="Signal Bridge morning desk, setup readiness, session lifecycle, market intelligence, and durable TradingView signal history." />
   <link rel="icon" href="assets/brand/signal-bridge-favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="app.css" />
   <link rel="stylesheet" href="signals.css" />
@@ -17,101 +17,104 @@
         <img src="assets/brand/signal-bridge-mark-blue.svg" alt="Signal Bridge" />
         <span class="brand-copy"><strong>SIGNAL BRIDGE</strong><span>Trading OS</span></span>
       </a>
-      <nav class="nav" aria-label="Main navigation">
-        <a href="index.html">Home</a>
-        <a class="active" href="signals.html">Signals</a>
-        <a href="strategies.html">Strategies</a>
-        <a href="indicators.html">Indicators</a>
-        <a href="journal.html">Journal</a>
-        <a href="trade-bible.html">Trade Bible</a>
-        <a href="evidence.html">Evidence</a>
-      </nav>
+      <nav class="nav" aria-label="Main navigation"><a href="index.html">Home</a><a class="active" href="signals.html">Signals</a><a href="strategies.html">Strategies</a><a href="indicators.html">Indicators</a><a href="journal.html">Journal</a><a href="mason.html">Mason</a></nav>
       <span class="beta-pill">Premium OS · Beta</span>
     </div>
   </header>
 
   <main>
     <section class="shell page-hero signal-hero">
-      <div class="breadcrumb"><a href="index.html">Signal Bridge</a> / Live Signals</div>
-      <span class="eyebrow">TradingView → Signal Bridge → Discord</span>
-      <h1><span class="gradient-text">Live Signal History.</span></h1>
-      <p>The hosted event stream behind Signal Bridge. TradingView alerts pass through the Worker, reach Discord, and remain searchable here so a setup can be reviewed later with its strategy version, timing, market state, and journal record.</p>
-      <div class="hero-kicker"><span class="chip green">Hosted</span><span class="chip blue">Durable history</span><span class="chip purple">Discord delivery</span><span class="chip yellow">Journal linking next</span></div>
+      <div class="breadcrumb"><a href="index.html">Signal Bridge</a> / Morning Desk &amp; Live Signals</div>
+      <span class="eyebrow">Session state → setup readiness → signal history</span>
+      <h1><span class="gradient-text">Know what the day is doing before you stare at the alert.</span></h1>
+      <p>Live Signals now carries the useful parts of the original dashboard: the morning mission, ORB/session state, setup-readiness checklist, news status, session timeline, and the durable event ledger. The percentage below is condition completion — not a win probability.</p>
+      <div class="hero-kicker"><span class="chip green">Hosted</span><span class="chip blue">Session lifecycle</span><span class="chip purple">Discord delivery</span><span class="chip yellow">Readiness, not probability</span></div>
+    </section>
+
+    <section class="shell morning-desk" id="morning-desk">
+      <article class="mission-card">
+        <div class="mission-main">
+          <div class="mission-top"><div><span class="eyebrow">Morning Mission</span><h2 id="deskAction">WAIT</h2></div><span class="session-date" id="sessionDate">No session yet</span></div>
+          <p class="mission-thesis" id="missionThesis">Waiting for a real Signal Bridge session lifecycle event. When Pine begins sending premarket and ORB state, the desk will build the day here automatically.</p>
+          <div class="mission-meta">
+            <div><span>Bias</span><strong id="deskBias">—</strong></div>
+            <div><span>Setup</span><strong id="deskSetup">—</strong></div>
+            <div><span>Target</span><strong id="deskTarget">—</strong></div>
+            <div><span>Latest stage</span><strong id="deskStage">—</strong></div>
+          </div>
+        </div>
+        <aside class="readiness-card">
+          <span class="readiness-label">Setup Readiness</span>
+          <div class="readiness-ring" id="readinessRing" style="--readiness:0deg"><div><strong id="readinessPct">0%</strong><small id="readinessCount">0 / 5</small></div></div>
+          <p>Defined session conditions currently present in the stored lifecycle.</p>
+        </aside>
+      </article>
+
+      <div class="desk-grid">
+        <article class="desk-panel orb-panel">
+          <div class="desk-panel-head"><span>Opening Range</span><b id="orbStatus">Waiting</b></div>
+          <div class="orb-levels">
+            <div><span>ORH</span><strong id="orbHigh">—</strong></div>
+            <div><span>ORM</span><strong id="orbMid">—</strong></div>
+            <div><span>ORL</span><strong id="orbLow">—</strong></div>
+            <div><span>Range</span><strong id="orbRange">—</strong></div>
+          </div>
+          <small id="orbDetail">No ORB_FORMED event received yet.</small>
+        </article>
+
+        <article class="desk-panel readiness-panel">
+          <div class="desk-panel-head"><span>Condition Checklist</span><b id="conditionState">0 complete</b></div>
+          <ul class="condition-list" id="conditionList">
+            <li><i></i><span>ORB formed</span><b>Pending</b></li>
+            <li><i></i><span>Directional context</span><b>Pending</b></li>
+            <li><i></i><span>Setup identified</span><b>Pending</b></li>
+            <li><i></i><span>Actionable side</span><b>Pending</b></li>
+            <li><i></i><span>Target mapped</span><b>Pending</b></li>
+          </ul>
+        </article>
+
+        <article class="desk-panel intel-panel">
+          <div class="desk-panel-head"><span>Market Intelligence</span><b id="intelStatus">Checking</b></div>
+          <div class="intel-calendar" id="calendarBlock"><strong>Economic calendar</strong><span>Checking provider status…</span></div>
+          <div class="headline-stack" id="headlineStack"><p>Loading market headlines…</p></div>
+        </article>
+      </div>
+
+      <article class="timeline-panel">
+        <div class="desk-panel-head"><span>Session Story</span><b id="timelineCount">0 events</b></div>
+        <div class="session-timeline" id="sessionTimeline"><div class="timeline-empty">No production session events have been received yet.</div></div>
+      </article>
     </section>
 
     <section class="shell signal-status-grid" aria-label="Signal system status">
-      <div class="status-card">
-        <span>Hosted Worker</span>
-        <strong id="workerStatus">Checking…</strong>
-        <small id="workerDetail">Connecting to Signal Bridge</small>
-      </div>
-      <div class="status-card">
-        <span>History Storage</span>
-        <strong id="storageStatus">Checking…</strong>
-        <small>D1 durable event ledger</small>
-      </div>
-      <div class="status-card">
-        <span>Visible Events</span>
-        <strong id="eventCount">—</strong>
-        <small>TEST events hidden by default</small>
-      </div>
-      <div class="status-card">
-        <span>Last Refresh</span>
-        <strong id="lastRefresh">—</strong>
-        <small>Auto-refreshes every 30 seconds</small>
-      </div>
+      <div class="status-card"><span>Hosted Worker</span><strong id="workerStatus">Checking…</strong><small id="workerDetail">Connecting to Signal Bridge</small></div>
+      <div class="status-card"><span>Signal Storage</span><strong id="storageStatus">Checking…</strong><small>D1 durable event ledger</small></div>
+      <div class="status-card"><span>Visible Signals</span><strong id="eventCount">—</strong><small>TEST events hidden by default</small></div>
+      <div class="status-card"><span>Last Refresh</span><strong id="lastRefresh">—</strong><small>Auto-refreshes every 30 seconds</small></div>
     </section>
 
     <section class="shell section signal-section">
-      <div class="section-head">
-        <div><span class="eyebrow">Event Ledger</span><h2>Recent production events.</h2></div>
-        <p>Filter by side or event type, inspect the original strategy label and note, and keep the alert history available for post-session review.</p>
-      </div>
-
+      <div class="section-head"><div><span class="eyebrow">Event Ledger</span><h2>Recent production signals.</h2></div><p>The signal ledger stays separate from session intelligence. A signal says something fired; the Morning Desk explains the broader day around it.</p></div>
       <div class="signal-toolbar">
-        <label>
-          <span>Side</span>
-          <select id="sideFilter">
-            <option value="">All sides</option>
-            <option value="LONG">Long</option>
-            <option value="SHORT">Short</option>
-            <option value="WAIT">Wait</option>
-          </select>
-        </label>
-        <label>
-          <span>Event</span>
-          <select id="eventFilter">
-            <option value="">All events</option>
-            <option value="ENTRY">Entry</option>
-            <option value="EXIT">Exit</option>
-            <option value="STOP">Stop</option>
-            <option value="TARGET">Target</option>
-            <option value="ALERT">Alert</option>
-          </select>
-        </label>
+        <label><span>Side</span><select id="sideFilter"><option value="">All sides</option><option value="LONG">Long</option><option value="SHORT">Short</option><option value="WAIT">Wait</option></select></label>
+        <label><span>Event</span><select id="eventFilter"><option value="">All events</option><option value="ENTRY">Entry</option><option value="EXIT">Exit</option><option value="STOP">Stop</option><option value="TARGET">Target</option><option value="ALERT">Alert</option></select></label>
         <button class="refresh-btn" id="refreshButton" type="button">Refresh now</button>
       </div>
-
       <div id="signalNotice" class="notice signal-notice" hidden></div>
-      <div id="signalList" class="signal-list" aria-live="polite">
-        <div class="signal-empty">Loading Signal Bridge history…</div>
-      </div>
+      <div id="signalList" class="signal-list" aria-live="polite"><div class="signal-empty">Loading Signal Bridge history…</div></div>
     </section>
 
     <section class="shell section">
-      <div class="section-head">
-        <div><span class="eyebrow">Premium Signal Layer</span><h2>A feed becomes more useful when the rest of the system knows about it.</h2></div>
-        <p>The premium direction is not just another Discord alert channel. It is a signal record that can connect to a member, a strategy version, a journal entry, and the eventual session outcome.</p>
-      </div>
+      <div class="section-head"><div><span class="eyebrow">Why this matters</span><h2>The alert is one moment. The session is the evidence.</h2></div><p>A useful trading system should know what happened before the setup, whether a trade fired, what happened after it, and why a no-trade day stayed a no-trade day.</p></div>
       <div class="grid-3">
-        <div class="card"><span class="chip green">Live</span><h3>Real-time delivery</h3><p>TradingView → hosted Worker → Discord, without depending on a personal computer staying online.</p></div>
-        <div class="card"><span class="chip blue">Live</span><h3>Durable history</h3><p>Each event keeps a unique ID, receive time, alert time when supplied, symbol, side, event type, strategy label, and note.</p></div>
-        <div class="card"><span class="chip purple">Next</span><h3>Signal → journal review</h3><p>Link the alert directly to the member’s private trade record so entry context, screenshot, result, and later review live together.</p></div>
+        <div class="card"><span class="chip blue">Context</span><h3>Morning state</h3><p>Premarket levels, ORB formation, bias, setup state, news status, and the current location of price.</p></div>
+        <div class="card"><span class="chip green">Action</span><h3>Signal + execution</h3><p>TradingView events remain durable and can later link directly into the member’s journal and strategy version.</p></div>
+        <div class="card"><span class="chip purple">Memory</span><h3>Session Story</h3><p>Post-session outcome closes the loop so no-trade days, failed setups, and target travel become usable research too.</p></div>
       </div>
     </section>
   </main>
 
-  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Live Signals</strong><span>Hosted alerts · durable history · Discord delivery · journal linkage.</span></div></footer>
+  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Morning Desk &amp; Live Signals</strong><span>Session intelligence · readiness · alerts · durable history.</span></div></footer>
 
   <script>
     const API = "https://signal-bridge-webhook.airy-iris.workers.dev";
@@ -127,115 +130,166 @@
     const refreshButton = document.getElementById("refreshButton");
 
     function escapeHtml(value) {
-      return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+      return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
     }
-
+    function formatNumber(value) {
+      if (value === null || value === undefined || value === "") return "—";
+      const number = Number(value);
+      return Number.isFinite(number) ? number.toLocaleString(undefined, { maximumFractionDigits: 2 }) : String(value);
+    }
     function formatTime(value) {
       if (!value) return "Time unavailable";
       const date = new Date(value);
       if (Number.isNaN(date.getTime())) return value;
-      return new Intl.DateTimeFormat(undefined, {
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-        second: "2-digit",
-      }).format(date);
+      return new Intl.DateTimeFormat(undefined, { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" }).format(date);
     }
-
-    function sideClass(side) {
-      if (side === "LONG") return "long";
-      if (side === "SHORT") return "short";
-      return "wait";
-    }
+    function sideClass(side) { return side === "LONG" ? "long" : side === "SHORT" ? "short" : "wait"; }
 
     function renderEvents(events) {
       eventCount.textContent = String(events.length);
       if (!events.length) {
-        list.innerHTML = '<div class="signal-empty"><strong>No production events stored yet.</strong><span>The next real TradingView alert will appear here after history storage is connected.</span></div>';
+        list.innerHTML = '<div class="signal-empty"><strong>No production signals stored yet.</strong><span>The next real TradingView signal will appear here.</span></div>';
         return;
       }
-
       list.innerHTML = events.map((item) => `
         <article class="signal-row">
           <div class="signal-side ${sideClass(item.side)}">${escapeHtml(item.side)}</div>
-          <div class="signal-main">
-            <div class="signal-title">
-              <strong>${escapeHtml(item.symbol)}</strong>
-              <span class="chip blue">${escapeHtml(item.event)}</span>
-              <span class="signal-price">${item.price ? `@ ${escapeHtml(item.price)}` : ""}</span>
-            </div>
-            <p>${escapeHtml(item.note || "TradingView alert")}</p>
-            <div class="signal-meta">
-              <span>${escapeHtml(item.strategy)}</span>
-              <span>Received ${escapeHtml(formatTime(item.received_at))}</span>
-              ${item.alert_time ? `<span>Alert ${escapeHtml(item.alert_time)}</span>` : ""}
-            </div>
-          </div>
+          <div class="signal-main"><div class="signal-title"><strong>${escapeHtml(item.symbol)}</strong><span class="chip blue">${escapeHtml(item.event)}</span><span class="signal-price">${item.price ? `@ ${escapeHtml(item.price)}` : ""}</span></div><p>${escapeHtml(item.note || "TradingView alert")}</p><div class="signal-meta"><span>${escapeHtml(item.strategy)}</span><span>Received ${escapeHtml(formatTime(item.received_at))}</span>${item.alert_time ? `<span>Alert ${escapeHtml(item.alert_time)}</span>` : ""}</div></div>
           <code class="signal-id" title="Event ID">${escapeHtml(String(item.id).slice(0, 8))}</code>
-        </article>
-      `).join("");
+        </article>`).join("");
+    }
+
+    function readinessConditions(summary) {
+      const latest = summary.latest || {};
+      const side = String(latest.side || "").toUpperCase();
+      return [
+        { label:"ORB formed", done:Boolean(summary.orb) },
+        { label:"Directional context", done:Boolean(latest.bias) },
+        { label:"Setup identified", done:Boolean(latest.setup) },
+        { label:"Actionable side", done:side === "LONG" || side === "SHORT" },
+        { label:"Target mapped", done:Boolean(latest.target) },
+      ];
+    }
+
+    function renderSession(summary) {
+      const latest = summary.latest || {};
+      const orb = summary.orb || {};
+      const events = Array.isArray(summary.events) ? summary.events : [];
+      document.getElementById("sessionDate").textContent = summary.session_date || "No session yet";
+      const latestSide = String(latest.side || "WAIT").toUpperCase();
+      const action = latest.stage === "SESSION_CLOSE" ? "SESSION CLOSED" : latestSide || "WAIT";
+      const actionEl = document.getElementById("deskAction");
+      actionEl.textContent = action;
+      actionEl.className = sideClass(latestSide);
+      document.getElementById("missionThesis").textContent = latest.note || "Waiting for a real Signal Bridge session lifecycle event. When Pine begins sending premarket and ORB state, the desk will build the day here automatically.";
+      document.getElementById("deskBias").textContent = latest.bias || "—";
+      document.getElementById("deskSetup").textContent = latest.setup || "—";
+      document.getElementById("deskTarget").textContent = latest.target || "—";
+      document.getElementById("deskStage").textContent = latest.stage ? latest.stage.replaceAll("_", " ") : "—";
+
+      document.getElementById("orbHigh").textContent = formatNumber(orb.orb_high);
+      document.getElementById("orbMid").textContent = formatNumber(orb.orb_mid);
+      document.getElementById("orbLow").textContent = formatNumber(orb.orb_low);
+      document.getElementById("orbRange").textContent = orb.range_points === null || orb.range_points === undefined ? "—" : `${formatNumber(orb.range_points)} pts`;
+      document.getElementById("orbStatus").textContent = summary.orb ? "Formed" : "Waiting";
+      document.getElementById("orbDetail").textContent = summary.orb ? `${orb.symbol || summary.symbol || "MES"} · ${orb.event_time || formatTime(orb.received_at)}` : "No ORB_FORMED event received yet.";
+
+      const conditions = readinessConditions(summary);
+      const completed = conditions.filter((item) => item.done).length;
+      const pct = Math.round(completed / conditions.length * 100);
+      document.getElementById("readinessPct").textContent = `${pct}%`;
+      document.getElementById("readinessCount").textContent = `${completed} / ${conditions.length}`;
+      document.getElementById("readinessRing").style.setProperty("--readiness", `${pct * 3.6}deg`);
+      document.getElementById("conditionState").textContent = `${completed} complete`;
+      document.getElementById("conditionList").innerHTML = conditions.map((item) => `<li class="${item.done ? "done" : "pending"}"><i></i><span>${escapeHtml(item.label)}</span><b>${item.done ? "Ready" : "Pending"}</b></li>`).join("");
+
+      document.getElementById("timelineCount").textContent = `${events.length} event${events.length === 1 ? "" : "s"}`;
+      document.getElementById("sessionTimeline").innerHTML = events.length ? events.map((event) => `<div class="timeline-event"><i></i><div><span>${escapeHtml(event.stage.replaceAll("_", " "))}</span><strong>${escapeHtml(event.note || event.setup || event.outcome || "Session update")}</strong><small>${escapeHtml(event.event_time || formatTime(event.received_at))}${event.price !== null && event.price !== undefined ? ` · ${escapeHtml(formatNumber(event.price))}` : ""}</small></div></div>`).join("") : '<div class="timeline-empty">No production session events have been received yet.</div>';
+    }
+
+    function renderMarketIntel(data) {
+      const calendar = data.calendar || {};
+      const headlines = data.headlines || {};
+      const calendarEvents = Array.isArray(calendar.events) ? calendar.events : [];
+      const headlineItems = Array.isArray(headlines.items) ? headlines.items : [];
+      const intelStatus = document.getElementById("intelStatus");
+      const calendarBlock = document.getElementById("calendarBlock");
+      const headlineStack = document.getElementById("headlineStack");
+
+      if (calendar.status === "OK" && calendar.fresh) {
+        intelStatus.textContent = "Fresh";
+        calendarBlock.className = "intel-calendar good";
+        calendarBlock.innerHTML = `<strong>High-impact calendar</strong><span>${calendarEvents.length ? `${calendarEvents.length} event${calendarEvents.length === 1 ? "" : "s"} in the current window` : "No stored high-impact events in the current window"}</span>`;
+      } else {
+        intelStatus.textContent = "Calendar unavailable";
+        calendarBlock.className = "intel-calendar warn";
+        calendarBlock.innerHTML = '<strong>Economic calendar</strong><span>Unavailable or stale. Signal Bridge does not treat that as “no red news.”</span>';
+      }
+
+      headlineStack.innerHTML = headlineItems.length ? headlineItems.slice(0,3).map((item) => `<a href="${escapeHtml(item.url || "#")}" ${item.url ? 'target="_blank" rel="noopener"' : ""}><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(item.publisher || "Market headline")} · ${escapeHtml(formatTime(item.published_at || item.fetched_at))}</span></a>`).join("") : '<p>No cached headlines available.</p>';
     }
 
     async function checkHealth() {
       try {
-        const response = await fetch(`${API}/health`, { cache: "no-store" });
+        const response = await fetch(`${API}/health`, { cache:"no-store" });
         const data = await response.json();
         if (!response.ok || !data.ok) throw new Error("health_failed");
-        workerStatus.textContent = "Online";
-        workerStatus.className = "good";
-        workerDetail.textContent = `Worker v${data.version || "—"}`;
+        workerStatus.textContent = "Online"; workerStatus.className = "good";
+        workerDetail.textContent = data.worker_release || `Worker v${data.version || "—"}`;
         storageStatus.textContent = data.history_storage ? "Connected" : "Not connected";
         storageStatus.className = data.history_storage ? "good" : "warn";
-      } catch (error) {
-        workerStatus.textContent = "Unavailable";
-        workerStatus.className = "bad";
+      } catch {
+        workerStatus.textContent = "Unavailable"; workerStatus.className = "bad";
         workerDetail.textContent = "Could not reach hosted Worker";
-        storageStatus.textContent = "Unknown";
-        storageStatus.className = "warn";
+        storageStatus.textContent = "Unknown"; storageStatus.className = "warn";
       }
     }
 
     async function loadEvents() {
-      refreshButton.disabled = true;
-      notice.hidden = true;
-      const params = new URLSearchParams({ limit: "50" });
+      const params = new URLSearchParams({ limit:"50" });
       if (sideFilter.value) params.set("side", sideFilter.value);
       if (eventFilter.value) params.set("event", eventFilter.value);
+      const response = await fetch(`${API}/events?${params}`, { cache:"no-store" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "history_failed");
+      storageStatus.textContent = "Connected"; storageStatus.className = "good";
+      renderEvents(data.events || []);
+    }
 
+    async function loadSession() {
       try {
-        const response = await fetch(`${API}/events?${params.toString()}`, { cache: "no-store" });
+        const response = await fetch(`${API}/session-summary?symbol=MES`, { cache:"no-store" });
         const data = await response.json();
-        if (!response.ok) {
-          if (data.error === "history_storage_not_configured") {
-            storageStatus.textContent = "Not connected";
-            storageStatus.className = "warn";
-            eventCount.textContent = "0";
-            list.innerHTML = '<div class="signal-empty"><strong>History backend is ready for its database binding.</strong><span>Alert delivery to Discord remains independent and can continue while D1 is being connected.</span></div>';
-            return;
-          }
-          throw new Error(data.error || "history_failed");
-        }
-        storageStatus.textContent = "Connected";
-        storageStatus.className = "good";
-        renderEvents(data.events || []);
-      } catch (error) {
-        notice.hidden = false;
-        notice.innerHTML = `<strong>History unavailable:</strong> ${escapeHtml(error.message || "Could not load events")}.`;
-        list.innerHTML = '<div class="signal-empty">Signal history could not be loaded right now.</div>';
-      } finally {
-        lastRefresh.textContent = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" }).format(new Date());
-        refreshButton.disabled = false;
+        if (!response.ok || !data.ok) throw new Error(data.error || "session_failed");
+        renderSession(data);
+      } catch {
+        renderSession({ events:[], latest:null, orb:null, session_date:null, symbol:"MES" });
+      }
+    }
+
+    async function loadMarketIntel() {
+      try {
+        const response = await fetch(`${API}/market-intelligence`, { cache:"no-store" });
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw new Error("intel_failed");
+        renderMarketIntel(data);
+      } catch {
+        renderMarketIntel({ calendar:{ status:"UNAVAILABLE", fresh:false, events:[] }, headlines:{ items:[] } });
       }
     }
 
     async function refreshAll() {
-      await Promise.all([checkHealth(), loadEvents()]);
+      refreshButton.disabled = true;
+      notice.hidden = true;
+      try {
+        await Promise.all([checkHealth(), loadEvents(), loadSession(), loadMarketIntel()]);
+      } catch (error) {
+        notice.hidden = false;
+        notice.innerHTML = `<strong>Signal history unavailable:</strong> ${escapeHtml(error.message || "Could not load events")}.`;
+      } finally {
+        lastRefresh.textContent = new Intl.DateTimeFormat(undefined,{hour:"numeric",minute:"2-digit",second:"2-digit"}).format(new Date());
+        refreshButton.disabled = false;
+      }
     }
 
     sideFilter.addEventListener("change", loadEvents);
