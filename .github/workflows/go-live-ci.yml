@@ -96,6 +96,9 @@ jobs:
           test -s _site/report.json
           grep -q "Live Signal History" _site/signals.html
           grep -q "/events" _site/signals.html
+          grep -q "href=\"journal.html\"" _site/signals.html
+          grep -q "href=\"strategies.html\"" _site/trade-bible.html
+          grep -q "href=\"journal.html\"" _site/evidence.html
           grep -q "Strategy Library" _site/strategies.html
           grep -q "Opening-range variants" _site/strategies.html
           grep -q "The ORB clock is not settled" _site/mason-orb.html
@@ -103,3 +106,6 @@ jobs:
           grep -q "Journal Intelligence" _site/journal.html
           grep -q "/journal" _site/journal.html
           grep -q "Private-first by design" _site/journal.html
+          grep -q "Discord Capture" _site/journal.html
+          grep -q "discord_capture_configured" _site/journal.html
+          grep -q "Capture to Journal" _site/journal.html

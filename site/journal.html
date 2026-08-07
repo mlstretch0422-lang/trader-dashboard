@@ -35,9 +35,9 @@
       <div class="breadcrumb"><a href="index.html">Signal Bridge</a> / Journal Intelligence</div>
       <span class="eyebrow" style="margin-top:25px">Capture → Review → Learn</span>
       <h1><span class="gradient-text">Turn every trade into usable data.</span></h1>
-      <p>Journal Intelligence is the bridge between daily execution and long-term research. Short Discord notes, screenshots, signal events, results, and later AI normalization can become one durable trade-learning record instead of disappearing into chat history or camera roll folders.</p>
+      <p>Journal Intelligence is the bridge between daily execution and long-term research. Discord notes, screenshots, signal events, results, and later AI normalization can become one durable trade-learning record instead of disappearing into chat history or camera roll folders.</p>
       <div class="hero-kicker">
-        <span class="chip green">D1 schema ready</span>
+        <span class="chip green">Discord capture live</span>
         <span class="chip blue">Signal-link ready</span>
         <span class="chip yellow">Private first</span>
         <span class="chip purple">AI normalization next</span>
@@ -46,7 +46,8 @@
 
     <section class="shell journal-status-grid" aria-label="Journal system status">
       <div class="journal-status-card"><span>Journal Storage</span><strong id="journalStorage">Checking…</strong><small>D1 durable journal ledger</small></div>
-      <div class="journal-status-card"><span>Capture API</span><strong id="journalIngest">Checking…</strong><small>Authenticated ingestion only</small></div>
+      <div class="journal-status-card"><span>Capture API</span><strong id="journalIngest">Checking…</strong><small>Authenticated direct ingestion</small></div>
+      <div class="journal-status-card"><span>Discord Capture</span><strong id="discordCapture">Checking…</strong><small>Signed interaction endpoint</small></div>
       <div class="journal-status-card"><span>Published Entries</span><strong id="journalCount">—</strong><small>Private entries never appear here</small></div>
       <div class="journal-status-card"><span>Last Refresh</span><strong id="journalRefresh">—</strong><small>Auto-refreshes every 45 seconds</small></div>
     </section>
@@ -54,16 +55,16 @@
     <section class="shell section">
       <div class="section-head">
         <div><span class="eyebrow">Capture Architecture</span><h2>Write once. Reuse everywhere.</h2></div>
-        <p>The target workflow is intentionally simple enough to fit real trading: journal the trade in Discord, preserve the raw note, normalize it later, connect it to Signal Bridge events, and only publish educational material after review.</p>
+        <p>The live workflow is intentionally simple enough to fit real trading: journal in Discord, preserve the raw note privately, normalize it later, connect it to Signal Bridge events, and only publish educational material after review.</p>
       </div>
       <div class="journal-flow">
         <div class="journal-flow-step"><span>01</span><b>Discord journal post</b><small>Fast, short-form note while the trade is fresh.</small></div>
-        <div class="journal-flow-step"><span>02</span><b>Private capture</b><small>Raw text and source reference are stored without public exposure.</small></div>
+        <div class="journal-flow-step"><span>02</span><b>Private capture</b><small>Signed Discord interaction stores the raw note and provenance in D1.</small></div>
         <div class="journal-flow-step"><span>03</span><b>Normalize</b><small>Symbol, direction, setup, result, tags, screenshots, and signal link become structured fields.</small></div>
         <div class="journal-flow-step"><span>04</span><b>Review</b><small>Separate what actually happened from hindsight and research interpretation.</small></div>
         <div class="journal-flow-step"><span>05</span><b>Publish / research</b><small>Approved lessons can feed education, strategy evidence, and future testing.</small></div>
       </div>
-      <div class="privacy-callout"><strong>Private-first by design.</strong> The current beta website is publicly reachable, so raw Discord journal posts should not automatically become public website content. The journal API stores entries as <code>PRIVATE</code> by default; the public page only reads entries explicitly marked <code>PUBLISHED</code>.</div>
+      <div class="privacy-callout"><strong>Private-first by design.</strong> Discord captures default to <code>PRIVATE</code> + <code>RAW</code>. The current public beta page reads only entries explicitly marked <code>PUBLISHED</code>, while the Worker restricts Discord capture to the configured application, server, and trade-journal channel.</div>
     </section>
 
     <section class="shell section journal-section">
@@ -111,13 +112,13 @@
 
     <section class="shell section">
       <div class="section-head">
-        <div><span class="eyebrow">Next Automation Layer</span><h2>Discord can become the capture surface.</h2></div>
-        <p>The storage and API contract are being built so a future Signal Bridge Discord bot can watch the trade-journal channel, send each journal post into the private ledger, and hand it to an AI normalization step without changing how the trader journals in the moment.</p>
+        <div><span class="eyebrow">Live Capture Layer</span><h2>Discord is now the journal surface.</h2></div>
+        <p>Signal Bridge has two hosted capture paths in the configured trade-journal channel. Both preserve the original record privately; neither publishes anything to the website automatically.</p>
       </div>
       <div class="grid-3">
-        <div class="card"><span class="chip blue">Source</span><h3>Discord</h3><p>Short trade journaling stays conversational and accountable instead of forcing a second form during the session.</p></div>
-        <div class="card"><span class="chip purple">Processor</span><h3>AI normalization</h3><p>Extract structured fields and recurring themes while keeping the untouched raw note as provenance.</p></div>
-        <div class="card"><span class="chip green">Destination</span><h3>Signal Bridge</h3><p>Connect approved journal records to signals, strategy versions, screenshots, evidence work, and educational pages.</p></div>
+        <div class="card"><span class="chip green">Live</span><h3>/journal</h3><p>Structured Discord capture for note, symbol, side, result, setup, strategy/version, P&amp;L, R multiple, and an optional chart attachment.</p></div>
+        <div class="card"><span class="chip green">Live</span><h3>Capture to Journal</h3><p>Use the message context command on a normal Discord journal post to preserve the original text, message provenance, and first attachment without retyping it.</p></div>
+        <div class="card"><span class="chip purple">Next</span><h3>AI normalization</h3><p>Turn private raw records into structured summaries and recurring themes while preserving observed, derived, and unknown fields separately.</p></div>
       </div>
     </section>
   </main>
@@ -128,6 +129,7 @@
     const API = "https://signal-bridge-webhook.airy-iris.workers.dev";
     const storage = document.getElementById("journalStorage");
     const ingest = document.getElementById("journalIngest");
+    const discordCapture = document.getElementById("discordCapture");
     const count = document.getElementById("journalCount");
     const refreshTime = document.getElementById("journalRefresh");
     const list = document.getElementById("journalList");
@@ -158,7 +160,7 @@
     function renderEntries(entries) {
       count.textContent = String(entries.length);
       if (!entries.length) {
-        list.innerHTML = '<div class="journal-empty"><strong>No published journal entries yet.</strong><span>That is expected while the private capture pipeline is being connected. Raw journal notes stay private until explicitly reviewed and published.</span></div>';
+        list.innerHTML = '<div class="journal-empty"><strong>No published journal entries yet.</strong><span>Private Discord capture is active. Raw entries stay off this public beta page until they are explicitly reviewed and published.</span></div>';
         return;
       }
 
@@ -192,11 +194,15 @@
         storage.className = data.journal_storage ? "good" : "warn";
         ingest.textContent = data.journal_ingest_configured ? "Configured" : "Token pending";
         ingest.className = data.journal_ingest_configured ? "good" : "warn";
+        discordCapture.textContent = data.discord_capture_configured ? "Connected" : "Not configured";
+        discordCapture.className = data.discord_capture_configured ? "good" : "warn";
       } catch {
         storage.textContent = "Unavailable";
         storage.className = "bad";
         ingest.textContent = "Unknown";
         ingest.className = "warn";
+        discordCapture.textContent = "Unknown";
+        discordCapture.className = "warn";
       }
     }
 
@@ -217,7 +223,7 @@
         count.textContent = "—";
         notice.hidden = false;
         notice.innerHTML = `<strong>Journal unavailable:</strong> ${escapeHtml(error.message || "Could not load journal")}.`;
-        list.innerHTML = '<div class="journal-empty">The journal API is not available on the deployed Worker yet.</div>';
+        list.innerHTML = '<div class="journal-empty">The journal API is not available on the deployed Worker right now.</div>';
       } finally {
         refreshTime.textContent = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" }).format(new Date());
         refreshButton.disabled = false;
