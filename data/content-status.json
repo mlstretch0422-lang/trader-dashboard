@@ -1,8 +1,13 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "updated_at": "2026-08-06",
   "policy": {
-    "status_values": ["VERIFIED", "TESTING", "UNTESTED", "RETIRED"],
+    "status_values": [
+      "VERIFIED",
+      "TESTING",
+      "UNTESTED",
+      "RETIRED"
+    ],
     "evidence_levels": [
       "PROJECT_RULE",
       "IMPLEMENTED",
@@ -32,17 +37,27 @@
       "note": "Verified as an accepted project constraint, not as proof that MES/ES is more profitable than another market."
     },
     {
-      "id": "orb-0800-0815",
-      "name": "Reference ORB: 08:00–08:15 New York",
-      "status": "VERIFIED",
-      "evidence_level": "PROJECT_RULE",
+      "id": "orb-window",
+      "name": "ORB reference window",
+      "status": "TESTING",
+      "evidence_level": "BACKTESTED",
       "category": "session",
-      "claim": "The current project direction uses the 08:00–08:15 New York range as a reference level.",
+      "claim": "The repository contains competing ORB definitions: 08:00–08:15 in current Pine/backtest artifacts and 09:30–09:45 in STRATEGY_SOURCE_OF_TRUTH.md.",
       "sources": [
         "ES_ORB_Indicator_v1_1_FIXED.txt",
+        "ES_ORB_Strategy_v1_1_FIXED.txt",
+        "strat/BACKTEST_COMPARISON.csv",
+        "strat/STRATEGY_SOURCE_OF_TRUTH.md",
         "strat/AUDIT_CURRENT_STATE.md"
       ],
-      "note": "Accepted current reference window. Its standalone edge versus 09:30 variants remains unproven and must be tested separately."
+      "note": "No single ORB clock is promoted as settled until the windows are compared on the same instrument, timeframe, date range, sizing, and cost model.",
+      "test_requirements": [
+        "08:00–08:15 versus 09:30–09:45 versus 09:30–10:00",
+        "Same instrument and timeframe",
+        "Same date range",
+        "Same fill and cost assumptions",
+        "Out-of-sample holdout"
+      ]
     },
     {
       "id": "entry-window",
@@ -87,20 +102,20 @@
       "id": "breakout-retest",
       "name": "ORB breakout → retest → continuation",
       "status": "TESTING",
-      "evidence_level": "IMPLEMENTED",
+      "evidence_level": "BACKTESTED",
       "category": "entry",
-      "claim": "The current Pine files implement a breakout-retest continuation state machine.",
+      "claim": "The Pine files implement a breakout-retest continuation state machine and historical exports exist, but the evidence is not yet apples-to-apples or out-of-sample.",
       "sources": [
         "ES_ORB_Indicator_v1_1_FIXED.txt",
-        "ES_ORB_Strategy_v1_1_FIXED.txt"
+        "ES_ORB_Strategy_v1_1_FIXED.txt",
+        "strat/BACKTEST_COMPARISON.csv"
       ],
       "test_requirements": [
-        "Exact date range",
-        "Trade count",
-        "Commission and slippage",
+        "Exact cost model confirmed",
         "Immediate breakout comparison",
         "Boundary versus midpoint retest comparison",
-        "Walk-forward holdout"
+        "Walk-forward holdout",
+        "Replay or paper-forward confirmation"
       ]
     },
     {
@@ -125,9 +140,11 @@
       "claim": "Long signals require price above VWAP and short signals require price below VWAP when enabled.",
       "sources": [
         "ES_ORB_Indicator_v1_1_FIXED.txt",
-        "ES_ORB_Strategy_v1_1_FIXED.txt"
+        "ES_ORB_Strategy_v1_1_FIXED.txt",
+        "strat/EDGE_ATTRIBUTION.md",
+        "strat/PHASE7_TEST_PLAN.md"
       ],
-      "note": "The repository contains claims that VWAP adds edge, but no accepted isolated attribution record has been located."
+      "note": "The repository contains directional claims about VWAP, but no accepted isolated attribution record has been located."
     },
     {
       "id": "ema-filter",
@@ -151,7 +168,8 @@
       "claim": "The current Pine implementation accepts either threshold as displacement confirmation.",
       "sources": [
         "ES_ORB_Indicator_v1_1_FIXED.txt",
-        "ES_ORB_Strategy_v1_1_FIXED.txt"
+        "ES_ORB_Strategy_v1_1_FIXED.txt",
+        "strat/STRATEGY_SOURCE_OF_TRUTH.md"
       ],
       "note": "The thresholds require head-to-head sensitivity testing and out-of-sample confirmation."
     },
@@ -172,14 +190,24 @@
       "id": "midpoint-retest",
       "name": "ORB midpoint retest",
       "status": "TESTING",
-      "evidence_level": "IMPLEMENTED",
+      "evidence_level": "BACKTESTED",
       "category": "entry",
-      "claim": "Midpoint is the current default retest selection in the v1.1 Pine implementation.",
+      "claim": "Midpoint retest has historical support and is the current Pine default, but it has not been isolated against boundary retest and immediate breakout under a common test design.",
       "sources": [
         "ES_ORB_Indicator_v1_1_FIXED.txt",
-        "ES_ORB_Strategy_v1_1_FIXED.txt"
+        "ES_ORB_Strategy_v1_1_FIXED.txt",
+        "strat/BACKTEST_COMPARISON.csv",
+        "strat/EDGE_ATTRIBUTION.md",
+        "strat/PHASE7_TEST_PLAN.md"
       ],
-      "note": "Default input does not establish superiority."
+      "note": "The strongest exported run reports 156 trades, 39.1% win rate, profit factor 1.431, and 17.75% max drawdown on ES 15-minute data from 2025-04-01 to 2026-02-26. That is evidence of a tested configuration, not isolated proof that midpoint itself caused the result.",
+      "test_requirements": [
+        "Boundary retest control",
+        "Immediate breakout control",
+        "Same dates, timeframe, sizing, and costs",
+        "Walk-forward holdout",
+        "MES execution translation"
+      ]
     },
     {
       "id": "news-filter",
@@ -191,7 +219,8 @@
       "sources": [
         "MECHANICAL_STRATEGY_RESEARCH_BRIEF.md",
         "CONTENT_STATUS_AUDIT.md"
-      ]
+      ],
+      "note": "Requires a deterministic calendar source and an isolated before/after test."
     },
     {
       "id": "fvg-required",
@@ -203,18 +232,27 @@
       "sources": [
         "MECHANICAL_STRATEGY_RESEARCH_BRIEF.md",
         "CONTENT_STATUS_AUDIT.md"
-      ]
+      ],
+      "note": "No accepted isolated attribution record is present."
     },
     {
       "id": "second-trade-after-loss",
       "name": "Second trade after a first loss",
-      "status": "UNTESTED",
-      "evidence_level": "PROJECT_RULE",
+      "status": "TESTING",
+      "evidence_level": "BACKTESTED",
       "category": "risk",
-      "claim": "A second-trade model may be researched only as a separate configuration with a hard daily stop.",
+      "claim": "A historical adaptive-second-trade variant exists and underperformed in the available comparison.",
       "sources": [
+        "strat/BACKTEST_COMPARISON.csv",
         "MECHANICAL_STRATEGY_RESEARCH_BRIEF.md",
-        "CONTENT_STATUS_AUDIT.md"
+        "strat/PHASE7_TEST_PLAN.md"
+      ],
+      "note": "The available MES 15-minute run reports 82 trades, -$203.75 net, profit factor 0.949, and expectancy -$2.48. Treat the current implementation as negative evidence; do not generalize beyond that configuration.",
+      "test_requirements": [
+        "Confirm commissions and slippage",
+        "Compare against the same one-trade baseline",
+        "Use the same dates and sizing",
+        "Reject unless expectancy and drawdown both improve"
       ]
     },
     {
@@ -226,8 +264,10 @@
       "claim": "An ORB break alone is not sufficient authorization to enter.",
       "sources": [
         "MECHANICAL_STRATEGY_RESEARCH_BRIEF.md",
-        "CONTENT_STATUS_AUDIT.md"
-      ]
+        "CONTENT_STATUS_AUDIT.md",
+        "strat/EDGE_ATTRIBUTION.md"
+      ],
+      "note": "Can exist only as a control variant in research, not as the active operating model."
     },
     {
       "id": "net-profit-ranking",
@@ -239,8 +279,98 @@
       "sources": [
         "MECHANICAL_STRATEGY_RESEARCH_BRIEF.md",
         "CONTENT_STATUS_AUDIT.md"
-      ]
+      ],
+      "note": "Net profit remains a reported metric but cannot be the sole selection criterion."
     }
   ],
-  "metrics": []
+  "metrics": [
+    {
+      "id": "v6-midpoint-es-primary",
+      "name": "V6 ORB Midpoint Continuation — primary export",
+      "value": {
+        "net_profit_usd": 32750.0,
+        "total_trades": 156,
+        "win_rate_pct": 39.1,
+        "profit_factor": 1.431,
+        "max_drawdown_usd": 8875.0,
+        "max_drawdown_pct": 17.75,
+        "expectancy_usd": 209.94
+      },
+      "source": "strat/BACKTEST_COMPARISON.csv",
+      "sample_size": 156,
+      "date_range": "2025-04-01 10:00 to 2026-02-26 03:00",
+      "test_type": "historical backtest export",
+      "cost_model": "Not fully documented in the comparison file; must be confirmed before promotion.",
+      "decision": "KEEP AS RESEARCH BASELINE; not production proof.",
+      "instrument": "CME_MINI:ES1!",
+      "timeframe": "15 minutes",
+      "orb_build": "08:00–08:15"
+    },
+    {
+      "id": "v6-midpoint-es-duplicate",
+      "name": "V6 ORB Midpoint Continuation — duplicate export",
+      "value": {
+        "net_profit_usd": 32600.0,
+        "total_trades": 156,
+        "win_rate_pct": 39.1,
+        "profit_factor": 1.428,
+        "max_drawdown_usd": 9075.0,
+        "max_drawdown_pct": 18.15,
+        "expectancy_usd": 208.97
+      },
+      "source": "strat/BACKTEST_COMPARISON.csv",
+      "sample_size": 156,
+      "date_range": "2025-04-01 10:00 to 2026-02-26 03:00",
+      "test_type": "historical backtest export",
+      "cost_model": "Not fully documented in the comparison file; must be confirmed before promotion.",
+      "decision": "DUPLICATE/REPRODUCTION CHECK; investigate the small result difference.",
+      "instrument": "CME_MINI:ES1!",
+      "timeframe": "15 minutes",
+      "orb_build": "08:00–08:15"
+    },
+    {
+      "id": "ml-r13-mes-retest-confluence",
+      "name": "ML R1.3 ORB Retest + Confluence",
+      "value": {
+        "net_profit_usd": 546.25,
+        "total_trades": 74,
+        "win_rate_pct": 40.54,
+        "profit_factor": 1.284,
+        "max_drawdown_usd": 368.75,
+        "max_drawdown_pct": 0.74,
+        "expectancy_usd": 7.38
+      },
+      "source": "strat/BACKTEST_COMPARISON.csv",
+      "sample_size": 74,
+      "date_range": "2025-12-08 09:30 to 2026-03-20 16:55",
+      "test_type": "historical backtest export",
+      "cost_model": "Not fully documented in the comparison file; must be confirmed before promotion.",
+      "decision": "PROMISING RESEARCH; sample is below the 200-trade target and not isolated.",
+      "instrument": "CME_MINI:MES1!",
+      "timeframe": "5 minutes",
+      "orb_build": "08:00–08:15"
+    },
+    {
+      "id": "ml-r12-mes-adaptive-second-trade",
+      "name": "ML R1.2 Adaptive Second Trade",
+      "value": {
+        "net_profit_usd": -203.75,
+        "total_trades": 82,
+        "win_rate_pct": 43.9,
+        "profit_factor": 0.949,
+        "max_drawdown_usd": 1481.25,
+        "max_drawdown_pct": 2.96,
+        "expectancy_usd": -2.48
+      },
+      "source": "strat/BACKTEST_COMPARISON.csv",
+      "sample_size": 82,
+      "date_range": "2025-05-01 09:45 to 2026-03-20 10:00",
+      "test_type": "historical backtest export",
+      "cost_model": "Not fully documented in the comparison file; must be confirmed before promotion.",
+      "decision": "NEGATIVE EVIDENCE; reject the current variant unless a controlled retest overturns it.",
+      "instrument": "CME_MINI:MES1!",
+      "timeframe": "15 minutes",
+      "orb_build": "08:00–08:15"
+    }
+  ]
 }
