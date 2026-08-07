@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Validate the strategy evidence registry.
+"""Validate the strategy evidence registry and Phase 7 experiment manifest.
 
-This script intentionally validates evidence hygiene rather than trading performance.
-It prevents claims from silently losing provenance or being promoted without the
-metadata required by the project governance rules.
+This validates evidence hygiene and experiment structure. It does not validate
+trading performance and it does not compile Pine Script.
 """
 
 from __future__ import annotations
@@ -42,15 +41,8 @@ def require_nonempty_string(item: dict[str, Any], field: str, errors: list[str])
 
 def validate_metric(metric: dict[str, Any], errors: list[str]) -> None:
     required = {
-        "id",
-        "name",
-        "value",
-        "source",
-        "sample_size",
-        "date_range",
-        "test_type",
-        "cost_model",
-        "decision",
+        "id", "name", "value", "source", "sample_size", "date_range",
+        "test_type", "cost_model", "decision",
     }
     missing = sorted(required - metric.keys())
     if missing:
@@ -80,6 +72,12 @@ def validate_experiment_manifest(errors: list[str]) -> int:
         fail(f"invalid experiment manifest JSON: {exc}", errors)
         return 0
 
+    research_script = manifest.get("research_script")
+    if not isinstance(research_script, str) or not research_script.strip():
+        fail("experiment manifest must name a research_script", errors)
+    elif not (ROOT / research_script).exists():
+        fail(f"research_script does not exist: {research_script}", errors)
+
     experiments = manifest.get("experiments")
     if not isinstance(experiments, list) or not experiments:
         fail("experiment manifest must contain a non-empty 'experiments' list", errors)
@@ -90,19 +88,63 @@ def validate_experiment_manifest(errors: list[str]) -> int:
         if not isinstance(experiment, dict):
             fail("every experiment must be an object", errors)
             continue
-        for field in ("id", "question", "variants", "decision_rule"):
-            if field not in experiment:
-                fail(f"experiment {experiment.get('id', '<missing-id>')}: missing '{field}'", errors)
+
         experiment_id = experiment.get("id")
+        for field in ("id", "question", "decision_rule"):
+            value = experiment.get(field)
+            if not isinstance(value, str) or not value.strip():
+                fail(f"experiment {experiment_id or '<missing-id>'}: missing/non-empty '{field}'", errors)
+
         if isinstance(experiment_id, str) and experiment_id.strip():
             experiment_ids.append(experiment_id)
+
         variants = experiment.get("variants")
-        if not isinstance(variants, list) or len(variants) < 2:
-            fail(f"experiment {experiment_id}: must contain at least two variants", errors)
+        manual_checks = experiment.get("manual_checks")
+
+        has_variants = isinstance(variants, list) and len(variants) >= 2
+        has_manual_checks = (
+            isinstance(manual_checks, list)
+            and len(manual_checks) >= 1
+            and all(isinstance(check, str) and check.strip() for check in manual_checks)
+        )
+
+        if not has_variants and not has_manual_checks:
+            fail(
+                f"experiment {experiment_id}: must contain either at least two variants "
+                "or at least one manual sanity check",
+                errors,
+            )
+
+        if isinstance(variants, list):
+            variant_names: list[str] = []
+            for variant in variants:
+                if not isinstance(variant, dict):
+                    fail(f"experiment {experiment_id}: every variant must be an object", errors)
+                    continue
+                name = variant.get("name")
+                if not isinstance(name, str) or not name.strip():
+                    fail(f"experiment {experiment_id}: every variant needs a non-empty name", errors)
+                else:
+                    variant_names.append(name)
+            duplicate_variants = [name for name, count in Counter(variant_names).items() if count > 1]
+            if duplicate_variants:
+                fail(
+                    f"experiment {experiment_id}: duplicate variant names: {', '.join(sorted(duplicate_variants))}",
+                    errors,
+                )
 
     duplicates = [item_id for item_id, count in Counter(experiment_ids).items() if count > 1]
     if duplicates:
         fail(f"duplicate experiment ids: {', '.join(sorted(duplicates))}", errors)
+
+    run_order = manifest.get("run_order", [])
+    if run_order:
+        if not isinstance(run_order, list) or not all(isinstance(item, str) for item in run_order):
+            fail("run_order must be a list of experiment IDs", errors)
+        else:
+            missing_from_manifest = [item for item in run_order if item not in experiment_ids]
+            if missing_from_manifest:
+                fail(f"run_order references missing experiments: {', '.join(missing_from_manifest)}", errors)
 
     return len(experiments)
 
