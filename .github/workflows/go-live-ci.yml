@@ -36,6 +36,9 @@ jobs:
             trading_os/src/integrations/news_calendar_brief.py \
             trading_os/src/integrations/cron_runner.py
 
+      - name: Check hosted Worker syntax
+        run: node --check cloudflare/signal-bridge-worker/src/index.js
+
       - name: Test Discord bridge
         env:
           PYTHONPATH: trading_os
