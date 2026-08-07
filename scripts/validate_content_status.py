@@ -16,6 +16,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = ROOT / "data" / "content-status.json"
+EXPERIMENT_PATH = ROOT / "experiments" / "phase7" / "experiment_manifest.json"
 
 VALID_STATUSES = {"VERIFIED", "TESTING", "UNTESTED", "RETIRED"}
 VALID_EVIDENCE_LEVELS = {
@@ -54,6 +55,56 @@ def validate_metric(metric: dict[str, Any], errors: list[str]) -> None:
     missing = sorted(required - metric.keys())
     if missing:
         fail(f"metric {metric.get('id', '<missing-id>')}: missing {', '.join(missing)}", errors)
+        return
+
+    if not isinstance(metric.get("value"), dict) or not metric["value"]:
+        fail(f"metric {metric.get('id', '<missing-id>')}: 'value' must be a non-empty object", errors)
+
+    sample_size = metric.get("sample_size")
+    if not isinstance(sample_size, (int, float)) or sample_size <= 0:
+        fail(f"metric {metric.get('id', '<missing-id>')}: sample_size must be positive", errors)
+
+    source = metric.get("source")
+    if not isinstance(source, str) or not source.strip():
+        fail(f"metric {metric.get('id', '<missing-id>')}: source must be a repository path", errors)
+
+
+def validate_experiment_manifest(errors: list[str]) -> int:
+    if not EXPERIMENT_PATH.exists():
+        fail(f"experiment manifest not found: {EXPERIMENT_PATH}", errors)
+        return 0
+
+    try:
+        manifest = json.loads(EXPERIMENT_PATH.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        fail(f"invalid experiment manifest JSON: {exc}", errors)
+        return 0
+
+    experiments = manifest.get("experiments")
+    if not isinstance(experiments, list) or not experiments:
+        fail("experiment manifest must contain a non-empty 'experiments' list", errors)
+        return 0
+
+    experiment_ids: list[str] = []
+    for experiment in experiments:
+        if not isinstance(experiment, dict):
+            fail("every experiment must be an object", errors)
+            continue
+        for field in ("id", "question", "variants", "decision_rule"):
+            if field not in experiment:
+                fail(f"experiment {experiment.get('id', '<missing-id>')}: missing '{field}'", errors)
+        experiment_id = experiment.get("id")
+        if isinstance(experiment_id, str) and experiment_id.strip():
+            experiment_ids.append(experiment_id)
+        variants = experiment.get("variants")
+        if not isinstance(variants, list) or len(variants) < 2:
+            fail(f"experiment {experiment_id}: must contain at least two variants", errors)
+
+    duplicates = [item_id for item_id, count in Counter(experiment_ids).items() if count > 1]
+    if duplicates:
+        fail(f"duplicate experiment ids: {', '.join(sorted(duplicates))}", errors)
+
+    return len(experiments)
 
 
 def main() -> int:
@@ -112,12 +163,22 @@ def main() -> int:
     metrics = data.get("metrics", [])
     if not isinstance(metrics, list):
         fail("'metrics' must be a list", errors)
+        metrics = []
     else:
+        metric_ids: list[str] = []
         for metric in metrics:
             if not isinstance(metric, dict):
                 fail("every metric must be an object", errors)
                 continue
             validate_metric(metric, errors)
+            metric_id = metric.get("id")
+            if isinstance(metric_id, str):
+                metric_ids.append(metric_id)
+        duplicate_metrics = [metric_id for metric_id, count in Counter(metric_ids).items() if count > 1]
+        if duplicate_metrics:
+            fail(f"duplicate metric ids: {', '.join(sorted(duplicate_metrics))}", errors)
+
+    experiment_count = validate_experiment_manifest(errors)
 
     if errors:
         print("Content status validation failed:", file=sys.stderr)
@@ -126,7 +187,7 @@ def main() -> int:
         return 1
 
     counts = Counter(item["status"] for item in items)
-    print(f"Registry valid: {len(items)} claims, {len(metrics)} metrics")
+    print(f"Registry valid: {len(items)} claims, {len(metrics)} metrics, {experiment_count} experiments")
     print("Status counts: " + ", ".join(f"{status}={counts.get(status, 0)}" for status in sorted(VALID_STATUSES)))
     return 0
 
