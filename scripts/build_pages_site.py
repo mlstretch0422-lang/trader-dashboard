@@ -1,23 +1,26 @@
 #!/usr/bin/env python3
-"""Build the Signal Bridge Premium OS static artifact for GitHub Pages."""
+"""Build the Signal Bridge static artifact for GitHub Pages."""
 
 from __future__ import annotations
 
 import re
 import shutil
-import subprocess
-import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "_site"
 SITE_SOURCE = ROOT / "site"
-EXPORT_SCRIPT = ROOT / "trading_os" / "src" / "integrations" / "export_shareable_dashboard.py"
-SHAREABLE = ROOT / "share" / "signal_bridge_premium_shareable.html"
 REPORT = ROOT / "trading_os" / "src" / "integrations" / "report.json"
-RESEARCH_IMAGES = [
-    ROOT / "SPX500_2026-07-08_10-23-12.png",
-    ROOT / "Tradezella-Summary-June-26-2026.png",
+
+RESEARCH_IMAGE_MAP = [
+    (ROOT / "SPX500_2026-07-08_10-23-12.png", "SPX500_2026-07-08_10-23-12.png"),
+    (ROOT / "Tradezella-Summary-June-26-2026.png", "Tradezella-Summary-June-26-2026.png"),
+    (ROOT / "helper sc.png", "helper-panel-01.png"),
+    (ROOT / "helper sc 2.png", "helper-panel-02.png"),
+    (ROOT / "strat" / "Trade Stratagey" / "MES1!_2026-03-21_12-26-49.png", "mes-study-01.png"),
+    (ROOT / "strat" / "Trade Stratagey" / "MES1!_2026-03-21_12-51-44.png", "mes-study-02.png"),
+    (ROOT / "strat" / "Trade Stratagey" / "MES1!_2026-03-21_13-18-29.png", "mes-study-03.png"),
+    (ROOT / "strat" / "Trade Stratagey" / "MES1!_2026-03-21_13-19-13.png", "mes-study-04.png"),
 ]
 
 NAV_ITEMS = [
@@ -26,8 +29,8 @@ NAV_ITEMS = [
     ("strategies.html", "Strategies"),
     ("indicators.html", "Indicators"),
     ("journal.html", "Journal"),
-    ("reports.html", "Reports"),
-    ("dashboard.html", "Workspace"),
+    ("trade-bible.html", "Trade Bible"),
+    ("evidence.html", "Evidence"),
 ]
 
 
@@ -43,7 +46,6 @@ def copy_if_exists(source: Path, destination: Path) -> None:
 
 def apply_native_shell(path: Path) -> None:
     text = path.read_text(encoding="utf-8")
-
     if "polish.css" not in text:
         marker = "</head>"
         if marker not in text:
@@ -56,16 +58,10 @@ def apply_native_shell(path: Path) -> None:
         links.append(f'        <a{active} href="{href}">{label}</a>')
     nav_html = '<nav class="nav" aria-label="Main navigation">\n' + "\n".join(links) + "\n      </nav>"
 
-    text, count = re.subn(
-        r'<nav class="nav"(?:\s+aria-label="[^"]*")?>.*?</nav>',
-        nav_html,
-        text,
-        count=1,
-        flags=re.DOTALL,
-    )
-    if count != 1:
+    text, count = re.subn(r'<nav class="nav"(?:\s+aria-label="[^"]*")?>.*?</nav>', nav_html, text, count=1, flags=re.DOTALL)
+    # Redirect compatibility pages intentionally have no navigation.
+    if count == 0 and path.name not in {"dashboard.html", "reports.html"}:
         raise RuntimeError(f"Could not normalize navigation in {path}")
-
     path.write_text(text, encoding="utf-8")
 
 
@@ -74,37 +70,24 @@ def main() -> int:
         shutil.rmtree(SITE)
     SITE.mkdir(parents=True)
 
-    # Preserve the original research console as a generated snapshot. It is now
-    # embedded by the native dashboard.html wrapper instead of replacing the OS page.
-    subprocess.run([sys.executable, str(EXPORT_SCRIPT)], cwd=ROOT, check=True)
-    if not SHAREABLE.exists():
-        raise FileNotFoundError(f"Shareable dashboard was not generated: {SHAREABLE}")
-
     if not SITE_SOURCE.exists():
         raise FileNotFoundError(f"Premium site source is missing: {SITE_SOURCE}")
     copy_if_exists(SITE_SOURCE, SITE)
 
-    # Apply one shared navigation and mobile/product-polish layer to every native
-    # page so the published beta cannot drift into disconnected mini-sites.
     for source_html in SITE_SOURCE.glob("*.html"):
         built_html = SITE / source_html.name
         if built_html.exists():
             apply_native_shell(built_html)
 
-    # Keep the legacy console accessible under a separate internal filename so the
-    # native dashboard.html can provide Signal Bridge navigation and mobile escape.
-    shutil.copy2(SHAREABLE, SITE / "research-dashboard.html")
-
     copy_if_exists(ROOT / "assets", SITE / "assets")
-    for image in RESEARCH_IMAGES:
-        copy_if_exists(image, SITE / "assets" / "research" / image.name)
+    for source, public_name in RESEARCH_IMAGE_MAP:
+        copy_if_exists(source, SITE / "assets" / "research" / public_name)
 
     copy_if_exists(ROOT / "manifest.json", SITE / "manifest.json")
     copy_if_exists(ROOT / "metadata.json", SITE / "metadata.json")
     copy_if_exists(REPORT, SITE / "report.json")
     copy_if_exists(ROOT / "share" / "signal_bridge_report.json", SITE / "signal_bridge_report.json")
 
-    # Prevent Jekyll processing from altering asset paths.
     (SITE / ".nojekyll").write_text("", encoding="utf-8")
 
     required = [
@@ -119,12 +102,14 @@ def main() -> int:
         SITE / "journal.html",
         SITE / "journal.css",
         SITE / "indicators.html",
-        SITE / "reports.html",
-        SITE / "dashboard.html",
-        SITE / "research-dashboard.html",
+        SITE / "research.css",
         SITE / "polish.css",
-        SITE / "assets" / "research" / "SPX500_2026-07-08_10-23-12.png",
-        SITE / "assets" / "research" / "Tradezella-Summary-June-26-2026.png",
+        SITE / "assets" / "research" / "mes-study-01.png",
+        SITE / "assets" / "research" / "mes-study-02.png",
+        SITE / "assets" / "research" / "mes-study-03.png",
+        SITE / "assets" / "research" / "mes-study-04.png",
+        SITE / "assets" / "research" / "helper-panel-01.png",
+        SITE / "assets" / "research" / "helper-panel-02.png",
         SITE / "app.css",
         SITE / "report.json",
     ]
@@ -132,7 +117,7 @@ def main() -> int:
     if missing:
         raise FileNotFoundError(f"Missing required Pages outputs: {missing}")
 
-    print(f"Built Signal Bridge Premium OS Pages artifact at {SITE}")
+    print(f"Built Signal Bridge Pages artifact at {SITE}")
     return 0
 
 

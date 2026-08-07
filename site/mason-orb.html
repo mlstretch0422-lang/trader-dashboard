@@ -5,165 +5,103 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#060a11" />
   <title>Mason ORB — Signal Bridge</title>
-  <meta name="description" content="Mason ORB strategy dossier: process, evidence state, implementation lineage, conflicts, and research roadmap." />
+  <meta name="description" content="Mason ORB: current trading framework, research lineage, historical results, chart studies, implementation state, and next attribution tests." />
   <link rel="icon" href="assets/brand/signal-bridge-favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="app.css" />
   <link rel="stylesheet" href="strategy.css" />
+  <link rel="stylesheet" href="research.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="shell topbar-inner">
-      <a class="brand" href="index.html">
-        <img src="assets/brand/signal-bridge-mark-blue.svg" alt="Signal Bridge" />
-        <span class="brand-copy"><strong>SIGNAL BRIDGE</strong><span>Trading OS</span></span>
-      </a>
-      <nav class="nav" aria-label="Main navigation">
-        <a href="index.html">Home</a>
-        <a href="signals.html">Signals</a>
-        <a class="active" href="strategies.html">Strategies</a>
-        <a href="trade-bible.html">Trade Bible</a>
-        <a href="evidence.html">Evidence</a>
-        <a href="dashboard.html">Dashboard</a>
-      </nav>
-      <span class="beta-pill">Premium OS · Beta</span>
-    </div>
-  </header>
+  <header class="topbar"><div class="shell topbar-inner">
+    <a class="brand" href="index.html"><img src="assets/brand/signal-bridge-mark-blue.svg" alt="Signal Bridge" /><span class="brand-copy"><strong>SIGNAL BRIDGE</strong><span>Trading OS</span></span></a>
+    <nav class="nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="signals.html">Signals</a><a class="active" href="strategies.html">Strategies</a><a href="indicators.html">Indicators</a><a href="journal.html">Journal</a><a href="trade-bible.html">Trade Bible</a><a href="evidence.html">Evidence</a></nav>
+    <span class="beta-pill">Premium OS · Beta</span>
+  </div></header>
 
   <main>
-    <section class="shell page-hero">
-      <div class="breadcrumb"><a href="index.html">Signal Bridge</a> / <a href="strategies.html">Strategy Library</a> / Mason ORB</div>
-      <div class="dossier-header">
-        <div>
-          <span class="eyebrow" style="margin-top:25px">Strategy Dossier · v1</span>
-          <h1><span class="gradient-text">Mason ORB.</span></h1>
-          <p>A structured research model built around overnight market structure, an opening-range reference, pre-New York behavior, retest/acceptance, confluence, and liquidity objectives. This page preserves the strategy as it actually developed — including the clock conflicts and unisolated components that still need work.</p>
-          <div class="card-meta"><span class="chip yellow">Testing</span><span class="chip blue">MES / ES</span><span class="chip green">Alert infrastructure verified</span><span class="chip purple">Edge attribution incomplete</span></div>
-        </div>
-        <aside class="dossier-status" aria-label="Mason ORB status">
-          <div class="dossier-status-row"><span>Primary market</span><strong>MES / ES</strong></div>
-          <div class="dossier-status-row"><span>Session</span><strong>New York morning</strong></div>
-          <div class="dossier-status-row"><span>Execution model</span><strong>Retest / acceptance preferred</strong></div>
-          <div class="dossier-status-row"><span>Live alert source</span><strong>ORB Indicator v1.1</strong></div>
-          <div class="dossier-status-row"><span>Strategy evidence</span><strong>Historical + research only</strong></div>
-        </aside>
+    <section class="shell page-hero research-hero">
+      <div class="breadcrumb"><a href="index.html">Signal Bridge</a> / <a href="strategies.html">Strategies</a> / Mason ORB</div>
+      <span class="eyebrow" style="margin-top:25px">Current Strategy Framework</span>
+      <h1><span class="gradient-text">Mason ORB.</span></h1>
+      <p>An evolving MES / ES New-York-morning framework built from session liquidity, a local opening range, acceptance / rejection, retest behavior, price-action confirmation, and the next plausible liquidity objective. The current goal is not to add more concepts — it is to identify which parts of the process actually carry edge.</p>
+      <div class="hero-kicker"><span class="chip yellow">Testing</span><span class="chip blue">MES / ES</span><span class="chip green">Alert path live</span><span class="chip purple">Attribution next</span></div>
+      <div class="research-kpis">
+        <div class="research-kpi"><span>Largest related config</span><strong>156 trades</strong><small>V6 midpoint continuation historical export</small></div>
+        <div class="research-kpi"><span>Best reconstructed sample PF</span><strong>1.78</strong><small>38-trade V1 study · separate evidence class</small></div>
+        <div class="research-kpi"><span>Current live source</span><strong>ORB v1.1</strong><small>TradingView alerts → Signal Bridge</small></div>
+        <div class="research-kpi"><span>Primary research question</span><strong>What matters?</strong><small>Clock, entry, filters, risk, target behavior</small></div>
       </div>
     </section>
 
     <section class="shell section">
-      <div class="section-head">
-        <div><span class="eyebrow">The Model</span><h2>The decision process in one pass.</h2></div>
-        <p>The raw decision-process source makes one thing clear: the ORB is a reference inside a larger market map, not the whole strategy and not an automatic breakout signal.</p>
-      </div>
+      <div class="section-head"><div><span class="eyebrow">The Process</span><h2>How the morning is actually read.</h2></div><p>The ORB is a reference inside a larger map. The model starts with where liquidity sits and how price behaves around those references.</p></div>
       <div class="model-flow">
-        <div class="model-node"><span>01</span><b>Map Asia, London, previous-day structure</b></div>
-        <div class="model-node"><span>02</span><b>Build the local ORB high, low, midpoint</b></div>
-        <div class="model-node"><span>03</span><b>Read 8:15–9:30 behavior and first breaks</b></div>
-        <div class="model-node"><span>04</span><b>Evaluate the New York open and participation</b></div>
-        <div class="model-node"><span>05</span><b>Wait for retest, hold, reclaim, or rejection</b></div>
-        <div class="model-node"><span>06</span><b>Stack contextual evidence instead of one trigger</b></div>
-        <div class="model-node"><span>07</span><b>Rotate toward the next plausible liquidity target</b></div>
+        <div class="model-node"><span>01</span><b>Map Asia, London, and previous-day liquidity</b></div>
+        <div class="model-node"><span>02</span><b>Build ORB high, low, midpoint, and range</b></div>
+        <div class="model-node"><span>03</span><b>Read pre-New-York breaks, sweeps, and acceptance</b></div>
+        <div class="model-node"><span>04</span><b>Wait for the NY-open participation shift</b></div>
+        <div class="model-node"><span>05</span><b>Use retest / reclaim / rejection instead of chasing</b></div>
+        <div class="model-node"><span>06</span><b>Stack the evidence that is actually present</b></div>
+        <div class="model-node"><span>07</span><b>Target the next plausible liquidity objective</b></div>
       </div>
-      <div class="callout" style="margin-top:14px"><strong>Core mental model:</strong> “Where is price trying to go, what structure has it accepted or rejected, and is the retest giving enough evidence to participate?”</div>
     </section>
 
     <section class="shell section">
-      <div class="section-head">
-        <div><span class="eyebrow">Evidence State</span><h2>What is measurable, implemented, observed, or still discretionary.</h2></div>
-        <p>These labels deliberately stop short of saying “proven edge” where the repository does not contain an isolated controlled test.</p>
+      <div class="section-head"><div><span class="eyebrow">What We Have Tested</span><h2>The framework has a real history.</h2></div><p>These are not all the same strategy, which is exactly why they are useful: each version changed the question and exposed a different weakness or strength.</p></div>
+      <div class="lineage-grid">
+        <article class="lineage-card"><div class="lineage-top"><span class="chip blue">V1 study</span><span>38 trades</span></div><h3>Simple baseline looked promising enough to continue</h3><p>Reconstructed sample: PF 1.78, +$2,381.25 net, +$62.66 expectancy/trade, 31.6% win rate. Good enough for forward-testing research, not large enough for production confidence.</p></article>
+        <article class="lineage-card"><div class="lineage-top"><span class="chip red">R1.2</span><span>82 trades</span></div><h3>More trades did not automatically improve the system</h3><p>The adaptive second-trade branch reached 43.9% win rate but finished at PF 0.949 and -$203.75. That version is useful negative evidence against equating activity or win rate with edge.</p></article>
+        <article class="lineage-card"><div class="lineage-top"><span class="chip yellow">R1.3</span><span>74 reported</span></div><h3>Retest + confluence moved back positive</h3><p>MES 5-minute export: PF 1.284 and +$546.25. It remains research-grade because the total-trade count does not reconcile with the listed wins and losses.</p></article>
+        <article class="lineage-card"><div class="lineage-top"><span class="chip green">V6</span><span>156 trades</span></div><h3>Midpoint continuation became the strongest historical export</h3><p>ES 15-minute export: PF 1.431, +$32,750, 39.1% win rate, 17.75% max drawdown. It is the best current large-sample historical result in the comparison file, not a live track record.</p></article>
       </div>
+      <div class="hero-actions"><a class="btn secondary" href="evidence.html">Open the full research archive →</a></div>
+    </section>
+
+    <section class="shell section">
+      <div class="section-head"><div><span class="eyebrow">Chart Studies</span><h2>Visual research from the original build.</h2></div><p>The current site now uses more of the actual archive instead of one random chart and one journal summary.</p></div>
+      <div class="archive-grid">
+        <figure class="archive-shot"><img src="assets/research/mes-study-01.png" alt="Mason ORB archived MES chart study 1" /><figcaption>Archived MES study 01 · visual process research from the early strategy build.</figcaption></figure>
+        <figure class="archive-shot"><img src="assets/research/mes-study-02.png" alt="Mason ORB archived MES chart study 2" /><figcaption>Archived MES study 02 · preserved to compare levels, structure, and trade behavior across versions.</figcaption></figure>
+        <figure class="archive-shot"><img src="assets/research/mes-study-03.png" alt="Mason ORB archived MES chart study 3" /><figcaption>Archived MES study 03 · qualitative chart evidence, not a standalone performance claim.</figcaption></figure>
+        <figure class="archive-shot"><img src="assets/research/mes-study-04.png" alt="Mason ORB archived MES chart study 4" /><figcaption>Archived MES study 04 · part of the original research set that led into later mechanical work.</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="shell section">
+      <div class="section-head"><div><span class="eyebrow">Current Research Stack</span><h2>What is solid enough to use, and what still needs proof.</h2></div></div>
       <div class="matrix">
-        <div class="matrix-row"><strong>Session highs / lows</strong><span class="chip green">Objective</span><p>Asia, London, and previous-day references are measurable levels. Their usefulness as directional targets still depends on context and has not been isolated as an edge contribution.</p></div>
-        <div class="matrix-row"><strong>ORB high / low / midpoint</strong><span class="chip yellow">Testing</span><p>Implemented across multiple historical versions and backtests, but the exact clock differs across sources. The level itself is objective; the preferred clock is not settled.</p></div>
-        <div class="matrix-row"><strong>Retest / acceptance entry</strong><span class="chip yellow">Testing</span><p>Central to Mason’s raw process and present in historical strategy variants. Existing evidence does not cleanly isolate retest versus immediate breakout on the same data.</p></div>
-        <div class="matrix-row"><strong>VWAP alignment</strong><span class="chip yellow">Testing</span><p>Used as a directional filter in the process and implemented in code. The repository explicitly notes that no clean VWAP-on versus VWAP-off attribution test exists.</p></div>
-        <div class="matrix-row"><strong>EMA trend alignment</strong><span class="chip purple">Untested</span><p>Secondary confirmation in the raw process. It is implemented in historical code, but its independent contribution remains unknown.</p></div>
-        <div class="matrix-row"><strong>FVG / imbalance context</strong><span class="chip purple">Untested</span><p>Part of the discretionary framework and visible in historical trade notes, but not established as a required mechanical rule with isolated performance evidence.</p></div>
-        <div class="matrix-row"><strong>Volume / participation reading</strong><span class="chip purple">Discretionary</span><p>Volume is measurable, but interpreting conviction, participation, or weak acceptance remains contextual and visually judged in the current process.</p></div>
-        <div class="matrix-row"><strong>Liquidity target selection</strong><span class="chip purple">Discretionary</span><p>The candidate levels are objective. Choosing which target price is actually seeking remains one of the most discretionary parts of the framework.</p></div>
+        <div class="matrix-row"><strong>Session highs / lows</strong><span class="chip green">Objective</span><p>Asia, London, and previous-day references can be measured cleanly and stored as session state.</p></div>
+        <div class="matrix-row"><strong>ORB high / low / midpoint</strong><span class="chip yellow">Testing</span><p>The levels are objective; the preferred clock remains a controlled research question because 8:00–8:15 and cash-open variants represent different market regimes.</p></div>
+        <div class="matrix-row"><strong>Retest / acceptance / rejection</strong><span class="chip yellow">Testing</span><p>Central to the human process and historical variants. The next strategy harness needs matched comparisons against immediate breakout entries.</p></div>
+        <div class="matrix-row"><strong>VWAP / EMA / displacement</strong><span class="chip purple">Attribution pending</span><p>Implemented or historically used, but not independently proven as required filters.</p></div>
+        <div class="matrix-row"><strong>FVG / imbalance context</strong><span class="chip purple">Discretionary</span><p>Useful chart context in the current process; not yet a locked mechanical requirement.</p></div>
+        <div class="matrix-row"><strong>Liquidity target selection</strong><span class="chip purple">Discretionary</span><p>Candidate levels can be measured; deciding which objective price is seeking still needs structured labels and outcome data.</p></div>
       </div>
     </section>
 
     <section class="shell section">
-      <div class="conflict-box">
-        <div class="section-head" style="margin-bottom:10px">
-          <div><span class="eyebrow">Known Conflict</span><h2>The ORB clock is not settled.</h2></div>
-          <p>This is exactly the kind of contradiction Signal Bridge is supposed to preserve instead of hiding.</p>
-        </div>
-        <div class="conflict-grid">
-          <div class="conflict-side"><span>Raw decision process + current alert integration</span><strong>8:00–8:15 ET</strong><p>The actual-process document uses the 8:00–8:15 range, and the current v1.1 integration indicator follows that clock.</p></div>
-          <div class="conflict-side"><span>Simplified strategy source-of-truth v1</span><strong>9:30–9:45 ET</strong><p>The older mechanical specification calls the cash-open range primary and explicitly questions the pre-market clock.</p></div>
-        </div>
-        <p style="color:#a6b5c8;font-size:12px;line-height:1.65;margin-bottom:0"><strong style="color:#ff9baa">Current research position:</strong> neither document gets to erase the other. The audit identifies the clock mismatch as a major confounder because changing the ORB window changes the market regime, entry timing, range distribution, stops, and targets. The clocks need like-for-like isolation testing.</p>
+      <div class="section-head"><div><span class="eyebrow">Signal Bridge Layer</span><h2>The strategy is becoming a data source, not just an alert.</h2></div><p>The end-state is a session lifecycle that records what the ORB did even on no-trade days.</p></div>
+      <div class="flow">
+        <div class="flow-step"><b>Pre-market context</b><span>Sessions, prior levels, scheduled risk</span></div>
+        <div class="flow-step"><b>ORB formed</b><span>High, low, midpoint, range</span></div>
+        <div class="flow-step"><b>NY-open state</b><span>Location, sweep, acceptance / rejection</span></div>
+        <div class="flow-step"><b>Setup / wait / entry</b><span>Durable strategy events</span></div>
+        <div class="flow-step"><b>Post-session outcome</b><span>Which side broke, target travel, no-trade reason</span></div>
       </div>
+      <div class="hero-actions"><a class="btn secondary" href="signals.html">Live signal ledger →</a><a class="btn secondary" href="journal.html">Journal Intelligence →</a></div>
     </section>
 
     <section class="shell section">
-      <div class="section-head">
-        <div><span class="eyebrow">Historical Configurations</span><h2>Useful evidence, not a marketing headline.</h2></div>
-        <p>The current exports show that several ORB configurations produced materially different outcomes. They do not prove the isolated contribution of every component inside those configurations.</p>
-      </div>
-      <div class="evidence-strip">
-        <div class="evidence-stat"><span>V6 ES · 15m</span><strong>PF 1.431</strong><small>156 trades · 39.1% win rate · historical configuration result. A near-duplicate V6 export exists and is not independent confirmation.</small></div>
-        <div class="evidence-stat"><span>MES R1.3 · 5m</span><strong>PF 1.284</strong><small>74 reported trades · retest + confluence configuration. The export’s 30 wins + 41 losses totals 71, leaving a data-quality mismatch to reconcile.</small></div>
-        <div class="evidence-stat"><span>MES R1.2 · 15m</span><strong>PF 0.949</strong><small>82 trades · negative historical evidence. Preserved because failed variants matter to the research record.</small></div>
-      </div>
-      <div class="hero-actions"><a class="btn secondary" href="evidence.html">Open full Evidence Desk →</a></div>
-    </section>
-
-    <section class="shell section">
-      <div class="section-head">
-        <div><span class="eyebrow">Integration Layer</span><h2>The plumbing works. That is not the same as the edge working.</h2></div>
-        <p>The v1.1 indicator currently exists because it is a stable signal source for the hosted Signal Bridge path.</p>
-      </div>
-      <div class="grid-3">
-        <div class="card"><span class="chip green">Verified infrastructure</span><h3>TradingView → Worker</h3><p>Real TradingView-originated test alerts reached the hosted Worker successfully.</p></div>
-        <div class="card"><span class="chip green">Verified infrastructure</span><h3>Worker → Discord + D1</h3><p>Signal delivery and durable event storage have both been observed end to end.</p></div>
-        <div class="card"><span class="chip yellow">Strategy testing</span><h3>ORB v1.1 logic</h3><p>The same indicator being reliable as an alert source does not validate its clock, retest, filters, range settings, or profitability.</p></div>
-      </div>
-      <div class="hero-actions"><a class="btn secondary" href="signals.html">Open live event ledger →</a></div>
-    </section>
-
-    <section class="shell section">
-      <div class="section-head">
-        <div><span class="eyebrow">Research Captures</span><h2>The project has visual evidence too.</h2></div>
-        <p>These are preserved project captures, shown as research context rather than cherry-picked proof of profitability.</p>
-      </div>
-      <div class="research-gallery">
-        <figure class="research-shot"><img src="assets/research/SPX500_2026-07-08_10-23-12.png" alt="Trading research chart capture" /><figcaption class="research-caption">Chart capture from the project archive. Used as qualitative context for structure, levels, and the evolving morning process; not an isolated strategy test.</figcaption></figure>
-        <figure class="research-shot"><img src="assets/research/Tradezella-Summary-June-26-2026.png" alt="Trade journal summary capture" /><figcaption class="research-caption">Trade-journal summary capture from the project archive. Journal screenshots support process review, but do not replace a reconciled trade-level dataset.</figcaption></figure>
-      </div>
-    </section>
-
-    <section class="shell section">
-      <div class="section-head">
-        <div><span class="eyebrow">Source Lineage</span><h2>Where this dossier comes from.</h2></div>
-        <p>Strategy pages should always be traceable back to real project material.</p>
-      </div>
-      <div class="source-table">
-        <div class="source-row"><b>MASON_DECISION_PROCESS.md</b><p>Raw description of how Mason actually maps sessions, uses the 8:00–8:15 ORB, reads pre-NY behavior, waits for retests, stacks confluence, and thinks about liquidity.</p><span class="chip blue">Primary process source</span></div>
-        <div class="source-row"><b>STRATEGY_SOURCE_OF_TRUTH.md</b><p>Older simplified mechanical specification. Useful for rule definitions, but it contains unsupported “PROVEN” language and a conflicting 9:30–9:45 ORB clock.</p><span class="chip yellow">Reconcile</span></div>
-        <div class="source-row"><b>AUDIT_CURRENT_STATE.md</b><p>Documents the major conflicts: ORB clock, entry mode, sizing, stop placement, filter weighting, session rules, and incomplete journal data.</p><span class="chip green">Audit</span></div>
-        <div class="source-row"><b>BACKTEST_COMPARISON.csv</b><p>Historical configuration metrics used by the Evidence Desk. Useful for comparison, but not sufficient for isolated component attribution.</p><span class="chip purple">Historical data</span></div>
-        <div class="source-row"><b>ES_ORB_Indicator_v1_1_FIXED.txt</b><p>Current Pine integration source used to produce the real TradingView alerts feeding Signal Bridge.</p><span class="chip blue">Implemented</span></div>
-      </div>
-    </section>
-
-    <section class="shell section">
-      <div class="section-head">
-        <div><span class="eyebrow">Research Queue</span><h2>What has to happen before promotion.</h2></div>
-        <p>The page should get stronger because the evidence gets stronger — not because the copy gets more confident.</p>
-      </div>
+      <div class="section-head"><div><span class="eyebrow">Next Tests</span><h2>What gets answered when Pine research resumes.</h2></div></div>
       <div class="roadmap-list">
-        <div class="roadmap-item"><div><b>ORB clock isolation</b><p>Run comparable 8:00–8:15 and cash-open range definitions on matched dates, cost models, timeframe, sizing, and exits.</p></div></div>
-        <div class="roadmap-item"><div><b>Entry-mode attribution</b><p>Separate immediate breakout, boundary retest, and midpoint retest so a profitable full configuration is not mistaken for proof of one entry method.</p></div></div>
-        <div class="roadmap-item"><div><b>Filter attribution</b><p>Test VWAP, EMA, displacement, range, FVG, and other filters one variable at a time or through a controlled experiment matrix.</p></div></div>
-        <div class="roadmap-item"><div><b>Risk-model reconciliation</b><p>Lock position sizing, stop placement, target method, commission, slippage, and force-flat behavior before comparing strategy variants.</p></div></div>
-        <div class="roadmap-item"><div><b>Journal data structure</b><p>Turn screenshots and notes into trade-level records with setup type, version, timestamps, result, MAE/MFE, context, and review notes.</p></div></div>
-        <div class="roadmap-item"><div><b>Forward evidence</b><p>Only after historical attribution: replay / walk-forward, paper-forward, funded or live evidence kept in separate stages.</p></div></div>
+        <div class="roadmap-item"><div><b>ORB clock isolation</b><p>8:00–8:15 versus cash-open variants on matched dates, timeframe, risk, costs, and exits.</p></div></div>
+        <div class="roadmap-item"><div><b>Entry-mode attribution</b><p>Immediate breakout versus boundary retest versus midpoint retest.</p></div></div>
+        <div class="roadmap-item"><div><b>Filter attribution</b><p>VWAP, EMA, displacement, range, volume, and other filters measured one change at a time.</p></div></div>
+        <div class="roadmap-item"><div><b>Risk / exit reconciliation</b><p>Lock costs, position sizing, stop logic, target model, break-even behavior, and forced-flat timing before comparisons.</p></div></div>
+        <div class="roadmap-item"><div><b>Forward evidence</b><p>Replay, paper-forward, and eventually funded/live evidence stored separately from backtests.</p></div></div>
       </div>
     </section>
   </main>
-
-  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Mason ORB</strong><span>Research, education, and tooling — not trade authorization.</span></div></footer>
+  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Mason ORB</strong><span>Current framework · historical evidence · next tests.</span></div></footer>
 </body>
 </html>
