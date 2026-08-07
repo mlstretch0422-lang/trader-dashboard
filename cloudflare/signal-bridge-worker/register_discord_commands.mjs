@@ -39,6 +39,21 @@ const commands = [
     options: [symbolOption],
   },
   {
+    name: "news",
+    type: 1,
+    description: "Show high-impact calendar context and recent market headlines",
+    integration_types: [0],
+    contexts: [0],
+    options: [
+      {
+        name: "refresh",
+        description: "Refresh hosted market intelligence before replying",
+        type: 5,
+        required: false,
+      },
+    ],
+  },
+  {
     name: "journal",
     type: 1,
     description: "Save a trade journal entry to Signal Bridge",
