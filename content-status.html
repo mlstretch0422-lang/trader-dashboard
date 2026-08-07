@@ -12,7 +12,7 @@
     <header class="topbar">
       <div class="brand">
         <h1>Strategy Evidence Registry</h1>
-        <p>What is accepted, implemented, being tested, untested, or retired.</p>
+        <p>Accepted rules, implementation state, historical evidence, open tests, and retired logic.</p>
       </div>
       <a class="backLink" href="./index.html">Back to Signal Bridge</a>
     </header>
@@ -25,7 +25,8 @@
         <ul class="policyList">
           <li><strong>VERIFIED</strong> can mean an accepted project rule. It does not automatically mean statistically proven edge.</li>
           <li><strong>IMPLEMENTED</strong> means code exists. It does not mean the rule should be marketed as validated.</li>
-          <li>Any performance claim must name its source file, period, sample size, test type, costs, and acceptance decision.</li>
+          <li><strong>BACKTESTED</strong> means a complete historical configuration produced an output. It does not isolate the contribution of every component inside it.</li>
+          <li>Any performance claim must name its source file, period, sample size, test type, cost-model status, and acceptance decision.</li>
         </ul>
       </article>
 
@@ -34,6 +35,37 @@
         <div class="countGrid" id="countGrid"></div>
         <p>Schema <strong id="schemaVersion">--</strong><br />Updated <strong id="updatedAt">--</strong></p>
       </article>
+    </section>
+
+    <section class="panel evidencePanel">
+      <div class="sectionHeading">
+        <div>
+          <h2>Historical configuration evidence</h2>
+          <p>These rows are sourced from <code>strat/BACKTEST_COMPARISON.csv</code>. They are not apples-to-apples and are not presented as production performance.</p>
+        </div>
+        <span id="metricCount">Loading metrics...</span>
+      </div>
+      <div class="tableWrap">
+        <table class="evidenceTable">
+          <thead>
+            <tr>
+              <th>Configuration / decision</th>
+              <th>Instrument</th>
+              <th>TF</th>
+              <th>ORB</th>
+              <th>Trades</th>
+              <th>Win rate</th>
+              <th>PF</th>
+              <th>Expectancy</th>
+              <th>Max DD</th>
+              <th>Period / cost-model status</th>
+            </tr>
+          </thead>
+          <tbody id="metricRows">
+            <tr><td colspan="10">Loading historical evidence...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </section>
 
     <section class="controls" aria-label="Registry filters">
