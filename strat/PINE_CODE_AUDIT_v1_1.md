@@ -112,22 +112,43 @@ The file name does not mean:
 - paper-forward validated
 - safe for live use
 
-### 8. The cost model needs explicit verification
+### 8. The cost model is easy to misread
 
 The declaration includes:
 
 ```pine
+commission_type=strategy.commission.cash_per_contract
 commission_value=1.2
 slippage=2
 ```
 
-The meaning and realism of these settings must be confirmed for the exact TradingView symbol, contract, and order model used in each export.
+In TradingView Pine, `commission_value=1.2` under `cash_per_contract` means **$1.20 per contract per executed order** in the strategy account currency. More importantly, `slippage=2` means **2 ticks**, not 2 index points.
 
-### 9. Range thresholds are instrument/regime assumptions
+For ES/MES, where the minimum tick is typically 0.25 index points, `slippage=2` models about **0.50 points of slippage per affected fill**, not 2.00 points. Any project document or old test note describing this declaration as “2 points slippage” is therefore inconsistent with the Pine implementation.
+
+**Impact:** comparing runs while describing one as 2-point slippage and another as `slippage=2` can create false apples-to-apples claims.
+
+**Required fix:** every exported run must record both the raw Pine setting and its interpreted units, e.g. `slippage_ticks=2`, `mintick=0.25`, `slippage_points=0.50`.
+
+### 9. `process_orders_on_close=true` is a deliberate fill assumption, not live execution proof
+
+The strategy declaration enables:
+
+```pine
+process_orders_on_close=true
+```
+
+TradingView's broker emulator can therefore fill generated orders on the signal bar's closing tick rather than waiting for the next bar's open. This keeps signal-close entries aligned with the coded `plannedEntry := close`, but it can be more optimistic than live execution in some situations.
+
+**Impact:** a profitable close-fill backtest does not establish that the same result survives next-tick or real broker fills.
+
+**Required fix:** keep the setting frozen during component attribution, label the result as a close-fill historical model, then run a separate execution-sensitivity test before production promotion.
+
+### 10. Range thresholds are instrument/regime assumptions
 
 The default 5–50 point ORB gate is coded identically for ES and MES because both quote the same index points, but its volatility-regime effect is not established.
 
-### 10. Indicator and strategy authorization differ
+### 11. Indicator and strategy authorization differ
 
 The indicator emits visual signals; the strategy simulates orders and management. A chart signal compiling successfully does not validate fill quality or account survival.
 
@@ -138,9 +159,10 @@ The indicator emits visual signals; the strategy simulates orders and management
 3. Add setup invalidation and reset reason.
 4. Change primary new-entry cutoff to 10:30.
 5. Create a clean one-entry / one-stop / one-target attribution baseline.
-6. Reproduce a known historical export.
-7. Test entry mode, ORB clock, VWAP, EMA, displacement, and range filters one at a time.
-8. Add partials, staircase stops, breakeven, and adaptive logic only after the entry model is stable.
+6. Lock and record the exact date range and execution model.
+7. Reproduce a known historical export.
+8. Test entry mode, ORB clock, VWAP, EMA, displacement, and range filters one at a time.
+9. Add partials, staircase stops, breakeven, and adaptive logic only after the entry model is stable.
 
 ## Promotion decision
 
