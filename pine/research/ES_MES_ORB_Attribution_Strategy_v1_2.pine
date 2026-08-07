@@ -93,9 +93,6 @@ f_inWindow(string startHHMM, string endHHMM) =>
 f_newDay() =>
     ta.change(dayofmonth(time, i_timezone)) != 0
 
-f_resetSetup() =>
-    [0, int(na), false]
-
 //──────────────────────────────────────────────────────────────────────
 // Session state
 //──────────────────────────────────────────────────────────────────────
@@ -292,7 +289,7 @@ plotshape(i_showMarkers and shortSig, title="Short Signal", style=shape.triangle
 var table dash = table.new(position.top_right, 2, 12, border_width=1)
 if i_showDashboard and barstate.islast
     table.cell(dash, 0, 0, "ORB ATTRIBUTION v1.2", text_color=color.white, bgcolor=color.new(color.blue, 65))
-    table.cell(dash, 1, 0, "RESEARCH", text_color=color.white, bgcolor=color.new(color.amber, 55))
+    table.cell(dash, 1, 0, "RESEARCH", text_color=color.white, bgcolor=color.new(color.orange, 55))
     table.cell(dash, 0, 1, "Entry Mode")
     table.cell(dash, 1, 1, i_entryMode)
     table.cell(dash, 0, 2, "ORB Clock")
