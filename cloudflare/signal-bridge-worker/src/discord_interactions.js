@@ -3,6 +3,8 @@ const INTERACTION_APPLICATION_COMMAND = 2;
 const RESPONSE_PONG = 1;
 const RESPONSE_CHANNEL_MESSAGE = 4;
 const MESSAGE_EPHEMERAL = 1 << 6;
+const PERMISSION_ADMINISTRATOR = 1n << 3n;
+const PERMISSION_MANAGE_GUILD = 1n << 5n;
 
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -62,6 +64,15 @@ function optionMap(interaction) {
 
 function invokingUserId(interaction) {
   return interaction?.member?.user?.id || interaction?.user?.id || null;
+}
+
+function canPublishJournal(interaction) {
+  try {
+    const permissions = BigInt(interaction?.member?.permissions || "0");
+    return Boolean(permissions & PERMISSION_ADMINISTRATOR) || Boolean(permissions & PERMISSION_MANAGE_GUILD);
+  } catch {
+    return false;
+  }
 }
 
 function allowedDiscordLocation(interaction, env) {
@@ -151,6 +162,18 @@ async function insertDiscordJournal(record, env) {
   return { inserted: (result.meta?.changes ?? 0) > 0 };
 }
 
+async function promoteDiscordMessage(targetMessageId, imageUrl, env) {
+  if (!env.DB || !targetMessageId) return { promoted: false };
+  const result = await env.DB.prepare(
+    `UPDATE journal_entries
+     SET visibility = 'PUBLISHED',
+         review_status = 'REVIEWED',
+         image_url = COALESCE(image_url, ?2)
+     WHERE discord_message_id = ?1`,
+  ).bind(targetMessageId, imageUrl || null).run();
+  return { promoted: (result.meta?.changes ?? 0) > 0 };
+}
+
 function baseRecord(interaction, overrides) {
   const now = new Date().toISOString();
   return {
@@ -184,14 +207,17 @@ function baseRecord(interaction, overrides) {
 }
 
 function commandReceipt(record) {
-  const lines = ["📝 **SIGNAL BRIDGE | JOURNAL SAVED**"];
+  const published = record.visibility === "PUBLISHED";
+  const lines = [published ? "📡 **SIGNAL BRIDGE | JOURNAL PUBLISHED**" : "📝 **SIGNAL BRIDGE | JOURNAL SAVED**"];
   const identity = [record.symbol, record.side, record.result].filter(Boolean).join(" | ");
   if (identity) lines.push(identity);
   if (record.setup) lines.push(`Setup: ${record.setup}`);
   if (record.rr !== null) lines.push(`R: ${record.rr}`);
   if (record.pnl !== null) lines.push(`P&L: ${record.pnl}`);
   lines.push(`Note: ${record.raw_text.slice(0, 700)}`);
-  lines.push("Saved privately to Signal Bridge Journal Intelligence.");
+  lines.push(published
+    ? "Published to the Signal Bridge Journal website."
+    : "Saved privately to Signal Bridge Journal Intelligence.");
   return lines.join("\n");
 }
 
@@ -205,10 +231,22 @@ async function handleSlashJournal(interaction, env) {
     });
   }
 
+  const publishRequested = options.publish === true;
+  if (publishRequested && !canPublishJournal(interaction)) {
+    return jsonResponse({
+      type: RESPONSE_CHANNEL_MESSAGE,
+      data: {
+        content: "Publishing to the public Journal is limited to server managers. Re-run without Publish to save privately.",
+        flags: MESSAGE_EPHEMERAL,
+      },
+    });
+  }
+
   const chartId = options.chart || null;
   const attachment = chartId ? interaction?.data?.resolved?.attachments?.[chartId] : null;
   const tags = ["discord", "trade-journal", "slash-command"];
   if (options.setup) tags.push(compactText(options.setup, 40).toLowerCase());
+  if (publishRequested) tags.push("published");
 
   const record = baseRecord(interaction, {
     symbol: nullableText(options.symbol, 32)?.toUpperCase() || null,
@@ -224,10 +262,13 @@ async function handleSlashJournal(interaction, env) {
     source: "discord-slash",
     source_ref: sourceRef(interaction, {
       command: "journal",
+      publish_requested: publishRequested,
       attachment_id: chartId,
       attachment_filename: attachment?.filename || null,
     }),
     image_url: attachment?.url || null,
+    visibility: publishRequested ? "PUBLISHED" : "PRIVATE",
+    review_status: publishRequested ? "REVIEWED" : "RAW",
   });
 
   const stored = await insertDiscordJournal(record, env);
@@ -247,7 +288,17 @@ async function handleSlashJournal(interaction, env) {
   });
 }
 
-async function handleMessageCapture(interaction, env) {
+async function handleMessageCapture(interaction, env, publish = false) {
+  if (publish && !canPublishJournal(interaction)) {
+    return jsonResponse({
+      type: RESPONSE_CHANNEL_MESSAGE,
+      data: {
+        content: "Publishing to the public Journal is limited to server managers.",
+        flags: MESSAGE_EPHEMERAL,
+      },
+    });
+  }
+
   const targetId = interaction?.data?.target_id;
   const targetMessage = targetId ? interaction?.data?.resolved?.messages?.[targetId] : null;
   if (!targetMessage) {
@@ -272,20 +323,36 @@ async function handleMessageCapture(interaction, env) {
     });
   }
 
+  if (publish) {
+    const promoted = await promoteDiscordMessage(targetId, firstAttachment?.url || null, env);
+    if (promoted.promoted) {
+      return jsonResponse({
+        type: RESPONSE_CHANNEL_MESSAGE,
+        data: {
+          content: "Published the existing Signal Bridge journal record to the website ✅",
+          flags: MESSAGE_EPHEMERAL,
+          allowed_mentions: { parse: [] },
+        },
+      });
+    }
+  }
+
   const authorId = targetMessage?.author?.id || null;
   const record = baseRecord(interaction, {
-    title: "Discord journal message",
+    title: publish ? "Published Discord journal message" : "Discord journal message",
     raw_text: rawText || fallbackText,
-    tags: JSON.stringify(["discord", "trade-journal", "message-capture"]),
-    source: "discord-message",
+    tags: JSON.stringify(["discord", "trade-journal", "message-capture", ...(publish ? ["published"] : [])]),
+    source: publish ? "discord-publish" : "discord-message",
     source_ref: sourceRef(interaction, {
-      command: "Capture to Journal",
+      command: publish ? "Publish to Journal" : "Capture to Journal",
       target_message_id: targetId,
       target_author_id: authorId,
       attachment_id: firstAttachment?.id || null,
       attachment_filename: firstAttachment?.filename || null,
     }),
     image_url: firstAttachment?.url || null,
+    visibility: publish ? "PUBLISHED" : "PRIVATE",
+    review_status: publish ? "REVIEWED" : "RAW",
     discord_message_id: targetId,
     discord_author_id: authorId,
   });
@@ -295,8 +362,12 @@ async function handleMessageCapture(interaction, env) {
     type: RESPONSE_CHANNEL_MESSAGE,
     data: {
       content: stored.inserted
-        ? "Captured that trade-journal message privately into Signal Bridge ✅"
-        : "That message is already in Signal Bridge Journal Intelligence.",
+        ? (publish
+          ? "Published that trade-journal message to Signal Bridge ✅"
+          : "Captured that trade-journal message privately into Signal Bridge ✅")
+        : (publish
+          ? "That message already exists in Signal Bridge. Use Publish to Journal again after the service refresh if it is still private."
+          : "That message is already in Signal Bridge Journal Intelligence."),
       flags: MESSAGE_EPHEMERAL,
       allowed_mentions: { parse: [] },
     },
@@ -348,7 +419,10 @@ export async function handleDiscordInteraction(request, env) {
       return await handleSlashJournal(interaction, env);
     }
     if (commandName === "capture to journal") {
-      return await handleMessageCapture(interaction, env);
+      return await handleMessageCapture(interaction, env, false);
+    }
+    if (commandName === "publish to journal") {
+      return await handleMessageCapture(interaction, env, true);
     }
   } catch (error) {
     console.error(`Signal Bridge Discord journal capture failed: ${error?.message || "CAPTURE_ERROR"}`);
