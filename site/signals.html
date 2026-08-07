@@ -21,10 +21,10 @@
         <a href="index.html">Home</a>
         <a class="active" href="signals.html">Signals</a>
         <a href="strategies.html">Strategies</a>
+        <a href="indicators.html">Indicators</a>
         <a href="journal.html">Journal</a>
         <a href="trade-bible.html">Trade Bible</a>
         <a href="evidence.html">Evidence</a>
-        <a href="dashboard.html">Dashboard</a>
       </nav>
       <span class="beta-pill">Premium OS · Beta</span>
     </div>
@@ -33,9 +33,10 @@
   <main>
     <section class="shell page-hero signal-hero">
       <div class="breadcrumb"><a href="index.html">Signal Bridge</a> / Live Signals</div>
-      <span class="eyebrow">TradingView → Signal Bridge</span>
+      <span class="eyebrow">TradingView → Signal Bridge → Discord</span>
       <h1><span class="gradient-text">Live Signal History.</span></h1>
-      <p>The durable event ledger for production Signal Bridge alerts. Events originate from TradingView, pass through the hosted Worker, route to Discord, and are stored here for review. This is event history — not trade authorization and not a claim of strategy profitability.</p>
+      <p>The hosted event stream behind Signal Bridge. TradingView alerts pass through the Worker, reach Discord, and remain searchable here so a setup can be reviewed later with its strategy version, timing, market state, and journal record.</p>
+      <div class="hero-kicker"><span class="chip green">Hosted</span><span class="chip blue">Durable history</span><span class="chip purple">Discord delivery</span><span class="chip yellow">Journal linking next</span></div>
     </section>
 
     <section class="shell signal-status-grid" aria-label="Signal system status">
@@ -64,7 +65,7 @@
     <section class="shell section signal-section">
       <div class="section-head">
         <div><span class="eyebrow">Event Ledger</span><h2>Recent production events.</h2></div>
-        <p>Use the filters to inspect direction and event type. The default view excludes authenticated TEST events so infrastructure checks do not pollute the trading record.</p>
+        <p>Filter by side or event type, inspect the original strategy label and note, and keep the alert history available for post-session review.</p>
       </div>
 
       <div class="signal-toolbar">
@@ -99,18 +100,18 @@
 
     <section class="shell section">
       <div class="section-head">
-        <div><span class="eyebrow">Evidence Boundary</span><h2>What this page proves — and what it does not.</h2></div>
-        <p>Infrastructure evidence and strategy evidence stay separate.</p>
+        <div><span class="eyebrow">Premium Signal Layer</span><h2>A feed becomes more useful when the rest of the system knows about it.</h2></div>
+        <p>The premium direction is not just another Discord alert channel. It is a signal record that can connect to a member, a strategy version, a journal entry, and the eventual session outcome.</p>
       </div>
       <div class="grid-3">
-        <div class="card"><span class="chip green">Infrastructure</span><h3>Event delivery</h3><p>A stored event shows the hosted Signal Bridge received and normalized an alert. Discord delivery is handled by the same Worker path.</p></div>
-        <div class="card"><span class="chip blue">Provenance</span><h3>Traceable history</h3><p>Each row receives a unique event ID plus Worker receive time, TradingView alert time when supplied, symbol, side, event type, strategy label, and note.</p></div>
-        <div class="card"><span class="chip yellow">Research</span><h3>Not strategy proof</h3><p>Frequency or outcome of these alerts does not by itself validate the ORB model, any confluence component, or profitability. Those claims remain inside the evidence process.</p></div>
+        <div class="card"><span class="chip green">Live</span><h3>Real-time delivery</h3><p>TradingView → hosted Worker → Discord, without depending on a personal computer staying online.</p></div>
+        <div class="card"><span class="chip blue">Live</span><h3>Durable history</h3><p>Each event keeps a unique ID, receive time, alert time when supplied, symbol, side, event type, strategy label, and note.</p></div>
+        <div class="card"><span class="chip purple">Next</span><h3>Signal → journal review</h3><p>Link the alert directly to the member’s private trade record so entry context, screenshot, result, and later review live together.</p></div>
       </div>
     </section>
   </main>
 
-  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Premium Trading OS</strong><span>Research, education, and tooling — not trade authorization.</span></div></footer>
+  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Live Signals</strong><span>Hosted alerts · durable history · Discord delivery · journal linkage.</span></div></footer>
 
   <script>
     const API = "https://signal-bridge-webhook.airy-iris.workers.dev";
