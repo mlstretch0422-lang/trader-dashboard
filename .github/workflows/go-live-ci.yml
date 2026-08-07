@@ -32,6 +32,7 @@ jobs:
             trading_os/src/integrations/alert_bridge.py \
             trading_os/src/integrations/run_signal_bridge.py \
             trading_os/src/integrations/serve_signal_bridge.py \
+            trading_os/src/integrations/live_market_brief.py \
             trading_os/src/integrations/daily_brief.py \
             trading_os/src/integrations/news_calendar_brief.py \
             trading_os/src/integrations/cron_runner.py
@@ -91,9 +92,22 @@ jobs:
           test -s _site/strategy.css
           test -s _site/journal.html
           test -s _site/journal.css
+          test -s _site/indicators.html
+          test -s _site/reports.html
+          test -s _site/dashboard.html
+          test -s _site/research-dashboard.html
+          test -s _site/polish.css
           test -s _site/assets/research/SPX500_2026-07-08_10-23-12.png
           test -s _site/assets/research/Tradezella-Summary-June-26-2026.png
           test -s _site/report.json
+          grep -q "Research it. Trade it. Record it. Improve it." _site/index.html
+          grep -q "Built around Mason" _site/index.html
+          grep -q "Indicator Library" _site/indicators.html
+          grep -q "Validated live edge" _site/indicators.html
+          grep -q "Reports & Research" _site/reports.html
+          grep -q "research-dashboard.html" _site/dashboard.html
+          grep -q "OS Home" _site/dashboard.html
+          grep -q "polish.css" _site/trade-bible.html
           grep -q "Live Signal History" _site/signals.html
           grep -q "/events" _site/signals.html
           grep -q "href=\"journal.html\"" _site/signals.html
