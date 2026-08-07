@@ -1,0 +1,40 @@
+name: Journal Backend Safety Checks
+
+on:
+  pull_request:
+    paths:
+      - "cloudflare/signal-bridge-worker/src/**"
+      - "cloudflare/signal-bridge-worker/register_discord_commands.mjs"
+      - ".github/workflows/journal-backend-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-journal-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Check Worker module syntax
+        run: |
+          node --check cloudflare/signal-bridge-worker/src/index.js
+          node --check cloudflare/signal-bridge-worker/src/entry.js
+          node --check cloudflare/signal-bridge-worker/src/discord_interactions.js
+          node --check cloudflare/signal-bridge-worker/src/journal_admin.js
+          node --check cloudflare/signal-bridge-worker/register_discord_commands.mjs
+
+      - name: Verify journal management surfaces
+        run: |
+          grep -q 'journal_admin_configured' cloudflare/signal-bridge-worker/src/entry.js
+          grep -q 'startsWith("/journal-admin/")' cloudflare/signal-bridge-worker/src/entry.js
+          grep -q 'export async function handleJournalAdminRequest' cloudflare/signal-bridge-worker/src/journal_admin.js
+          grep -q 'raw_text and provenance fields are intentionally immutable' cloudflare/signal-bridge-worker/src/journal_admin.js
+          grep -q 'name: "journal-inbox"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
+          grep -q 'name: "journal-publish"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
+          grep -q 'name: "journal-private"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
+          grep -q 'commandName === "journal-inbox"' cloudflare/signal-bridge-worker/src/discord_interactions.js
+          grep -q 'commandName === "journal-publish"' cloudflare/signal-bridge-worker/src/discord_interactions.js
+          grep -q 'commandName === "journal-private"' cloudflare/signal-bridge-worker/src/discord_interactions.js
+          grep -q 'ID: ${record.id.slice(0, 8)}' cloudflare/signal-bridge-worker/src/discord_interactions.js
