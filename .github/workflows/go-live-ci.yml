@@ -103,11 +103,15 @@ jobs:
           test -s _site/report.json
 
           grep -q "Research it. Trade it. Record it. Improve it." _site/index.html
+          grep -q "Welcome to Signal Bridge" _site/index.html
+          grep -q "How do you want to enter" _site/index.html
+          grep -q "I’m new / still learning" _site/index.html
+          grep -q "I’m experienced" _site/index.html
           grep -q "Signal Bridge Premium" _site/index.html
           grep -q "Bring your own trading into the system" _site/index.html
-          grep -q "Public playbook, flagship desk, and community" _site/index.html
+          grep -q "A session should tell a story" _site/index.html
+          grep -q "Signal Bridge difference" _site/index.html
           grep -q "Mason · Strategy &amp; Research" _site/index.html
-          grep -q "Trade, review, and build with Signal Bridge connected" _site/index.html
           ! grep -q "The beta already has a live home" _site/index.html
           test "$(grep -o '<h3>Strategy Lab</h3>' _site/index.html | wc -l | tr -d ' ')" = "1"
           test "$(grep -o '<h3>Indicator Workspace</h3>' _site/index.html | wc -l | tr -d ' ')" = "1"
@@ -152,10 +156,14 @@ jobs:
           grep -q "url=evidence.html" _site/reports.html
           grep -q "url=evidence.html" _site/dashboard.html
           grep -q "polish.css" _site/trade-bible.html
-          grep -q "Live Signal History" _site/signals.html
-          grep -q "Premium Signal Layer" _site/signals.html
+          grep -q "Morning Desk &amp; Live Signals" _site/signals.html
+          grep -q "Setup Readiness" _site/signals.html
+          grep -q "Morning Mission" _site/signals.html
+          grep -q "Session Story" _site/signals.html
+          grep -q "/session-summary" _site/signals.html
+          grep -q "/market-intelligence" _site/signals.html
           grep -q "/events" _site/signals.html
-          grep -q "href=\"journal.html\"" _site/signals.html
+          grep -q "readiness-ring" _site/signals.css
           grep -q "Journal Intelligence" _site/journal.html
           grep -q "/journal" _site/journal.html
           grep -q "Private-first by design" _site/journal.html
