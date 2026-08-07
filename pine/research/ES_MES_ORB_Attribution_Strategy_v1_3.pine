@@ -17,77 +17,60 @@ strategy(
      max_labels_count=100
 )
 
-// RESEARCH STATUS
-// Attribution harness only. Not production-approved trading logic.
-// Pine `slippage=2` means TWO TICKS, not two ES/MES index points.
-// `process_orders_on_close=true` is a frozen close-fill backtest assumption.
-// Execution sensitivity must be tested separately before production promotion.
+// RESEARCH ONLY — not production-approved logic.
+// `slippage=2` means 2 ticks, not 2 index points.
+// `process_orders_on_close=true` is a frozen historical fill assumption.
 
-//──────────────────────────────────────────────────────────────────────
 // 00. Experiment lock
-//──────────────────────────────────────────────────────────────────────
 grpExperiment = "00. Experiment Lock"
 i_testStart = input.time(timestamp("01 Apr 2025 00:00 -0400"), "Historical Test Start", group=grpExperiment)
-i_testEnd   = input.time(timestamp("27 Feb 2026 00:00 -0500"), "Historical Test End (exclusive)", group=grpExperiment)
+i_testEnd = input.time(timestamp("27 Feb 2026 00:00 -0500"), "Historical Test End (exclusive)", group=grpExperiment)
 i_enforceEnvironment = input.bool(true, "Enforce Expected Symbol Root + Timeframe", group=grpExperiment)
 i_expectedRoot = input.string("ES", "Expected Symbol Root", group=grpExperiment)
 i_expectedTimeframe = input.string("15", "Expected Timeframe", options=["1", "5", "15"], group=grpExperiment)
 
-//──────────────────────────────────────────────────────────────────────
-// 01. Time settings
-//──────────────────────────────────────────────────────────────────────
+// 01. Time
 grpTime = "01. Time Settings"
-i_timezone   = input.string("America/New_York", "Timezone", options=["America/New_York", "America/Chicago", "UTC"], group=grpTime)
-i_orbStart   = input.string("0800", "ORB Start (HHMM)", group=grpTime)
-i_orbEnd     = input.string("0815", "ORB End (HHMM)", group=grpTime)
+i_timezone = input.string("America/New_York", "Timezone", options=["America/New_York", "America/Chicago", "UTC"], group=grpTime)
+i_orbStart = input.string("0800", "ORB Start (HHMM)", group=grpTime)
+i_orbEnd = input.string("0815", "ORB End (HHMM)", group=grpTime)
 i_tradeStart = input.string("0930", "Trade Start (HHMM)", group=grpTime)
-i_tradeEnd   = input.string("1030", "No New Entries After (HHMM)", group=grpTime)
-i_flatTime   = input.string("1100", "Force Flat At (HHMM)", group=grpTime)
+i_tradeEnd = input.string("1030", "No New Entries After (HHMM)", group=grpTime)
+i_flatTime = input.string("1100", "Force Flat At (HHMM)", group=grpTime)
 
-//──────────────────────────────────────────────────────────────────────
 // 02. Entry attribution
-//──────────────────────────────────────────────────────────────────────
 grpEntry = "02. Entry Attribution"
-i_enableLongs   = input.bool(true, "Enable Longs", group=grpEntry)
-i_enableShorts  = input.bool(true, "Enable Shorts", group=grpEntry)
-i_entryMode     = input.string("Midpoint", "Entry Mode", options=["Breakout", "Boundary", "Midpoint"], group=grpEntry)
+i_enableLongs = input.bool(true, "Enable Longs", group=grpEntry)
+i_enableShorts = input.bool(true, "Enable Shorts", group=grpEntry)
+i_entryMode = input.string("Midpoint", "Entry Mode", options=["Breakout", "Boundary", "Midpoint"], group=grpEntry)
 i_retestTimeout = input.int(60, "Retest Timeout Bars", minval=1, maxval=300, group=grpEntry)
 i_invalidateOnOppositeClose = input.bool(true, "Invalidate On Close Through Opposite ORB Side", group=grpEntry)
 
-//──────────────────────────────────────────────────────────────────────
 // 03. Filter attribution
-//──────────────────────────────────────────────────────────────────────
 grpFilters = "03. Filter Attribution"
 i_displacementMode = input.string("Off", "Displacement Mode", options=["Off", "ORB Body", "ATR", "Either"], group=grpFilters)
-i_bodyMinPct        = input.float(0.35, "Min Body % of ORB Range", minval=0.0, maxval=2.0, step=0.05, group=grpFilters)
-i_bodyMinAtr        = input.float(0.75, "Min Body × ATR", minval=0.0, maxval=5.0, step=0.05, group=grpFilters)
-i_atrLen            = input.int(14, "ATR Length", minval=1, group=grpFilters)
-i_useVWAP           = input.bool(false, "Use VWAP Alignment", group=grpFilters)
-i_useEMA            = input.bool(false, "Use EMA Alignment", group=grpFilters)
-i_emaLen            = input.int(50, "EMA Length", minval=1, group=grpFilters)
-i_useRangeFilter    = input.bool(false, "Use ORB Range Filter", group=grpFilters)
-i_minRange          = input.float(5.0, "Min ORB Range Points", minval=0.25, step=0.25, group=grpFilters)
-i_maxRange          = input.float(50.0, "Max ORB Range Points", minval=1.0, step=0.5, group=grpFilters)
+i_bodyMinPct = input.float(0.35, "Min Body % of ORB Range", minval=0.0, maxval=2.0, step=0.05, group=grpFilters)
+i_bodyMinAtr = input.float(0.75, "Min Body × ATR", minval=0.0, maxval=5.0, step=0.05, group=grpFilters)
+i_atrLen = input.int(14, "ATR Length", minval=1, group=grpFilters)
+i_useVWAP = input.bool(false, "Use VWAP Alignment", group=grpFilters)
+i_useEMA = input.bool(false, "Use EMA Alignment", group=grpFilters)
+i_emaLen = input.int(50, "EMA Length", minval=1, group=grpFilters)
+i_useRangeFilter = input.bool(false, "Use ORB Range Filter", group=grpFilters)
+i_minRange = input.float(5.0, "Min ORB Range Points", minval=0.25, step=0.25, group=grpFilters)
+i_maxRange = input.float(50.0, "Max ORB Range Points", minval=1.0, step=0.5, group=grpFilters)
 
-//──────────────────────────────────────────────────────────────────────
 // 04. Risk attribution
-//──────────────────────────────────────────────────────────────────────
 grpRisk = "04. Risk Attribution"
-i_stopMethod     = input.string("Opposite", "Stop Method", options=["Opposite", "Midpoint", "Fixed Points"], group=grpRisk)
-i_fixedStopPts   = input.float(10.0, "Fixed Stop Points", minval=0.25, step=0.25, group=grpRisk)
-i_targetR        = input.float(2.0, "Single Target R", minval=0.25, step=0.25, group=grpRisk)
-i_maxStopPts     = input.float(40.0, "Maximum Allowed Stop Points", minval=0.25, step=0.25, group=grpRisk)
+i_stopMethod = input.string("Opposite", "Stop Method", options=["Opposite", "Midpoint", "Fixed Points"], group=grpRisk)
+i_fixedStopPts = input.float(10.0, "Fixed Stop Points", minval=0.25, step=0.25, group=grpRisk)
+i_targetR = input.float(2.0, "Single Target R", minval=0.25, step=0.25, group=grpRisk)
+i_maxStopPts = input.float(40.0, "Maximum Allowed Stop Points", minval=0.25, step=0.25, group=grpRisk)
 
-//──────────────────────────────────────────────────────────────────────
 // 05. Display
-//──────────────────────────────────────────────────────────────────────
 grpDisplay = "05. Display"
 i_showDashboard = input.bool(true, "Show Research Dashboard", group=grpDisplay)
-i_showMarkers   = input.bool(true, "Show Setup Markers", group=grpDisplay)
+i_showMarkers = input.bool(true, "Show Setup Markers", group=grpDisplay)
 
-//──────────────────────────────────────────────────────────────────────
-// Helpers
-//──────────────────────────────────────────────────────────────────────
 f_timeToMins(string hhmm) =>
     float h = str.tonumber(str.substring(hhmm, 0, 2))
     float m = str.tonumber(str.substring(hhmm, 2, 4))
@@ -108,25 +91,20 @@ f_inWindow(string startHHMM, string endHHMM) =>
 f_newDay() =>
     ta.change(dayofmonth(time, i_timezone)) != 0
 
-//──────────────────────────────────────────────────────────────────────
 // Experiment environment
-//──────────────────────────────────────────────────────────────────────
 inDateRange = time >= i_testStart and time < i_testEnd
 symbolOk = syminfo.root == i_expectedRoot
 timeframeOk = timeframe.period == i_expectedTimeframe
 environmentOk = not i_enforceEnvironment or (symbolOk and timeframeOk)
 
-//──────────────────────────────────────────────────────────────────────
 // Session state
-//──────────────────────────────────────────────────────────────────────
 newDay = f_newDay()
-openMins = f_openMins()
-closeMins = f_closeMins()
 inOrbWindow = f_inWindow(i_orbStart, i_orbEnd)
 inTradeWindow = f_inWindow(i_tradeStart, i_tradeEnd)
+closeMins = f_closeMins()
 flatMins = f_timeToMins(i_flatTime)
 pastFlatOnClose = closeMins >= flatMins
-forceFlatHit = pastFlatOnClose and (na(pastFlatOnClose[1]) or not pastFlatOnClose[1])
+forceFlatHit = pastFlatOnClose and not pastFlatOnClose[1]
 
 var float orbHigh = na
 var float orbLow = na
@@ -152,9 +130,7 @@ if inDateRange and not inOrbWindow and not orbDone and not na(orbHigh) and not n
 orbRange = orbDone ? orbHigh - orbLow : na
 orbRangeOk = orbDone and (not i_useRangeFilter or (orbRange >= i_minRange and orbRange <= i_maxRange))
 
-//──────────────────────────────────────────────────────────────────────
-// Filter states
-//──────────────────────────────────────────────────────────────────────
+// Filters
 atrVal = ta.atr(i_atrLen)
 barBody = math.abs(close - open)
 bodyPctOfRange = orbDone and orbRange > 0 ? barBody / orbRange : 0.0
@@ -173,9 +149,7 @@ emaVal = ta.ema(close, i_emaLen)
 longContextOk = (not i_useVWAP or close > vwapVal) and (not i_useEMA or close > emaVal)
 shortContextOk = (not i_useVWAP or close < vwapVal) and (not i_useEMA or close < emaVal)
 
-//──────────────────────────────────────────────────────────────────────
 // Breakout -> retest state machine
-//──────────────────────────────────────────────────────────────────────
 var int setupDir = 0
 var int setupBar = na
 var bool retestSeen = false
@@ -226,11 +200,7 @@ if futureBarAfterSetup and setupDir == -1 and not retestSeen and high >= shortRe
 longSig = barstate.isconfirmed and canSeekSetup and setupDir == 1 and retestSeen and close > orbHigh and displacementOk and longContextOk
 shortSig = barstate.isconfirmed and canSeekSetup and setupDir == -1 and retestSeen and close < orbLow and displacementOk and shortContextOk
 
-//──────────────────────────────────────────────────────────────────────
-// Orders: one entry, one stop, one target
-// Exit bracket is submitted on the SAME calculation as the entry order so
-// the next bar is not left unprotected in the broker emulator.
-//──────────────────────────────────────────────────────────────────────
+// One entry, one bracket. Submit bracket with entry so the next bar is protected.
 var float plannedEntry = na
 var float plannedStop = na
 var float plannedTarget = na
@@ -293,9 +263,7 @@ if forceFlatHit and strategy.position_size != 0
     strategy.close_all(immediately=true, alert_message='{"status":"research","action":"exit","reason":"force_flat"}')
     resetReason := "FORCE FLAT"
 
-//──────────────────────────────────────────────────────────────────────
 // Display
-//──────────────────────────────────────────────────────────────────────
 plot(orbDone ? orbHigh : na, "ORB High", color=color.new(color.green, 0), linewidth=2)
 plot(orbDone ? orbLow : na, "ORB Low", color=color.new(color.red, 0), linewidth=2)
 plot(orbDone ? orbMid : na, "ORB Mid", color=color.new(color.orange, 15), linewidth=1)
