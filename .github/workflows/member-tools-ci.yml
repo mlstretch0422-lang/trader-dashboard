@@ -1,0 +1,44 @@
+name: Member Tool Safety Checks
+
+on:
+  pull_request:
+    paths:
+      - "cloudflare/signal-bridge-worker/src/member_tools.js"
+      - "cloudflare/signal-bridge-worker/src/entry.js"
+      - ".github/workflows/member-tools-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-member-tools:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Verify JavaScript syntax
+        run: |
+          node --check cloudflare/signal-bridge-worker/src/member_tools.js
+          node --check cloudflare/signal-bridge-worker/src/entry.js
+
+      - name: Guard private member routes
+        run: |
+          grep -q '"/member/live"' cloudflare/signal-bridge-worker/src/member_tools.js
+          grep -q '"/member/indicators"' cloudflare/signal-bridge-worker/src/member_tools.js
+          grep -q '"/member/api/indicators/config"' cloudflare/signal-bridge-worker/src/member_tools.js
+          grep -q 'handleMemberToolsRequest' cloudflare/signal-bridge-worker/src/entry.js
+
+      - name: Guard ownership and evidence boundaries
+        run: |
+          grep -q "p.owner_type='MEMBER'" cloudflare/signal-bridge-worker/src/member_tools.js
+          grep -q 'p.owner_discord_id=?3' cloudflare/signal-bridge-worker/src/member_tools.js
+          grep -q 'VERSION MISMATCH' cloudflare/signal-bridge-worker/src/member_tools.js
+          grep -q 'not evidence that the indicator improves performance' cloudflare/signal-bridge-worker/src/member_tools.js
+          grep -q "stage != 'TEST'" cloudflare/signal-bridge-worker/src/member_tools.js
+
+      - name: Guard health release
+        run: |
+          grep -q 'premium-member-tools-v1' cloudflare/signal-bridge-worker/src/entry.js
+          grep -q 'member_live_desk_ready' cloudflare/signal-bridge-worker/src/entry.js
+          grep -q 'member_indicator_workspace_ready' cloudflare/signal-bridge-worker/src/entry.js
