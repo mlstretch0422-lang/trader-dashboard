@@ -1,0 +1,37 @@
+name: Journal Bot Presentation Checks
+
+on:
+  pull_request:
+    paths:
+      - "cloudflare/signal-bridge-worker/src/discord_journal_brand.js"
+      - "cloudflare/signal-bridge-worker/src/entry.js"
+      - ".github/workflows/journal-bot-brand-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-journal-presentation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Syntax checks
+        run: |
+          node --check cloudflare/signal-bridge-worker/src/discord_journal_brand.js
+          node --check cloudflare/signal-bridge-worker/src/entry.js
+
+      - name: Guard branded journal response contract
+        run: |
+          grep -q 'SIGNAL BRIDGE · TRADE JOURNAL' cloudflare/signal-bridge-worker/src/discord_journal_brand.js
+          grep -q 'SIGNAL BRIDGE · JOURNAL CAPTURE' cloudflare/signal-bridge-worker/src/discord_journal_brand.js
+          grep -q 'SIGNAL BRIDGE · JOURNAL INBOX' cloudflare/signal-bridge-worker/src/discord_journal_brand.js
+          grep -q 'Signal Bridge · trade journal' cloudflare/signal-bridge-worker/src/discord_journal_brand.js
+          grep -q 'brandJournalInteractionResponse' cloudflare/signal-bridge-worker/src/entry.js
+          grep -q 'handleDiscordInteraction' cloudflare/signal-bridge-worker/src/entry.js
+
+      - name: Keep journal storage logic isolated
+        run: |
+          ! grep -q 'INSERT INTO journal_entries' cloudflare/signal-bridge-worker/src/discord_journal_brand.js
+          ! grep -q 'UPDATE journal_entries' cloudflare/signal-bridge-worker/src/discord_journal_brand.js
