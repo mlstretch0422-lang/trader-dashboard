@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#060a11" />
+  <title>Member Access — Signal Bridge</title>
+  <meta name="description" content="Enter the Signal Bridge private member workspace through your Discord-linked account." />
+  <link rel="icon" href="assets/brand/signal-bridge-favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="app.css" />
+  <link rel="stylesheet" href="polish.css" />
+</head>
+<body>
+  <header class="topbar"><div class="shell topbar-inner">
+    <a class="brand" href="index.html"><img src="assets/brand/signal-bridge-mark-blue.svg" alt="Signal Bridge" /><span class="brand-copy"><strong>SIGNAL BRIDGE</strong><span>Trading OS</span></span></a>
+    <nav class="nav" aria-label="Main navigation"><a href="index.html">Home</a><a href="signals.html">Signals</a><a href="strategies.html">Strategies</a><a href="indicators.html">Indicators</a><a href="journal.html">Journal</a><a href="mason.html">Mason</a></nav>
+    <span class="beta-pill">Member Access</span>
+  </div></header>
+
+  <main>
+    <section class="shell page-hero">
+      <div class="breadcrumb"><a href="index.html">Signal Bridge</a> / Member Access</div>
+      <span class="eyebrow" style="margin-top:25px">Discord identity → private workspace</span>
+      <h1><span class="gradient-text">Your private Signal Bridge account starts in Discord.</span></h1>
+      <p>Signal Bridge uses your Discord identity for beta access. Run one command in the Signal Bridge server, tap the private one-time link, and your journal, strategies, and member tools open in the browser without a separate password.</p>
+      <div class="hero-actions">
+        <a class="btn primary" id="discordAccessButton" href="https://discord.com/channels/1520334916334915665" target="_blank" rel="noopener">Open Signal Bridge Discord →</a>
+        <a class="btn secondary" href="https://signal-bridge-webhook.airy-iris.workers.dev/member">Already signed in? Open workspace</a>
+      </div>
+    </section>
+
+    <section class="shell section">
+      <div class="section-head"><div><span class="eyebrow">How login works</span><h2>Three steps. No second account to remember.</h2></div><p>The login link is intentionally generated inside Discord so the private workspace can be attached to the same identity that owns your journal records.</p></div>
+      <div class="grid-3">
+        <article class="card"><span class="chip blue">01</span><h3>Open the Discord</h3><p>Enter the Signal Bridge server on the Discord account you want tied to your trading records.</p></article>
+        <article class="card"><span class="chip purple">02</span><h3>Run <code>/member-login</code></h3><p>The Signal Bridge app replies privately with a one-time sign-in link. The link expires after ten minutes.</p></article>
+        <article class="card"><span class="chip green">03</span><h3>Open the workspace</h3><p>Tap the link. The browser receives a secure member session and opens your private workspace, journal, and Strategy Lab.</p></article>
+      </div>
+    </section>
+
+    <section class="shell section">
+      <div class="section-head"><div><span class="eyebrow">What is actually private</span><h2>The member side is the operating layer around your own trading.</h2></div><p>The public website explains the product and shows selected examples. The member workspace is where user-owned records and tools belong.</p></div>
+      <div class="grid-4">
+        <a class="card interactive-surface" href="journal.html"><span class="chip green">Live</span><h3>Private Journal</h3><p>Discord notes, screenshots, results, P&amp;L, R, reviews, and linked strategy versions.</p></a>
+        <a class="card interactive-surface" href="strategies.html#strategy-lab"><span class="chip green">Live</span><h3>Strategy Lab</h3><p>Create a strategy identity and preserve versions instead of overwriting the rules that produced older evidence.</p></a>
+        <a class="card interactive-surface" href="indicators.html#premium-workspace"><span class="chip purple">Beta build</span><h3>Indicator Workspace</h3><p>Save the chart-tool configuration that supports a strategy version and route its supported alerts into Signal Bridge.</p></a>
+        <a class="card interactive-surface" href="signals.html#morning-desk"><span class="chip green">Hosted</span><h3>Morning Desk</h3><p>Live session state, ORB, readiness, news, signal history, and the Session Story fed by TradingView alerts.</p></a>
+      </div>
+    </section>
+
+    <section class="shell section">
+      <div class="premium-banner"><strong>Beta access:</strong><span>Signal Bridge is using Discord-linked friends/family access while the product is being proven end-to-end. Paid-role gating can be switched on without rebuilding the account system.</span></div>
+    </section>
+  </main>
+  <footer class="footer"><div class="shell footer-row"><strong>Signal Bridge · Member Access</strong><span>Discord-linked identity · private records · member tools.</span></div></footer>
+</body>
+</html>
