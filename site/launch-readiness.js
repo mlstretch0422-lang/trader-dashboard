@@ -12,6 +12,9 @@
   }
 
   function replaceWorkerMemberLinks() {
+    // Public pages should enter through the Discord-linked access flow. The access
+    // page itself must preserve its direct "already signed in" Worker link.
+    if (file === 'access.html') return;
     document.querySelectorAll(`a[href="${MEMBER_APP}"]`).forEach((a) => {
       a.href = MEMBER_ACCESS;
       if (/open member workspace/i.test(a.textContent || '')) a.textContent = 'Member access';
@@ -19,10 +22,8 @@
   }
 
   function home() {
-    // The lower historical-number block was useful during project review, but it
-    // interrupts the product story. Keep historical evidence in Evidence/Mason.
-    const moneyStrip = document.querySelector('.beta-money-strip');
-    moneyStrip?.closest('section')?.remove();
+    // Historical performance belongs under Mason/Evidence, not in the Home demo.
+    document.querySelector('.beta-money-strip')?.closest('section')?.remove();
 
     const hero = document.querySelector('.home-hero');
     const eyebrow = hero?.querySelector('.eyebrow');
@@ -38,12 +39,13 @@
       });
     }
 
-    // Premium cards should route to the page that explains the tool; member-only
-    // actions are exposed from those pages through the access flow.
+    // Premium is usable, so the cards enter the member-access flow directly.
     document.querySelectorAll('.premium-card').forEach((card) => {
       const title = card.querySelector('h3')?.textContent?.trim();
-      if (title === 'Strategy Lab') card.href = 'strategies.html#strategy-lab';
-      if (title === 'Indicator Workspace') card.href = 'indicators.html#premium-workspace';
+      if (title === 'Journal Intelligence') card.href = 'access.html?tool=journal';
+      if (title === 'Live Signals + Morning Desk') card.href = 'access.html?tool=live-desk';
+      if (title === 'Strategy Lab') card.href = 'access.html?tool=strategy-lab';
+      if (title === 'Indicator Workspace') card.href = 'access.html?tool=indicator-workspace';
     });
   }
 
@@ -84,7 +86,6 @@
       hero.appendChild(row);
     }
 
-    // The private workspace is already live; don't describe it as a future item.
     document.querySelectorAll('.card').forEach((card) => {
       const h3 = card.querySelector('h3')?.textContent?.trim();
       if (h3 === 'Private member workspace') {

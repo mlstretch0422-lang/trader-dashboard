@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import html
 import re
 import shutil
@@ -58,6 +59,13 @@ def copy_if_exists(source: Path, destination: Path) -> None:
         shutil.copy2(source, destination)
 
 
+def asset_version(name: str) -> str:
+    source = SITE_SOURCE / name
+    if not source.exists() or not source.is_file():
+        return "dev"
+    return hashlib.sha256(source.read_bytes()).hexdigest()[:10]
+
+
 def page_metadata(path: Path, text: str) -> tuple[str, str, str]:
     title_match = re.search(r"<title>(.*?)</title>", text, flags=re.DOTALL | re.IGNORECASE)
     description_match = re.search(r'<meta\s+name="description"\s+content="([^"]*)"\s*/?>', text, flags=re.IGNORECASE)
@@ -98,16 +106,18 @@ def apply_native_shell(path: Path) -> None:
             raise RuntimeError(f"Could not inject polish.css into {path}")
         text = text.replace(marker, '  <link rel="stylesheet" href="polish.css" />\n</head>', 1)
 
-    # Fast-moving usability and presentation layers stay separate from the core
-    # page markup so the product can evolve without destabilizing every page.
+    # Fast-moving usability/presentation files use content-hash query strings so
+    # a successful Pages deploy cannot be masked by an older browser/CDN copy.
     for stylesheet in ("beta-clarity.css", "pro-visuals.css", "product-visuals-v2.css"):
         if stylesheet not in text:
             if "</head>" not in text:
                 raise RuntimeError(f"Could not inject {stylesheet} into {path}")
-            text = text.replace("</head>", f'  <link rel="stylesheet" href="{stylesheet}" />\n</head>', 1)
+            version = asset_version(stylesheet)
+            text = text.replace("</head>", f'  <link rel="stylesheet" href="{stylesheet}?v={version}" />\n</head>', 1)
     for script in ("beta-clarity.js", "pro-visuals.js", "product-visuals-v2.js", "launch-readiness.js"):
         if script not in text and "</body>" in text:
-            text = text.replace("</body>", f'  <script src="{script}"></script>\n</body>', 1)
+            version = asset_version(script)
+            text = text.replace("</body>", f'  <script src="{script}?v={version}"></script>\n</body>', 1)
 
     links = []
     for href, label in NAV_ITEMS:
