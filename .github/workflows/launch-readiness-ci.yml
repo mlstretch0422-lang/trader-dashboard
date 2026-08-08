@@ -1,0 +1,58 @@
+name: Launch Readiness Safety Checks
+
+on:
+  pull_request:
+    paths:
+      - "site/**"
+      - "scripts/build_pages_site.py"
+      - "cloudflare/signal-bridge-worker/sync_discord_brand.mjs"
+      - ".github/workflows/launch-readiness-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-launch-funnel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Syntax checks
+        run: |
+          node --check site/launch-readiness.js
+          node --check cloudflare/signal-bridge-worker/sync_discord_brand.mjs
+          python -m py_compile scripts/build_pages_site.py
+
+      - name: Build website
+        run: python scripts/build_pages_site.py
+
+      - name: Verify member access funnel
+        run: |
+          test -s _site/access.html
+          test -s _site/launch-readiness.js
+          grep -q 'href="access.html">Member</a>' _site/index.html
+          grep -q 'Run <code>/member-login</code>' _site/access.html
+          grep -q 'Open Signal Bridge Discord' _site/access.html
+          ! grep -q 'href="https://signal-bridge-webhook.airy-iris.workers.dev/member">Member</a>' _site/index.html
+
+      - name: Verify social sharing metadata
+        run: |
+          grep -q 'property="og:title"' _site/index.html
+          grep -q 'property="og:description"' _site/index.html
+          grep -q 'property="og:image"' _site/index.html
+          grep -q 'name="twitter:card" content="summary_large_image"' _site/index.html
+          grep -q 'rel="canonical"' _site/index.html
+
+      - name: Guard homepage cleanup
+        run: |
+          grep -q "moneyStrip?.closest('section')?.remove()" site/launch-readiness.js
+          grep -q 'One workspace for the full trade loop' site/launch-readiness.js
+          grep -q 'Turn a setup into rules you can test.' site/launch-readiness.js
+
+      - name: Guard Discord brand sync safety
+        run: |
+          grep -q 'DISCORD_BOT_TOKEN' cloudflare/signal-bridge-worker/sync_discord_brand.mjs
+          grep -q 'users/@me' cloudflare/signal-bridge-worker/sync_discord_brand.mjs
+          grep -q 'applications/@me' cloudflare/signal-bridge-worker/sync_discord_brand.mjs
+          ! grep -Eq '(Bot [A-Za-z0-9._-]{20,}|mfa\.)' cloudflare/signal-bridge-worker/sync_discord_brand.mjs
