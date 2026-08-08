@@ -1,0 +1,67 @@
+name: Pine Visual Stack Safety Checks
+
+on:
+  pull_request:
+    paths:
+      - "ES_ORB_Indicator_v1_3_VISUAL_STACK.pine"
+      - "cloudflare/signal-bridge-worker/PINE_VISUAL_STACK_V1.md"
+      - ".github/workflows/pine-visual-stack-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-visual-stack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Verify Pine v1.3 integration contract
+        run: |
+          test -s ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q '^//@version=6' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'v1.3 VISUAL STACK' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'i_orbStart   = input.string("0800"' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'i_orbEnd     = input.string("0815"' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'i_tradeStart = input.string("0930"' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'i_tradeEnd   = input.string("1100"' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'i_bodyMinPct    = input.float(0.35' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'i_bodyMinAtr    = input.float(0.75' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'i_retestMode    = input.string("Midpoint"' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'i_retestTimeout = input.int(60' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'i_useVWAP  = input.bool(true' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'i_useEMA   = input.bool(false' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'i_minRange = input.float(5.0' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'i_maxRange = input.float(50.0' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'mason-orb-v1.2-session-bridge' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q '1.3-visual-stack' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'alertcondition(longSig, title="Long Setup Ready"' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'alertcondition(shortSig, title="Short Setup Ready"' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+
+      - name: Verify lifecycle and visual modules
+        run: |
+          grep -q 'f_emit("PREMARKET"' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'f_emit("ORB_FORMED"' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'f_emit("PREOPEN"' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'f_emit("OPEN_SNAPSHOT"' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'f_emit("SETUP"' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'f_emit("WAIT"' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'f_emit("SESSION_CLOSE"' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'box.new(left=time' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'xloc=xloc.bar_time' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'Previous Day High' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'Overnight High' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'Previous 4H High' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'Show EMA 200' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'Show Reference Session Boxes' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'Show Decision Panel' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'BOTH_OR_SAME_BAR' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+
+      - name: Guard indicator/strategy separation
+        run: |
+          ! grep -q '^strategy(' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          ! grep -q 'strategy.entry' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          ! grep -q 'strategy.exit' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'Reference-session visuals are configurable and OFF by default' ES_ORB_Indicator_v1_3_VISUAL_STACK.pine
+          grep -q 'STAGED · TRADINGVIEW COMPILE REQUIRED' cloudflare/signal-bridge-worker/PINE_VISUAL_STACK_V1.md
