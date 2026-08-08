@@ -54,6 +54,13 @@ const commands = [
     ],
   },
   {
+    name: "member-login",
+    type: 1,
+    description: "Open your private Signal Bridge Premium workspace",
+    integration_types: [0],
+    contexts: [0],
+  },
+  {
     name: "journal",
     type: 1,
     description: "Save a trade or no-trade journal record to Signal Bridge",
@@ -126,7 +133,7 @@ const commands = [
   {
     name: "journal-login",
     type: 1,
-    description: "Open your private Signal Bridge journal workspace",
+    description: "Legacy alias for the private Signal Bridge workspace",
     integration_types: [0],
     contexts: [0],
   },
