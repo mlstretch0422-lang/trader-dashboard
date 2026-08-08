@@ -6,6 +6,8 @@ if (!token) throw new Error("DISCORD_BOT_TOKEN is required");
 if (!applicationId) throw new Error("DISCORD_APPLICATION_ID is required");
 if (!guildId) throw new Error("DISCORD_GUILD_ID is required");
 
+const MANAGE_GUILD_PERMISSION = "32";
+
 const symbolOption = {
   name: "symbol",
   description: "Market symbol (defaults to MES)",
@@ -24,6 +26,13 @@ const resultChoices = [
 ];
 
 const commands = [
+  {
+    name: "start",
+    type: 1,
+    description: "Start here: learn the Signal Bridge trading workflow",
+    integration_types: [0],
+    contexts: [0],
+  },
   {
     name: "status",
     type: 1,
@@ -72,11 +81,11 @@ const commands = [
   {
     name: "journal",
     type: 1,
-    description: "Save a trade or no-trade journal record to Signal Bridge",
+    description: "Save a trade, idea, or no-trade record to Signal Bridge",
     integration_types: [0],
     contexts: [0],
     options: [
-      { name: "note", description: "What happened, what did you see, and where did the idea come from?", type: 3, required: true, max_length: 2000 },
+      { name: "note", description: "What did you see, do, or want to test? Include the idea source if relevant.", type: 3, required: true, max_length: 2000 },
       { name: "symbol", description: "Market symbol, for example MES", type: 3, required: false, max_length: 32 },
       {
         name: "side",
@@ -89,7 +98,7 @@ const commands = [
           { name: "Wait / no trade", value: "WAIT" },
         ],
       },
-      { name: "result", description: "Current result (use Open if logging before exit)", type: 3, required: false, choices: resultChoices },
+      { name: "result", description: "Use Open before exit, or enter the final result if already finished", type: 3, required: false, choices: resultChoices },
       { name: "setup", description: "Setup name, for example ORB retest", type: 3, required: false, max_length: 96 },
       { name: "strategy", description: "Strategy or model version", type: 3, required: false, max_length: 96 },
       { name: "pnl", description: "Dollar P&L if known", type: 10, required: false },
@@ -141,16 +150,10 @@ const commands = [
     ],
   },
   {
-    name: "journal-login",
-    type: 1,
-    description: "Legacy alias for the private Signal Bridge workspace",
-    integration_types: [0],
-    contexts: [0],
-  },
-  {
     name: "journal-publish",
     type: 1,
-    description: "Publish a stored journal record by ID (server managers only)",
+    description: "Publish a stored journal record by ID",
+    default_member_permissions: MANAGE_GUILD_PERMISSION,
     integration_types: [0],
     contexts: [0],
     options: [
@@ -161,6 +164,7 @@ const commands = [
     name: "journal-private",
     type: 1,
     description: "Move a published journal record back to private",
+    default_member_permissions: MANAGE_GUILD_PERMISSION,
     integration_types: [0],
     contexts: [0],
     options: [
@@ -176,6 +180,7 @@ const commands = [
   {
     name: "Publish to Journal",
     type: 3,
+    default_member_permissions: MANAGE_GUILD_PERMISSION,
     integration_types: [0],
     contexts: [0],
   },
@@ -191,7 +196,7 @@ async function bulkOverwriteGuildCommands(maxAttempts = 4) {
       headers: {
         authorization: `Bot ${token}`,
         "content-type": "application/json",
-        "user-agent": "SignalBridgeCommandRegistrar/2.0",
+        "user-agent": "SignalBridgeCommandRegistrar/2.1",
       },
       body: JSON.stringify(commands),
     });
