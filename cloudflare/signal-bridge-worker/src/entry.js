@@ -56,6 +56,7 @@ async function extendHealth(response, env) {
       journalTable,
       sessionTable,
       memberSessions,
+      memberEntitlements,
       interactionLog,
       intelRuns,
       calendarTable,
@@ -68,6 +69,7 @@ async function extendHealth(response, env) {
       tableReady(env, "journal_entries"),
       tableReady(env, "session_events"),
       tableReady(env, "member_sessions"),
+      tableReady(env, "member_entitlements"),
       tableReady(env, "discord_interaction_log"),
       tableReady(env, "market_intelligence_runs"),
       tableReady(env, "economic_calendar_events"),
@@ -79,7 +81,7 @@ async function extendHealth(response, env) {
     ]);
     return new Response(JSON.stringify({
       ...data,
-      worker_release: "strategy-dna-v1",
+      worker_release: "premium-entitlements-v1",
       discord_capture_configured: Boolean(
         env.DISCORD_PUBLIC_KEY &&
         env.DISCORD_APPLICATION_ID &&
@@ -90,6 +92,9 @@ async function extendHealth(response, env) {
       journal_table_ready: journalTable,
       session_table_ready: sessionTable,
       member_sessions_ready: memberSessions,
+      member_entitlements_ready: memberEntitlements,
+      premium_role_gating_configured: Boolean(env.DISCORD_PREMIUM_ROLE_ID),
+      premium_access_mode: env.DISCORD_PREMIUM_ROLE_ID ? "DISCORD_ROLE" : "FRIENDS_FAMILY_BETA",
       interaction_diagnostics_ready: interactionLog,
       session_intelligence_storage: Boolean(env.DB) && sessionTable,
       market_intelligence_ready: intelRuns && calendarTable && headlinesTable,

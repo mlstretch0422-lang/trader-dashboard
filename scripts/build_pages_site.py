@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "_site"
 SITE_SOURCE = ROOT / "site"
 REPORT = ROOT / "trading_os" / "src" / "integrations" / "report.json"
+MEMBER_URL = "https://signal-bridge-webhook.airy-iris.workers.dev/member"
 
 RESEARCH_IMAGE_MAP = [
     (ROOT / "SPX500_2026-07-08_10-23-12.png", "SPX500_2026-07-08_10-23-12.png"),
@@ -30,6 +31,7 @@ NAV_ITEMS = [
     ("indicators.html", "Indicators"),
     ("journal.html", "Journal"),
     ("mason.html", "Mason"),
+    (MEMBER_URL, "Member"),
 ]
 
 MASON_SECTION_PAGES = {"mason.html", "mason-orb.html", "trade-bible.html", "evidence.html"}
@@ -64,6 +66,8 @@ def apply_native_shell(path: Path) -> None:
     for href, label in NAV_ITEMS:
         if href == "mason.html":
             is_active = path.name in MASON_SECTION_PAGES
+        elif href.startswith("http"):
+            is_active = False
         else:
             is_active = path.name == href
         active = ' class="active"' if is_active else ""
