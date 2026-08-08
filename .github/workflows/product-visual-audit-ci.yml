@@ -42,7 +42,8 @@ jobs:
           grep -q 'assets/product/journal-trade-detail.svg' site/product-visuals-v2.js
           grep -q 'assets/product/session-desk.svg' site/product-visuals-v2.js
           grep -q 'assets/product/strategy-dna.svg' site/product-visuals-v2.js
-          grep -q 'Keep the numbers. Lose the ugly source screenshots.' site/product-visuals-v2.js
+          grep -q 'removeHomeDuplicateShowcase' site/product-visuals-v2.js
+          grep -q 'Historical numbers, kept separate from the product demo.' site/product-visuals-v2.js
           grep -q 'Visual standard' PRODUCT_AUDIT_2026-08-08.md
 
       - name: Guard product-facing demo labels
