@@ -29,18 +29,11 @@
     if (tabs) tabs.innerHTML = '<span>Chart</span><span>Morning Desk</span><span>Journal</span><span>Strategy DNA</span>';
   }
 
-  function replaceProductShowcase() {
-    const windows = [...document.querySelectorAll('.pro-showcase .pro-product-window')];
-    if (windows.length < 3) return;
-    const head = document.querySelector('.pro-showcase .section-head');
-    if (head) {
-      head.querySelector('h2').textContent = 'The product should look like trading software before you read a word.';
-      const p = head.querySelector('p');
-      if (p) p.textContent = 'These are designed Signal Bridge interface previews. Real session records and trade data replace the demo state as the live pipeline fills.';
-    }
-    windows[0].innerHTML = `<div class="pro-product-head"><strong>Morning Desk</strong><span>session command center</span></div><div class="v2-product-shot"><img src="assets/product/session-desk.svg" alt="Signal Bridge Morning Desk product preview" /></div>`;
-    windows[1].innerHTML = `<div class="pro-product-head"><strong>Trade Journal</strong><span>trade + chart + P&amp;L</span></div><div class="v2-product-shot"><img src="assets/product/journal-trade-detail.svg" alt="Signal Bridge Trade Journal product preview" /></div>`;
-    windows[2].innerHTML = `<div class="pro-product-head"><strong>Strategy DNA</strong><span>version-aware evidence</span></div><div class="v2-product-shot"><img src="assets/product/strategy-dna.svg" alt="Signal Bridge Strategy DNA product preview" /></div>`;
+  function removeHomeDuplicateShowcase() {
+    // Product screenshots belong on the pages they explain. Home keeps one strong
+    // hero visual and routes visitors into the product instead of repeating the
+    // Journal / Strategy DNA / desk imagery they will see after clicking through.
+    document.querySelector('.pro-showcase')?.remove();
   }
 
   function cleanResearchGallery() {
@@ -53,14 +46,14 @@
       const h2 = head.querySelector('h2');
       const p = head.querySelector('p');
       if (eyebrow) eyebrow.textContent = 'Historical strategy research';
-      if (h2) h2.textContent = 'Keep the numbers. Lose the ugly source screenshots.';
-      if (p) p.textContent = 'Source files remain preserved in the Research & Evidence room. The homepage only carries the clean summary so the product does not look like a folder export.';
+      if (h2) h2.textContent = 'Historical numbers, kept separate from the product demo.';
+      if (p) p.textContent = 'Source files remain preserved in Research & Evidence. Home keeps only the clean historical summary instead of repeating raw research artifacts.';
     }
     gallery.remove();
     const strip = sectionEl.querySelector('.beta-money-strip');
     if (strip) strip.classList.add('v2-historical-strip');
     if (!sectionEl.querySelector('.v2-evidence-link')) {
-      const link = section('<div class="v2-evidence-link"><span>Want the raw research trail?</span><a href="evidence.html">Open Research &amp; Evidence →</a></div>');
+      const link = section('<div class="v2-evidence-link"><span>Want the full research trail?</span><a href="evidence.html">Open Research &amp; Evidence →</a></div>');
       sectionEl.appendChild(link);
     }
   }
@@ -75,7 +68,7 @@
   function decoratePage() {
     if (file === '' || file === 'index.html') {
       replaceHomeHero();
-      replaceProductShowcase();
+      removeHomeDuplicateShowcase();
       cleanResearchGallery();
       return;
     }
