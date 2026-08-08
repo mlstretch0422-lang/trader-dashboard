@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import html
 import re
 import shutil
 from pathlib import Path
@@ -11,7 +12,10 @@ ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "_site"
 SITE_SOURCE = ROOT / "site"
 REPORT = ROOT / "trading_os" / "src" / "integrations" / "report.json"
-MEMBER_URL = "https://signal-bridge-webhook.airy-iris.workers.dev/member"
+PUBLIC_BASE = "https://mlstretch0422-lang.github.io/trader-dashboard"
+MEMBER_APP_URL = "https://signal-bridge-webhook.airy-iris.workers.dev/member"
+MEMBER_ENTRY = "access.html"
+SOCIAL_IMAGE = f"{PUBLIC_BASE}/assets/product/hero-trade-win.svg"
 
 RESEARCH_IMAGE_MAP = [
     (ROOT / "SPX500_2026-07-08_10-23-12.png", "SPX500_2026-07-08_10-23-12.png"),
@@ -31,7 +35,7 @@ NAV_ITEMS = [
     ("indicators.html", "Indicators"),
     ("journal.html", "Journal"),
     ("mason.html", "Mason"),
-    (MEMBER_URL, "Member"),
+    (MEMBER_ENTRY, "Member"),
 ]
 
 MASON_SECTION_PAGES = {"mason.html", "mason-orb.html", "trade-bible.html", "evidence.html"}
@@ -54,6 +58,38 @@ def copy_if_exists(source: Path, destination: Path) -> None:
         shutil.copy2(source, destination)
 
 
+def page_metadata(path: Path, text: str) -> tuple[str, str, str]:
+    title_match = re.search(r"<title>(.*?)</title>", text, flags=re.DOTALL | re.IGNORECASE)
+    description_match = re.search(r'<meta\s+name="description"\s+content="([^"]*)"\s*/?>', text, flags=re.IGNORECASE)
+    title = html.unescape(title_match.group(1).strip()) if title_match else "Signal Bridge — Trading OS"
+    description = html.unescape(description_match.group(1).strip()) if description_match else "Signal Bridge is a connected trading operating system for live session context, journaling, strategy versions, chart tools, and evidence."
+    canonical = f"{PUBLIC_BASE}/" if path.name == "index.html" else f"{PUBLIC_BASE}/{path.name}"
+    return title, description, canonical
+
+
+def inject_social_metadata(path: Path, text: str) -> str:
+    if 'property="og:title"' in text:
+        return text
+    title, description, canonical = page_metadata(path, text)
+    social = (
+        f'  <link rel="canonical" href="{canonical}" />\n'
+        '  <meta property="og:type" content="website" />\n'
+        '  <meta property="og:site_name" content="Signal Bridge" />\n'
+        f'  <meta property="og:title" content="{html.escape(title, quote=True)}" />\n'
+        f'  <meta property="og:description" content="{html.escape(description, quote=True)}" />\n'
+        f'  <meta property="og:url" content="{canonical}" />\n'
+        f'  <meta property="og:image" content="{SOCIAL_IMAGE}" />\n'
+        '  <meta property="og:image:alt" content="Signal Bridge trading workspace preview" />\n'
+        '  <meta name="twitter:card" content="summary_large_image" />\n'
+        f'  <meta name="twitter:title" content="{html.escape(title, quote=True)}" />\n'
+        f'  <meta name="twitter:description" content="{html.escape(description, quote=True)}" />\n'
+        f'  <meta name="twitter:image" content="{SOCIAL_IMAGE}" />\n'
+    )
+    if "</head>" not in text:
+        raise RuntimeError(f"Could not inject social metadata into {path}")
+    return text.replace("</head>", f"{social}</head>", 1)
+
+
 def apply_native_shell(path: Path) -> None:
     text = path.read_text(encoding="utf-8")
     if "polish.css" not in text:
@@ -69,7 +105,7 @@ def apply_native_shell(path: Path) -> None:
             if "</head>" not in text:
                 raise RuntimeError(f"Could not inject {stylesheet} into {path}")
             text = text.replace("</head>", f'  <link rel="stylesheet" href="{stylesheet}" />\n</head>', 1)
-    for script in ("beta-clarity.js", "pro-visuals.js", "product-visuals-v2.js"):
+    for script in ("beta-clarity.js", "pro-visuals.js", "product-visuals-v2.js", "launch-readiness.js"):
         if script not in text and "</body>" in text:
             text = text.replace("</body>", f'  <script src="{script}"></script>\n</body>', 1)
 
@@ -77,8 +113,6 @@ def apply_native_shell(path: Path) -> None:
     for href, label in NAV_ITEMS:
         if href == "mason.html":
             is_active = path.name in MASON_SECTION_PAGES
-        elif href.startswith("http"):
-            is_active = False
         else:
             is_active = path.name == href
         active = ' class="active"' if is_active else ""
@@ -98,6 +132,8 @@ def apply_native_shell(path: Path) -> None:
         text, breadcrumb_count = re.subn(r'<div class="breadcrumb">.*?</div>', mason_breadcrumbs[path.name], text, count=1, flags=re.DOTALL)
         if breadcrumb_count == 0:
             raise RuntimeError(f"Could not normalize Mason breadcrumb in {path}")
+
+    text = inject_social_metadata(path, text)
 
     if "legal-disclaimer" not in text and "</body>" in text:
         text = text.replace("</body>", f"  {LEGAL_NOTE}\n</body>", 1)
@@ -132,6 +168,7 @@ def main() -> int:
 
     required = [
         SITE / "index.html",
+        SITE / "access.html",
         SITE / "mason.html",
         SITE / "trade-bible.html",
         SITE / "evidence.html",
@@ -151,6 +188,7 @@ def main() -> int:
         SITE / "pro-visuals.js",
         SITE / "product-visuals-v2.css",
         SITE / "product-visuals-v2.js",
+        SITE / "launch-readiness.js",
         SITE / "assets" / "product" / "hero-trade-win.svg",
         SITE / "assets" / "product" / "journal-trade-detail.svg",
         SITE / "assets" / "product" / "session-desk.svg",
