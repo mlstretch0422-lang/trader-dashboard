@@ -9,6 +9,7 @@ const JOURNAL_URL = "https://mlstretch0422-lang.github.io/trader-dashboard/journ
 
 export const MEMBER_COMMANDS = new Set([
   "journal-inbox",
+  "journal-update",
   "journal-publish",
   "journal-private",
   "journal-login",
@@ -65,6 +66,10 @@ function optionMap(interaction) {
   return Object.fromEntries((interaction?.data?.options || []).map((option) => [option.name, option.value]));
 }
 
+function hasOption(options, key) {
+  return Object.prototype.hasOwnProperty.call(options, key);
+}
+
 function compact(value, maxLength = 160) {
   return String(value ?? "").trim().replace(/\s+/g, " ").slice(0, maxLength);
 }
@@ -77,7 +82,7 @@ async function editOriginal(interaction, content) {
   const endpoint = `https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`;
   const response = await fetch(endpoint, {
     method: "PATCH",
-    headers: { "content-type": "application/json", "user-agent": "SignalBridgeMemberBot/2.0" },
+    headers: { "content-type": "application/json", "user-agent": "SignalBridgeMemberBot/2.1" },
     body: JSON.stringify({ content: String(content || "Signal Bridge completed the request.").slice(0, 1950), allowed_mentions: { parse: [] } }),
   });
   if (!response.ok) throw new Error(`discord_edit_${response.status}`);
@@ -176,7 +181,7 @@ async function listJournalForUser(interaction, env) {
 
   const result = await env.DB.prepare(
     `SELECT id, created_at, journal_time, symbol, side, setup, title, raw_text,
-            summary, result, image_url, visibility, review_status
+            summary, result, pnl, rr, image_url, visibility, review_status
      FROM journal_entries
      WHERE ${where}
      ORDER BY COALESCE(journal_time, created_at) DESC
@@ -191,10 +196,12 @@ async function listJournalForUser(interaction, env) {
     lines.push("");
     lines.push(`**${entry.id.slice(0, 8)}** · ${entry.visibility} · ${identity}`);
     if (entry.setup) lines.push(`Setup: ${compact(entry.setup, 60)}`);
+    if (entry.pnl !== null && entry.pnl !== undefined) lines.push(`P&L: ${entry.pnl}`);
+    if (entry.rr !== null && entry.rr !== undefined) lines.push(`R: ${entry.rr}`);
     lines.push(compact(entry.summary || entry.raw_text, 115));
     if (entry.image_url) lines.push(`Chart: ${entry.image_url}`);
   }
-  lines.push("", "Use `/member-login` for the private Signal Bridge workspace.");
+  lines.push("", "Use `/journal-update id:<ID>` to close out an OPEN trade. Use `/member-login` for the private workspace.");
   return lines.join("\n");
 }
 
@@ -210,6 +217,41 @@ async function resolveJournalForUser(idValue, userId, env) {
   if (!rows.length) throw new Error("journal_not_found");
   if (rows.length > 1) throw new Error("journal_id_ambiguous");
   return rows[0];
+}
+
+async function updateOwnJournal(interaction, env) {
+  if (!env.DB) throw new Error("journal_storage_not_configured");
+  const userId = invokingUserId(interaction);
+  if (!userId) throw new Error("discord_user_missing");
+  const options = optionMap(interaction);
+  const entry = await resolveJournalForUser(options.id, userId, env);
+
+  const hasResult = hasOption(options, "result");
+  const hasPnl = hasOption(options, "pnl");
+  const hasRr = hasOption(options, "rr");
+  const hasReview = hasOption(options, "review");
+  if (!hasResult && !hasPnl && !hasRr && !hasReview) throw new Error("journal_update_empty");
+
+  const result = hasResult ? compact(options.result, 16).toUpperCase() : entry.result;
+  const pnl = hasPnl ? Number(options.pnl) : entry.pnl;
+  const rr = hasRr ? Number(options.rr) : entry.rr;
+  const review = hasReview ? compact(options.review, 1000) : entry.summary;
+  if (hasPnl && !Number.isFinite(pnl)) throw new Error("journal_update_invalid_number");
+  if (hasRr && !Number.isFinite(rr)) throw new Error("journal_update_invalid_number");
+
+  await env.DB.prepare(
+    `UPDATE journal_entries
+     SET result = ?2, pnl = ?3, rr = ?4, summary = ?5
+     WHERE id = ?1 AND discord_author_id = ?6`,
+  ).bind(entry.id, result, pnl, rr, review || null, userId).run();
+
+  const lines = ["✅ **SIGNAL BRIDGE | JOURNAL UPDATED**", `ID: ${entry.id.slice(0, 8)}`];
+  if (result) lines.push(`Result: ${result}`);
+  if (pnl !== null && pnl !== undefined) lines.push(`P&L: ${pnl}`);
+  if (rr !== null && rr !== undefined) lines.push(`R: ${rr}`);
+  if (hasReview && review) lines.push(`Review: ${review}`);
+  lines.push("Original trade note preserved.");
+  return lines.join("\n");
 }
 
 async function setJournalVisibility(interaction, visibility, env) {
@@ -248,6 +290,8 @@ function friendlyError(error) {
     journal_id_too_short: "Use at least 6 characters of the journal ID.",
     journal_not_found: "I could not find that journal record under your Discord account.",
     journal_id_ambiguous: "That journal ID prefix matches more than one record. Use more of the ID.",
+    journal_update_empty: "Add at least one field to update: result, P&L, R, or review note.",
+    journal_update_invalid_number: "P&L and R must be valid numbers.",
     manager_permission_required: "Publishing controls are limited to server managers during beta.",
     member_storage_not_configured: "Private member storage is not ready yet.",
     premium_role_required: "Your Discord account does not currently have the Signal Bridge Premium role.",
@@ -257,6 +301,7 @@ function friendlyError(error) {
 
 async function perform(interaction, command, env) {
   if (command === "journal-inbox") return listJournalForUser(interaction, env);
+  if (command === "journal-update") return updateOwnJournal(interaction, env);
   if (command === "journal-publish") return setJournalVisibility(interaction, "PUBLISHED", env);
   if (command === "journal-private") return setJournalVisibility(interaction, "PRIVATE", env);
   if (command === "journal-login" || command === "member-login") return buildLogin(interaction, env);
