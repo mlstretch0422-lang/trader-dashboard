@@ -12,6 +12,7 @@ import {
   handleTradingViewSessionEvent,
   listSessionEvents,
 } from "./session_events.js";
+import { handleStrategyDnaRequest } from "./strategy_dna.js";
 
 async function discordCommandName(request) {
   if (request.method !== "POST") return "";
@@ -60,6 +61,9 @@ async function extendHealth(response, env) {
       calendarTable,
       headlinesTable,
       botDispatchTable,
+      strategyProfiles,
+      strategyVersions,
+      strategyObservations,
     ] = await Promise.all([
       tableReady(env, "journal_entries"),
       tableReady(env, "session_events"),
@@ -69,10 +73,13 @@ async function extendHealth(response, env) {
       tableReady(env, "economic_calendar_events"),
       tableReady(env, "market_headlines"),
       tableReady(env, "bot_dispatch_log"),
+      tableReady(env, "strategy_profiles"),
+      tableReady(env, "strategy_versions"),
+      tableReady(env, "strategy_observations"),
     ]);
     return new Response(JSON.stringify({
       ...data,
-      worker_release: "desk-assistant-v2",
+      worker_release: "strategy-dna-v1",
       discord_capture_configured: Boolean(
         env.DISCORD_PUBLIC_KEY &&
         env.DISCORD_APPLICATION_ID &&
@@ -89,6 +96,7 @@ async function extendHealth(response, env) {
       economic_calendar_provider_configured: Boolean(env.TRADING_ECONOMICS_API_KEY),
       scheduled_desk_ready: botDispatchTable && Boolean(env.DISCORD_INTELLIGENCE_WEBHOOK_URL || env.DISCORD_WEBHOOK_URL),
       scheduled_desk_storage_ready: botDispatchTable,
+      strategy_dna_ready: strategyProfiles && strategyVersions && strategyObservations,
     }), {
       status: response.status,
       headers: response.headers,
@@ -115,6 +123,10 @@ export default {
 
     if (url.pathname === "/member" || url.pathname.startsWith("/member/")) {
       return handleMemberRequest(request, env);
+    }
+
+    if (url.pathname === "/strategy-dna" || url.pathname.startsWith("/strategy-dna/")) {
+      return handleStrategyDnaRequest(request, env);
     }
 
     if (url.pathname === "/tv-session") return handleTradingViewSessionEvent(request, env, ctx);

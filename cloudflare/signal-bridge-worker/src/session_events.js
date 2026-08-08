@@ -35,8 +35,8 @@ function safeText(value, fallback = "", maxLength = 160) {
 }
 
 function nullableText(value, maxLength = 160) {
-  const text = safeText(value, "", maxLength);
-  return text || null;
+  const valueText = safeText(value, "", maxLength);
+  return valueText || null;
 }
 
 function nullableNumber(value) {
@@ -79,9 +79,9 @@ async function readJson(request) {
   if (!contentType.toLowerCase().includes("application/json")) throw new Error("content_type_must_be_json");
   const contentLength = Number(request.headers.get("content-length") || 0);
   if (contentLength > MAX_BODY_BYTES) throw new Error("body_too_large");
-  const text = await request.text();
-  if (new TextEncoder().encode(text).byteLength > MAX_BODY_BYTES) throw new Error("body_too_large");
-  return JSON.parse(text);
+  const bodyText = await request.text();
+  if (new TextEncoder().encode(bodyText).byteLength > MAX_BODY_BYTES) throw new Error("body_too_large");
+  return JSON.parse(bodyText);
 }
 
 function normalizeSessionEvent(raw, forceTest = false) {
@@ -101,15 +101,16 @@ function normalizeSessionEvent(raw, forceTest = false) {
   if (orbMid === null && orbHigh !== null && orbLow !== null) orbMid = (orbHigh + orbLow) / 2;
   if (rangePoints === null && orbHigh !== null && orbLow !== null) rangePoints = Math.abs(orbHigh - orbLow);
 
-  const eventTime = normalizeEventTime(raw.time ?? raw.event_time);
   return {
     session_date: normalizeSessionDate(raw.session_date),
-    event_time: eventTime,
+    event_time: normalizeEventTime(raw.time ?? raw.event_time),
     symbol: safeText(raw.symbol, "MES", 32).toUpperCase(),
     stage,
     side: sideText || null,
     price: nullableNumber(raw.price),
     strategy: safeText(raw.strategy, "Signal Bridge Session", 96),
+    strategy_version_id: nullableText(raw.strategy_version_id, 128),
+    indicator_version: nullableText(raw.indicator_version, 96),
     note: safeText(raw.note, stage.replaceAll("_", " "), 500),
     timeframe: nullableText(raw.timeframe, 24),
     orb_high: orbHigh,
@@ -126,14 +127,16 @@ function normalizeSessionEvent(raw, forceTest = false) {
 
 async function persistSessionEvent(record, env) {
   if (!env.DB) throw new Error("session_storage_not_configured");
-  await env.DB.prepare(
+
+  const statements = [env.DB.prepare(
     `INSERT INTO session_events (
       id, received_at, event_time, session_date, symbol, stage, side, price,
-      strategy, note, timeframe, orb_high, orb_low, orb_mid, range_points,
-      bias, setup, target, outcome, payload_json, source
+      strategy, strategy_version_id, indicator_version, note, timeframe,
+      orb_high, orb_low, orb_mid, range_points, bias, setup, target, outcome,
+      payload_json, source
     ) VALUES (
-      ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11,
-      ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21
+      ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13,
+      ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23
     )`,
   ).bind(
     record.id,
@@ -145,6 +148,8 @@ async function persistSessionEvent(record, env) {
     record.side,
     record.price,
     record.strategy,
+    record.strategy_version_id,
+    record.indicator_version,
     record.note,
     record.timeframe,
     record.orb_high,
@@ -157,7 +162,30 @@ async function persistSessionEvent(record, env) {
     record.outcome,
     record.payload_json,
     record.source,
-  ).run();
+  )];
+
+  if (record.strategy_version_id && record.stage !== "TEST") {
+    statements.push(env.DB.prepare(
+      `INSERT OR IGNORE INTO strategy_observations (
+         id, created_at, strategy_version_id, observation_type,
+         session_event_id, signal_event_id, journal_entry_id,
+         outcome, note, metadata_json
+       )
+       SELECT ?1, ?2, ?3, ?4, ?5, NULL, NULL, ?6, ?7, ?8
+       WHERE EXISTS (SELECT 1 FROM strategy_versions WHERE id = ?3)`,
+    ).bind(
+      `session:${record.id}`,
+      record.received_at,
+      record.strategy_version_id,
+      record.stage,
+      record.id,
+      record.outcome,
+      record.note,
+      JSON.stringify({ symbol: record.symbol, session_date: record.session_date, indicator_version: record.indicator_version }),
+    ));
+  }
+
+  await env.DB.batch(statements);
 }
 
 function formatNumber(value) {
@@ -188,6 +216,7 @@ function buildDiscordMessage(record) {
   if (record.target) lines.push(`Target: ${record.target}`);
   if (record.outcome) lines.push(`Outcome: ${record.outcome}`);
   if (record.note) lines.push(record.note);
+  if (record.strategy_version_id) lines.push(`Strategy DNA: ${record.strategy_version_id}`);
   if (record.event_time) lines.push(`Time: ${record.event_time}`);
 
   return { content: lines.join("\n").slice(0, 1900), allowed_mentions: { parse: [] } };
@@ -232,6 +261,7 @@ async function acceptSessionEvent(request, env, ctx, source, forceTest = false) 
       session_date: record.session_date,
       stage: record.stage,
       symbol: record.symbol,
+      strategy_version_id: record.strategy_version_id,
     }, 202);
   } catch (error) {
     const reason = error instanceof SyntaxError ? "invalid_json" : String(error?.message || "invalid_request");
@@ -278,7 +308,8 @@ export async function listSessionEvents(url, env) {
   try {
     const result = await env.DB.prepare(
       `SELECT id, received_at, event_time, session_date, symbol, stage, side, price,
-              strategy, note, timeframe, orb_high, orb_low, orb_mid, range_points,
+              strategy, strategy_version_id, indicator_version, note, timeframe,
+              orb_high, orb_low, orb_mid, range_points,
               bias, setup, target, outcome, source
        FROM session_events
        WHERE ${where.join(" AND ")}
@@ -319,7 +350,8 @@ export async function getSessionSummaryData(env, symbol = "MES", requestedDate =
 
   const result = await env.DB.prepare(
     `SELECT id, received_at, event_time, session_date, symbol, stage, side, price,
-            strategy, note, timeframe, orb_high, orb_low, orb_mid, range_points,
+            strategy, strategy_version_id, indicator_version, note, timeframe,
+            orb_high, orb_low, orb_mid, range_points,
             bias, setup, target, outcome, source
      FROM session_events
      WHERE symbol = ?1 AND session_date = ?2 AND stage <> 'TEST'
@@ -332,6 +364,8 @@ export async function getSessionSummaryData(env, symbol = "MES", requestedDate =
     session_date: sessionDate,
     symbol: normalizedSymbol,
     event_count: events.length,
+    strategy_version_id: latest?.strategy_version_id || orb?.strategy_version_id || null,
+    indicator_version: latest?.indicator_version || orb?.indicator_version || null,
     orb,
     latest,
     events,

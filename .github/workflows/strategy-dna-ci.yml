@@ -1,0 +1,73 @@
+name: Strategy DNA Safety Checks
+
+on:
+  pull_request:
+    paths:
+      - "cloudflare/signal-bridge-worker/migrations/0008_strategy_dna.sql"
+      - "cloudflare/signal-bridge-worker/src/strategy_dna.js"
+      - "cloudflare/signal-bridge-worker/src/session_events.js"
+      - "cloudflare/signal-bridge-worker/src/entry.js"
+      - "cloudflare/signal-bridge-worker/STRATEGY_DNA_V1.md"
+      - ".github/workflows/strategy-dna-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-strategy-dna:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Check Worker syntax
+        run: |
+          node --check cloudflare/signal-bridge-worker/src/strategy_dna.js
+          node --check cloudflare/signal-bridge-worker/src/session_events.js
+          node --check cloudflare/signal-bridge-worker/src/entry.js
+
+      - name: Validate complete D1 schema
+        run: |
+          python - <<'PY'
+          import sqlite3
+          from pathlib import Path
+
+          db = sqlite3.connect(":memory:")
+          for migration in sorted(Path("cloudflare/signal-bridge-worker/migrations").glob("*.sql")):
+              db.executescript(migration.read_text())
+
+          expected = {
+              "strategy_profiles": {"id", "owner_type", "owner_discord_id", "slug", "name", "status"},
+              "strategy_versions": {"id", "strategy_id", "version_label", "evidence_stage", "rules_json", "indicator_version", "indicator_config_json", "is_current"},
+              "strategy_observations": {"id", "strategy_version_id", "observation_type", "session_event_id", "signal_event_id", "journal_entry_id", "outcome"},
+          }
+          for table, fields in expected.items():
+              found = {row[1] for row in db.execute(f"PRAGMA table_info({table})")}
+              missing = sorted(fields - found)
+              if missing:
+                  raise SystemExit(f"{table} missing: {missing}")
+
+          for table, field in [("session_events", "strategy_version_id"), ("session_events", "indicator_version"), ("signal_events", "strategy_version_id"), ("journal_entries", "strategy_version_id")]:
+              found = {row[1] for row in db.execute(f"PRAGMA table_info({table})")}
+              if field not in found:
+                  raise SystemExit(f"{table} missing {field}")
+
+          seeded = db.execute("SELECT id, evidence_stage FROM strategy_versions WHERE id = 'mason-orb-v1.2-session-bridge'").fetchone()
+          if seeded != ("mason-orb-v1.2-session-bridge", "IMPLEMENTED"):
+              raise SystemExit(f"unexpected seed: {seeded}")
+
+          triggers = {row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='trigger'")}
+          if "trg_session_mason_orb_v12_dna" not in triggers:
+              raise SystemExit("v1.2 session auto-link trigger missing")
+
+          print("Strategy DNA schema OK")
+          PY
+
+      - name: Verify protected API and linkage
+        run: |
+          grep -q 'handleStrategyDnaRequest' cloudflare/signal-bridge-worker/src/entry.js
+          grep -q 'url.pathname === "/strategy-dna"' cloudflare/signal-bridge-worker/src/entry.js
+          grep -q 'JOURNAL_ADMIN_TOKEN || env.SIGNAL_BRIDGE_TEST_TOKEN' cloudflare/signal-bridge-worker/src/strategy_dna.js
+          grep -q 'strategy_version_id' cloudflare/signal-bridge-worker/src/session_events.js
+          grep -q 'strategy_observations' cloudflare/signal-bridge-worker/src/session_events.js
+          grep -q 'strategy_dna_ready' cloudflare/signal-bridge-worker/src/entry.js
