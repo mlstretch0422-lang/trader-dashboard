@@ -1,0 +1,53 @@
+name: Strategy Pine v1.2 Source Checks
+
+on:
+  pull_request:
+    paths:
+      - "ES_ORB_Strategy_v1_2_SIGNAL_BRIDGE.pine"
+      - "STRATEGY_PINE_AUDIT_2026-08-08.md"
+      - ".github/workflows/strategy-pine-v1-2-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-strategy-source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Verify Pine v6 and staged identity
+        run: |
+          grep -q '^//@version=6' ES_ORB_Strategy_v1_2_SIGNAL_BRIDGE.pine
+          grep -q 'v1.2 STAGED' ES_ORB_Strategy_v1_2_SIGNAL_BRIDGE.pine
+          grep -q 'mason-orb-v1.2-signal-bridge' ES_ORB_Strategy_v1_2_SIGNAL_BRIDGE.pine
+          grep -q 'f_reachedTime' ES_ORB_Strategy_v1_2_SIGNAL_BRIDGE.pine
+          grep -q 'forceFlatHit = f_reachedTime(i_flatTime)' ES_ORB_Strategy_v1_2_SIGNAL_BRIDGE.pine
+
+      - name: Guard core mechanical defaults
+        run: |
+          grep -q 'input.string("0800", "ORB Start' ES_ORB_Strategy_v1_2_SIGNAL_BRIDGE.pine
+          grep -q 'input.string("0815", "ORB End' ES_ORB_Strategy_v1_2_SIGNAL_BRIDGE.pine
+          grep -q 'input.string("0930", "Trade Start' ES_ORB_Strategy_v1_2_SIGNAL_BRIDGE.pine
+          grep -q 'input.string("1100", "Force Flat Time' ES_ORB_Strategy_v1_2_SIGNAL_BRIDGE.pine
+          grep -q 'not tradeTakenToday' ES_ORB_Strategy_v1_2_SIGNAL_BRIDGE.pine
+          grep -q 'i_bodyMinPct.*0.35' ES_ORB_Strategy_v1_2_SIGNAL_BRIDGE.pine
+          grep -q 'i_bodyMinAtr.*0.75' ES_ORB_Strategy_v1_2_SIGNAL_BRIDGE.pine
+          grep -q 'i_useVWAP.*true' ES_ORB_Strategy_v1_2_SIGNAL_BRIDGE.pine
+          grep -q 'i_useEMA.*false' ES_ORB_Strategy_v1_2_SIGNAL_BRIDGE.pine
+
+      - name: Guard Signal Bridge alert contract
+        run: |
+          grep -q '\\"symbol\\"' ES_ORB_Strategy_v1_2_SIGNAL_BRIDGE.pine
+          grep -q '\\"side\\"' ES_ORB_Strategy_v1_2_SIGNAL_BRIDGE.pine
+          grep -q '\\"event\\"' ES_ORB_Strategy_v1_2_SIGNAL_BRIDGE.pine
+          grep -q '\\"strategy_version_id\\"' ES_ORB_Strategy_v1_2_SIGNAL_BRIDGE.pine
+          grep -q 'Mechanical ORB long entry' ES_ORB_Strategy_v1_2_SIGNAL_BRIDGE.pine
+          grep -q '11:00 force flat' ES_ORB_Strategy_v1_2_SIGNAL_BRIDGE.pine
+
+      - name: Guard evidence wording
+        run: |
+          grep -q 'partial exits on one futures contract' STRATEGY_PINE_AUDIT_2026-08-08.md
+          grep -q 'STAGED' STRATEGY_PINE_AUDIT_2026-08-08.md
+          grep -q 'fresh matched historical run' STRATEGY_PINE_AUDIT_2026-08-08.md
