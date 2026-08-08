@@ -88,3 +88,33 @@ INSERT OR IGNORE INTO strategy_versions (
   'Adds durable Signal Bridge session lifecycle events while preserving v1.1 signal logic.',
   1
 );
+
+-- v1.2 predates the generic strategy_version_id field in its TradingView payload.
+-- Link that exact named integration automatically so Monday forward session events
+-- immediately become Strategy DNA observations without changing the v1.2 signal rules.
+CREATE TRIGGER IF NOT EXISTS trg_session_mason_orb_v12_dna
+AFTER INSERT ON session_events
+WHEN NEW.strategy = 'ES/MES ORB Indicator v1.2 Session Bridge'
+BEGIN
+  UPDATE session_events
+  SET strategy_version_id = COALESCE(NEW.strategy_version_id, 'mason-orb-v1.2-session-bridge'),
+      indicator_version = COALESCE(NEW.indicator_version, '1.2-session-bridge')
+  WHERE id = NEW.id;
+
+  INSERT OR IGNORE INTO strategy_observations (
+    id, created_at, strategy_version_id, observation_type,
+    session_event_id, signal_event_id, journal_entry_id,
+    outcome, note, metadata_json
+  ) VALUES (
+    'session:' || NEW.id,
+    NEW.received_at,
+    'mason-orb-v1.2-session-bridge',
+    NEW.stage,
+    NEW.id,
+    NULL,
+    NULL,
+    NEW.outcome,
+    NEW.note,
+    '{}'
+  );
+END;
