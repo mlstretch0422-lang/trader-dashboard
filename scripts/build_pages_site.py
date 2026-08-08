@@ -62,14 +62,16 @@ def apply_native_shell(path: Path) -> None:
             raise RuntimeError(f"Could not inject polish.css into {path}")
         text = text.replace(marker, '  <link rel="stylesheet" href="polish.css" />\n</head>', 1)
 
-    # Trader-first beta clarity layer. Kept separate from the core visual system so
-    # usability experiments can move quickly without destabilizing the site shell.
-    if "beta-clarity.css" not in text:
-        if "</head>" not in text:
-            raise RuntimeError(f"Could not inject beta-clarity.css into {path}")
-        text = text.replace("</head>", '  <link rel="stylesheet" href="beta-clarity.css" />\n</head>', 1)
-    if "beta-clarity.js" not in text and "</body>" in text:
-        text = text.replace("</body>", '  <script src="beta-clarity.js"></script>\n</body>', 1)
+    # Fast-moving usability and presentation layers stay separate from the core
+    # page markup so the product can evolve without destabilizing every page.
+    for stylesheet in ("beta-clarity.css", "pro-visuals.css"):
+        if stylesheet not in text:
+            if "</head>" not in text:
+                raise RuntimeError(f"Could not inject {stylesheet} into {path}")
+            text = text.replace("</head>", f'  <link rel="stylesheet" href="{stylesheet}" />\n</head>', 1)
+    for script in ("beta-clarity.js", "pro-visuals.js"):
+        if script not in text and "</body>" in text:
+            text = text.replace("</body>", f'  <script src="{script}"></script>\n</body>', 1)
 
     links = []
     for href, label in NAV_ITEMS:
@@ -84,7 +86,6 @@ def apply_native_shell(path: Path) -> None:
     nav_html = '<nav class="nav" aria-label="Main navigation">\n' + "\n".join(links) + "\n      </nav>"
 
     text, count = re.subn(r'<nav class="nav"(?:\s+aria-label="[^"]*")?>.*?</nav>', nav_html, text, count=1, flags=re.DOTALL)
-    # Redirect compatibility pages intentionally have no navigation.
     if count == 0 and path.name not in {"dashboard.html", "reports.html"}:
         raise RuntimeError(f"Could not normalize navigation in {path}")
 
@@ -146,6 +147,8 @@ def main() -> int:
         SITE / "polish.css",
         SITE / "beta-clarity.css",
         SITE / "beta-clarity.js",
+        SITE / "pro-visuals.css",
+        SITE / "pro-visuals.js",
         SITE / "assets" / "research" / "mes-study-01.png",
         SITE / "assets" / "research" / "mes-study-02.png",
         SITE / "assets" / "research" / "mes-study-03.png",

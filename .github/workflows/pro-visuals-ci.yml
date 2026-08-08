@@ -1,0 +1,41 @@
+name: Professional Trading Visual Checks
+
+on:
+  pull_request:
+    paths:
+      - "site/pro-visuals.css"
+      - "site/pro-visuals.js"
+      - "scripts/build_pages_site.py"
+      - ".github/workflows/pro-visuals-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-pro-visuals:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Syntax checks
+        run: |
+          node --check site/pro-visuals.js
+          python -m py_compile scripts/build_pages_site.py
+
+      - name: Build website artifact
+        run: python scripts/build_pages_site.py
+
+      - name: Verify professional visual surfaces
+        run: |
+          test -s _site/pro-visuals.css
+          test -s _site/pro-visuals.js
+          grep -q 'pro-visuals.css' _site/index.html
+          grep -q 'pro-visuals.js' _site/index.html
+          grep -q 'pro-visuals.css' _site/signals.html
+          grep -q 'beta-terminal-card' site/pro-visuals.js
+          grep -q 'pro-product-grid' site/pro-visuals.js
+          grep -q 'proSessionMap' site/pro-visuals.js
+          grep -q 'Historical research' site/pro-visuals.js
+          grep -q 'illustrative layout' site/pro-visuals.js
+          grep -q 'event price trace' site/pro-visuals.css || grep -q 'actual stored session prices' site/pro-visuals.css
