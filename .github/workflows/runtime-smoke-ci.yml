@@ -1,0 +1,46 @@
+name: Hosted Worker Smoke Check
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/runtime-smoke-ci.yml"
+      - "cloudflare/signal-bridge-worker/src/**"
+      - "cloudflare/signal-bridge-worker/migrations/**"
+
+permissions:
+  contents: read
+
+jobs:
+  verify-hosted-worker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read hosted Worker health
+        run: |
+          curl --fail --silent --show-error --retry 3 --retry-delay 2 \
+            https://signal-bridge-webhook.airy-iris.workers.dev/health \
+            -o /tmp/signal-bridge-health.json
+          cat /tmp/signal-bridge-health.json
+
+      - name: Verify previous deploy and migrations are live
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(Path('/tmp/signal-bridge-health.json').read_text())
+          required_true = [
+              'journal_table_ready',
+              'session_table_ready',
+              'member_sessions_ready',
+              'member_entitlements_ready',
+              'strategy_dna_ready',
+          ]
+          if not data.get('ok'):
+              raise SystemExit(f"hosted Worker health is not OK: {data}")
+          if data.get('worker_release') != 'premium-entitlements-v1':
+              raise SystemExit(f"unexpected hosted Worker release: {data.get('worker_release')}")
+          missing = [key for key in required_true if not data.get(key)]
+          if missing:
+              raise SystemExit(f"hosted Worker migrations/features not ready: {missing}")
+          print('Hosted Signal Bridge premium/Strategy-DNA deployment verified.')
+          PY
