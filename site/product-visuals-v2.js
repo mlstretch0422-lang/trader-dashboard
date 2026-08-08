@@ -30,32 +30,28 @@
   }
 
   function removeHomeDuplicateShowcase() {
-    // Product screenshots belong on the pages they explain. Home keeps one strong
-    // hero visual and routes visitors into the product instead of repeating the
-    // Journal / Strategy DNA / desk imagery they will see after clicking through.
     document.querySelector('.pro-showcase')?.remove();
   }
 
-  function cleanResearchGallery() {
+  function removeHomeHistoricalPerformance() {
+    // Home is the product demo, not the strategy archive. Historical metrics and
+    // source artifacts remain available under Mason -> Research & Evidence.
     const gallery = document.querySelector('.beta-gallery');
     const sectionEl = gallery?.closest('section');
-    if (!sectionEl) return;
-    const head = sectionEl.querySelector('.section-head');
-    if (head) {
-      const eyebrow = head.querySelector('.eyebrow');
-      const h2 = head.querySelector('h2');
-      const p = head.querySelector('p');
-      if (eyebrow) eyebrow.textContent = 'Historical strategy research';
-      if (h2) h2.textContent = 'Historical numbers, kept separate from the product demo.';
-      if (p) p.textContent = 'Source files remain preserved in Research & Evidence. Home keeps only the clean historical summary instead of repeating raw research artifacts.';
+    if (sectionEl) {
+      sectionEl.remove();
+      return;
     }
-    gallery.remove();
-    const strip = sectionEl.querySelector('.beta-money-strip');
-    if (strip) strip.classList.add('v2-historical-strip');
-    if (!sectionEl.querySelector('.v2-evidence-link')) {
-      const link = section('<div class="v2-evidence-link"><span>Want the full research trail?</span><a href="evidence.html">Open Research &amp; Evidence →</a></div>');
-      sectionEl.appendChild(link);
-    }
+
+    // Fallback for older markup where the gallery may already be removed but the
+    // money strip/heading is still present.
+    document.querySelectorAll('.beta-money-strip, .v2-historical-strip').forEach((el) => el.remove());
+    document.querySelectorAll('.section-head h2').forEach((heading) => {
+      const copy = heading.textContent?.toLowerCase() || '';
+      if (copy.includes('historical numbers') || copy.includes('historical strategy research')) {
+        heading.closest('section')?.remove();
+      }
+    });
   }
 
   function addPageVisual(src, title, copy, tag) {
@@ -69,7 +65,7 @@
     if (file === '' || file === 'index.html') {
       replaceHomeHero();
       removeHomeDuplicateShowcase();
-      cleanResearchGallery();
+      removeHomeHistoricalPerformance();
       return;
     }
     if (file === 'journal.html') addPageVisual('assets/product/journal-trade-detail.svg', 'A journal entry should look like the trade.', 'One record can hold the thesis, chart, setup, P&L, R multiple, result, screenshot and review. Demo values are illustrative.', 'Illustrative member record');
