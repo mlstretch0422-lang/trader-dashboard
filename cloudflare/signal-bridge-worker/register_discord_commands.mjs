@@ -14,6 +14,15 @@ const symbolOption = {
   max_length: 32,
 };
 
+const resultChoices = [
+  { name: "Win", value: "WIN" },
+  { name: "Loss", value: "LOSS" },
+  { name: "Break even", value: "BE" },
+  { name: "Open", value: "OPEN" },
+  { name: "Pass / no trade", value: "PASS" },
+  { name: "Not assigned", value: "NA" },
+];
+
 const commands = [
   {
     name: "status",
@@ -67,7 +76,7 @@ const commands = [
     integration_types: [0],
     contexts: [0],
     options: [
-      { name: "note", description: "What happened and what did you see?", type: 3, required: true, max_length: 2000 },
+      { name: "note", description: "What happened, what did you see, and where did the idea come from?", type: 3, required: true, max_length: 2000 },
       { name: "symbol", description: "Market symbol, for example MES", type: 3, required: false, max_length: 32 },
       {
         name: "side",
@@ -80,26 +89,27 @@ const commands = [
           { name: "Wait / no trade", value: "WAIT" },
         ],
       },
-      {
-        name: "result",
-        description: "Current result",
-        type: 3,
-        required: false,
-        choices: [
-          { name: "Win", value: "WIN" },
-          { name: "Loss", value: "LOSS" },
-          { name: "Break even", value: "BE" },
-          { name: "Open", value: "OPEN" },
-          { name: "Pass / no trade", value: "PASS" },
-          { name: "Not assigned", value: "NA" },
-        ],
-      },
+      { name: "result", description: "Current result (use Open if logging before exit)", type: 3, required: false, choices: resultChoices },
       { name: "setup", description: "Setup name, for example ORB retest", type: 3, required: false, max_length: 96 },
       { name: "strategy", description: "Strategy or model version", type: 3, required: false, max_length: 96 },
       { name: "pnl", description: "Dollar P&L if known", type: 10, required: false },
       { name: "rr", description: "R multiple if known", type: 10, required: false },
       { name: "chart", description: "Optional chart or execution screenshot", type: 11, required: false },
       { name: "publish", description: "Publish this entry to the website (server managers only)", type: 5, required: false },
+    ],
+  },
+  {
+    name: "journal-update",
+    type: 1,
+    description: "Close out or review one of your saved journal records",
+    integration_types: [0],
+    contexts: [0],
+    options: [
+      { name: "id", description: "Journal ID or unique ID prefix", type: 3, required: true, min_length: 6, max_length: 64 },
+      { name: "result", description: "Final or current trade result", type: 3, required: false, choices: resultChoices },
+      { name: "pnl", description: "Dollar P&L", type: 10, required: false },
+      { name: "rr", description: "R multiple", type: 10, required: false },
+      { name: "review", description: "Post-trade lesson or review note", type: 3, required: false, max_length: 1000 },
     ],
   },
   {
