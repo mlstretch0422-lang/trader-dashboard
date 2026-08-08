@@ -1,0 +1,446 @@
+//@version=6
+indicator("Signal Bridge · ES/MES ORB v1.3 VISUAL STACK", overlay=true, max_labels_count=100, max_lines_count=200, max_boxes_count=100)
+
+// v1.3 VISUAL STACK
+// - Preserves the v1.2 ORB / breakout / retest / signal and Session Bridge behavior.
+// - Adds chart presentation/context modules only. Display modules do not become strategy filters.
+// - The current integration clock remains 08:00-08:15 ORB + 09:30-11:00 trade window.
+// - Reference-session visuals are configurable and OFF by default because session research remains separate.
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TIME + STRATEGY INPUTS — carried forward from v1.2
+// ─────────────────────────────────────────────────────────────────────────────
+grpTime = "01 · Time Settings"
+i_timezone   = input.string("America/New_York", "Timezone", options=["America/New_York", "America/Chicago", "UTC"], group=grpTime)
+i_orbStart   = input.string("0800", "ORB Start (HHMM)", group=grpTime)
+i_orbEnd     = input.string("0815", "ORB End (HHMM)", group=grpTime)
+i_tradeStart = input.string("0930", "Trade Start (HHMM)", group=grpTime)
+i_tradeEnd   = input.string("1100", "Trade End (HHMM)", group=grpTime)
+
+grpEntry = "02 · Entry Settings"
+i_bodyMinPct    = input.float(0.35, "Min Body % of ORB Range", minval=0.0, maxval=2.0, step=0.05, group=grpEntry)
+i_bodyMinAtr    = input.float(0.75, "Min Body × ATR", minval=0.0, maxval=5.0, step=0.05, group=grpEntry)
+i_atrLen        = input.int(14, "ATR Length", minval=1, group=grpEntry)
+i_retestMode    = input.string("Midpoint", "Retest Mode", options=["Breakout", "Boundary", "Midpoint"], group=grpEntry)
+i_retestTimeout = input.int(60, "Retest Timeout Bars", minval=1, maxval=300, group=grpEntry)
+
+grpFilters = "03 · Strategy Filters"
+i_useVWAP  = input.bool(true, "Use VWAP Alignment", group=grpFilters)
+i_useEMA   = input.bool(false, "Use EMA(50) Alignment", group=grpFilters)
+i_emaLen   = input.int(50, "Strategy EMA Length", minval=1, group=grpFilters)
+i_minRange = input.float(5.0, "Min ORB Range Points", minval=0.25, step=0.25, group=grpFilters)
+i_maxRange = input.float(50.0, "Max ORB Range Points", minval=1.0, step=0.5, group=grpFilters)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VISUAL MODULES — context only unless separately named above as a filter
+// ─────────────────────────────────────────────────────────────────────────────
+grpOrbVisual = "04 · Visual · Opening Range"
+i_showOrbBox      = input.bool(true, "Show ORB Box", group=grpOrbVisual)
+i_showOrbLevels   = input.bool(true, "Show ORH / ORM / ORL", group=grpOrbVisual)
+i_orbHistory      = input.int(5, "ORB Boxes to Keep", minval=1, maxval=20, group=grpOrbVisual)
+i_orbFill         = input.color(color.new(color.rgb(59, 130, 246), 91), "ORB Fill", group=grpOrbVisual)
+i_orbBorder       = input.color(color.new(color.rgb(96, 165, 250), 35), "ORB Border", group=grpOrbVisual)
+
+grpContext = "05 · Visual · Liquidity & Context"
+i_showPrevDay     = input.bool(true, "Previous Day High / Low", group=grpContext)
+i_showOvernight   = input.bool(true, "Overnight High / Low", group=grpContext)
+i_overnight       = input.session("1700-0930", "Overnight Session", group=grpContext)
+i_showHTF         = input.bool(false, "Previous 1H / 4H High / Low", group=grpContext)
+i_showVWAPVisual  = input.bool(true, "Show VWAP", group=grpContext)
+i_showEMA20       = input.bool(false, "Show EMA 20", group=grpContext)
+i_showEMA50       = input.bool(false, "Show EMA 50", group=grpContext)
+i_showEMA100      = input.bool(false, "Show EMA 100", group=grpContext)
+i_showEMA200      = input.bool(false, "Show EMA 200", group=grpContext)
+
+grpSessions = "06 · Visual · Reference Sessions"
+i_showSessions    = input.bool(false, "Show Reference Session Boxes", group=grpSessions, tooltip="Visual context only. These session defaults are editable and are not strategy rules.")
+i_asiaSession     = input.session("0000-0300", "Reference Asia Window", group=grpSessions)
+i_londonSession   = input.session("0300-0800", "Reference London Window", group=grpSessions)
+i_sessionHistory  = input.int(3, "Session Boxes to Keep", minval=1, maxval=10, group=grpSessions)
+i_asiaFill        = input.color(color.new(color.rgb(139, 92, 246), 94), "Asia Fill", group=grpSessions)
+i_londonFill      = input.color(color.new(color.rgb(245, 158, 11), 95), "London Fill", group=grpSessions)
+
+grpBridge = "07 · Signal Bridge Session Lifecycle"
+i_enableSessionBridge = input.bool(true, "Enable Session Lifecycle alert() calls", group=grpBridge)
+i_premarketSnapshot    = input.string("0755", "PREMARKET Snapshot (HHMM)", group=grpBridge)
+i_preopenSnapshot      = input.string("0915", "PREOPEN Snapshot (HHMM)", group=grpBridge)
+
+grpDisplay = "08 · Display"
+i_showDashboard = input.bool(true, "Show Decision Panel", group=grpDisplay)
+i_showSignals   = input.bool(true, "Show BRK / LONG / SHORT Markers", group=grpDisplay)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+f_timeToMins(string hhmm) =>
+    float h = str.tonumber(str.substring(hhmm, 0, 2))
+    float m = str.tonumber(str.substring(hhmm, 2, 4))
+    int(h * 60 + m)
+
+f_currentMins() =>
+    hour(time, i_timezone) * 60 + minute(time, i_timezone)
+
+f_inWindow(string startHHMM, string endHHMM) =>
+    int curMins = f_currentMins()
+    int startMins = f_timeToMins(startHHMM)
+    int endMins = f_timeToMins(endHHMM)
+    startMins < endMins ? (curMins >= startMins and curMins < endMins) : (curMins >= startMins or curMins < endMins)
+
+f_inSession(string sessionValue) =>
+    not na(time(timeframe.period, sessionValue, i_timezone))
+
+f_reachedTime(string hhmm) =>
+    int targetMins = f_timeToMins(hhmm)
+    int curMins = f_currentMins()
+    int prevMins = na(time[1]) ? curMins : hour(time[1], i_timezone) * 60 + minute(time[1], i_timezone)
+    bool sameDate = not na(time[1]) and year(time, i_timezone) == year(time[1], i_timezone) and month(time, i_timezone) == month(time[1], i_timezone) and dayofmonth(time, i_timezone) == dayofmonth(time[1], i_timezone)
+    sameDate and curMins >= targetMins and prevMins < targetMins
+
+f_pad2(int value) =>
+    value < 10 ? "0" + str.tostring(value) : str.tostring(value)
+
+f_sessionDate() =>
+    str.tostring(year(time, i_timezone)) + "-" + f_pad2(month(time, i_timezone)) + "-" + f_pad2(dayofmonth(time, i_timezone))
+
+f_numOrNull(float value) =>
+    na(value) ? "null" : str.tostring(value, "#.####")
+
+f_text(string value) =>
+    "\"" + value + "\""
+
+f_nullableText(string value) =>
+    str.length(value) == 0 ? "null" : f_text(value)
+
+f_contextLabel(bool longOk, bool shortOk) =>
+    not i_useVWAP and not i_useEMA ? "" : longOk and not shortOk ? "LONG_CONTEXT" : shortOk and not longOk ? "SHORT_CONTEXT" : "MIXED_CONTEXT"
+
+f_firstBreakLabel(int code) =>
+    code == 1 ? "HIGH_FIRST" : code == -1 ? "LOW_FIRST" : code == 2 ? "BOTH_OR_SAME_BAR" : "NONE"
+
+f_payload(string stage, string side, string note, string setup, string target, string outcome, string bias, float price, float highLevel, float lowLevel, float midLevel, float rangePoints) =>
+    string payload = "{"
+    payload += "\"session_date\":" + f_text(f_sessionDate()) + ","
+    payload += "\"symbol\":" + f_text(syminfo.root) + ","
+    payload += "\"stage\":" + f_text(stage) + ","
+    payload += "\"side\":" + f_nullableText(side) + ","
+    payload += "\"price\":" + f_numOrNull(price) + ","
+    payload += "\"strategy\":" + f_text("ES/MES ORB Indicator v1.2 Session Bridge") + ","
+    payload += "\"strategy_version_id\":" + f_text("mason-orb-v1.2-session-bridge") + ","
+    payload += "\"indicator_version\":" + f_text("1.3-visual-stack") + ","
+    payload += "\"note\":" + f_text(note) + ","
+    payload += "\"timeframe\":" + f_text(timeframe.period) + ","
+    payload += "\"orb_high\":" + f_numOrNull(highLevel) + ","
+    payload += "\"orb_low\":" + f_numOrNull(lowLevel) + ","
+    payload += "\"orb_mid\":" + f_numOrNull(midLevel) + ","
+    payload += "\"range_points\":" + f_numOrNull(rangePoints) + ","
+    payload += "\"bias\":" + f_nullableText(bias) + ","
+    payload += "\"setup\":" + f_nullableText(setup) + ","
+    payload += "\"target\":" + f_nullableText(target) + ","
+    payload += "\"outcome\":" + f_nullableText(outcome) + ","
+    payload += "\"event_time\":" + str.tostring(time)
+    payload += "}"
+    payload
+
+f_emit(string stage, string side, string note, string setup, string target, string outcome, string bias, float price, float highLevel, float lowLevel, float midLevel, float rangePoints) =>
+    if i_enableSessionBridge
+        alert(f_payload(stage, side, note, setup, target, outcome, bias, price, highLevel, lowLevel, midLevel, rangePoints), alert.freq_all)
+
+f_pruneBoxes(array<box> boxes, int keep) =>
+    while array.size(boxes) > keep
+        box oldBox = array.shift(boxes)
+        box.delete(oldBox)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CORE ORB STATE — signal logic carried forward
+// ─────────────────────────────────────────────────────────────────────────────
+newDay = ta.change(dayofmonth(time, i_timezone)) != 0
+inOrbWindow = f_inWindow(i_orbStart, i_orbEnd)
+inTradeWindow = f_inWindow(i_tradeStart, i_tradeEnd)
+
+var float orbHigh = na
+var float orbLow = na
+var float orbMid = na
+var bool orbDone = false
+var bool signalToday = false
+var int signalDirToday = 0
+
+varip int firstOrbBreak = 0
+varip bool sentPremarket = false
+varip bool sentOrbFormed = false
+varip bool sentPreopen = false
+varip bool sentOpen = false
+varip bool sentSessionClose = false
+var int sentSetupBar = na
+
+if newDay
+    orbHigh := na
+    orbLow := na
+    orbMid := na
+    orbDone := false
+    signalToday := false
+    signalDirToday := 0
+    firstOrbBreak := 0
+    sentPremarket := false
+    sentOrbFormed := false
+    sentPreopen := false
+    sentOpen := false
+    sentSessionClose := false
+    sentSetupBar := na
+
+if inOrbWindow and not orbDone
+    orbHigh := na(orbHigh) ? high : math.max(orbHigh, high)
+    orbLow := na(orbLow) ? low : math.min(orbLow, low)
+
+if not inOrbWindow and not orbDone and not na(orbHigh) and not na(orbLow)
+    orbDone := true
+    orbMid := (orbHigh + orbLow) / 2.0
+
+orbRange = orbDone ? orbHigh - orbLow : na
+orbRangeOk = orbDone and orbRange >= i_minRange and orbRange <= i_maxRange
+
+atrVal = ta.atr(i_atrLen)
+barBody = math.abs(close - open)
+bodyPctOfRange = orbRangeOk ? barBody / orbRange : 0.0
+bodyVsAtr = atrVal > 0 ? barBody / atrVal : 0.0
+displacementOk = bodyPctOfRange >= i_bodyMinPct or bodyVsAtr >= i_bodyMinAtr
+
+vwapVal = ta.vwap(hlc3)
+strategyEma = ta.ema(close, i_emaLen)
+longContextOk = (not i_useVWAP or close > vwapVal) and (not i_useEMA or close > strategyEma)
+shortContextOk = (not i_useVWAP or close < vwapVal) and (not i_useEMA or close < strategyEma)
+contextLabel = f_contextLabel(longContextOk, shortContextOk)
+
+if orbDone and firstOrbBreak == 0 and not inOrbWindow
+    bool brokeHigh = high > orbHigh
+    bool brokeLow = low < orbLow
+    if brokeHigh and brokeLow
+        firstOrbBreak := 2
+    else if brokeHigh
+        firstOrbBreak := 1
+    else if brokeLow
+        firstOrbBreak := -1
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NATIVE ORB VISUAL
+// ─────────────────────────────────────────────────────────────────────────────
+var box activeOrbBox = na
+var array<box> orbBoxes = array.new<box>()
+newOrbWindow = inOrbWindow and not inOrbWindow[1]
+
+if i_showOrbBox and newOrbWindow
+    activeOrbBox := box.new(left=time, top=high, right=time_close, bottom=low, xloc=xloc.bar_time, border_color=i_orbBorder, border_width=1, bgcolor=i_orbFill)
+    array.push(orbBoxes, activeOrbBox)
+    f_pruneBoxes(orbBoxes, i_orbHistory)
+
+if i_showOrbBox and inOrbWindow and not na(activeOrbBox)
+    box.set_right(activeOrbBox, time_close)
+    box.set_top(activeOrbBox, math.max(box.get_top(activeOrbBox), high))
+    box.set_bottom(activeOrbBox, math.min(box.get_bottom(activeOrbBox), low))
+
+if not inOrbWindow and inOrbWindow[1]
+    activeOrbBox := na
+
+// ─────────────────────────────────────────────────────────────────────────────
+// REFERENCE SESSION BOXES — visual only, disabled by default
+// ─────────────────────────────────────────────────────────────────────────────
+inAsia = i_showSessions and f_inSession(i_asiaSession)
+inLondon = i_showSessions and f_inSession(i_londonSession)
+newAsia = inAsia and not inAsia[1]
+newLondon = inLondon and not inLondon[1]
+
+var box activeAsiaBox = na
+var box activeLondonBox = na
+var array<box> asiaBoxes = array.new<box>()
+var array<box> londonBoxes = array.new<box>()
+
+if newAsia
+    activeAsiaBox := box.new(left=time, top=high, right=time_close, bottom=low, xloc=xloc.bar_time, border_color=color.new(color.rgb(167, 139, 250), 70), border_width=1, bgcolor=i_asiaFill)
+    array.push(asiaBoxes, activeAsiaBox)
+    f_pruneBoxes(asiaBoxes, i_sessionHistory)
+if inAsia and not na(activeAsiaBox)
+    box.set_right(activeAsiaBox, time_close)
+    box.set_top(activeAsiaBox, math.max(box.get_top(activeAsiaBox), high))
+    box.set_bottom(activeAsiaBox, math.min(box.get_bottom(activeAsiaBox), low))
+if not inAsia and inAsia[1]
+    activeAsiaBox := na
+
+if newLondon
+    activeLondonBox := box.new(left=time, top=high, right=time_close, bottom=low, xloc=xloc.bar_time, border_color=color.new(color.rgb(251, 191, 36), 75), border_width=1, bgcolor=i_londonFill)
+    array.push(londonBoxes, activeLondonBox)
+    f_pruneBoxes(londonBoxes, i_sessionHistory)
+if inLondon and not na(activeLondonBox)
+    box.set_right(activeLondonBox, time_close)
+    box.set_top(activeLondonBox, math.max(box.get_top(activeLondonBox), high))
+    box.set_bottom(activeLondonBox, math.min(box.get_bottom(activeLondonBox), low))
+if not inLondon and inLondon[1]
+    activeLondonBox := na
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CONTEXT LEVELS — visual only
+// ─────────────────────────────────────────────────────────────────────────────
+prevDayHigh = request.security(syminfo.tickerid, "D", high[1], lookahead=barmerge.lookahead_on)
+prevDayLow = request.security(syminfo.tickerid, "D", low[1], lookahead=barmerge.lookahead_on)
+
+inOvernight = f_inSession(i_overnight)
+newOvernight = inOvernight and not inOvernight[1]
+var float overnightHigh = na
+var float overnightLow = na
+if newOvernight
+    overnightHigh := high
+    overnightLow := low
+else if inOvernight
+    overnightHigh := na(overnightHigh) ? high : math.max(overnightHigh, high)
+    overnightLow := na(overnightLow) ? low : math.min(overnightLow, low)
+
+prev1hHigh = request.security(syminfo.tickerid, "60", high[1], lookahead=barmerge.lookahead_on)
+prev1hLow = request.security(syminfo.tickerid, "60", low[1], lookahead=barmerge.lookahead_on)
+prev4hHigh = request.security(syminfo.tickerid, "240", high[1], lookahead=barmerge.lookahead_on)
+prev4hLow = request.security(syminfo.tickerid, "240", low[1], lookahead=barmerge.lookahead_on)
+
+ema20 = ta.ema(close, 20)
+ema50 = ta.ema(close, 50)
+ema100 = ta.ema(close, 100)
+ema200 = ta.ema(close, 200)
+
+plot(i_showOrbLevels and orbDone ? orbHigh : na, "ORB High", color=color.new(color.rgb(74, 222, 128), 0), linewidth=2, style=plot.style_linebr)
+plot(i_showOrbLevels and orbDone ? orbLow : na, "ORB Low", color=color.new(color.rgb(248, 113, 113), 0), linewidth=2, style=plot.style_linebr)
+plot(i_showOrbLevels and orbDone ? orbMid : na, "ORB Mid", color=color.new(color.rgb(251, 191, 36), 15), linewidth=1, style=plot.style_linebr)
+plot(i_showPrevDay ? prevDayHigh : na, "Previous Day High", color=color.new(color.rgb(244, 196, 91), 45), linewidth=1, style=plot.style_stepline)
+plot(i_showPrevDay ? prevDayLow : na, "Previous Day Low", color=color.new(color.rgb(244, 196, 91), 45), linewidth=1, style=plot.style_stepline)
+plot(i_showOvernight ? overnightHigh : na, "Overnight High", color=color.new(color.rgb(147, 197, 253), 55), linewidth=1, style=plot.style_stepline)
+plot(i_showOvernight ? overnightLow : na, "Overnight Low", color=color.new(color.rgb(147, 197, 253), 55), linewidth=1, style=plot.style_stepline)
+plot(i_showHTF ? prev1hHigh : na, "Previous 1H High", color=color.new(color.rgb(192, 132, 252), 60), linewidth=1, style=plot.style_stepline)
+plot(i_showHTF ? prev1hLow : na, "Previous 1H Low", color=color.new(color.rgb(192, 132, 252), 60), linewidth=1, style=plot.style_stepline)
+plot(i_showHTF ? prev4hHigh : na, "Previous 4H High", color=color.new(color.rgb(216, 180, 254), 35), linewidth=1, style=plot.style_stepline)
+plot(i_showHTF ? prev4hLow : na, "Previous 4H Low", color=color.new(color.rgb(216, 180, 254), 35), linewidth=1, style=plot.style_stepline)
+plot(i_showVWAPVisual ? vwapVal : na, "VWAP", color=color.new(color.rgb(56, 189, 248), 15), linewidth=2)
+plot(i_showEMA20 ? ema20 : na, "EMA 20", color=color.new(color.rgb(45, 212, 191), 35), linewidth=1)
+plot(i_showEMA50 ? ema50 : na, "EMA 50", color=color.new(color.rgb(96, 165, 250), 35), linewidth=1)
+plot(i_showEMA100 ? ema100 : na, "EMA 100", color=color.new(color.rgb(167, 139, 250), 40), linewidth=1)
+plot(i_showEMA200 ? ema200 : na, "EMA 200", color=color.new(color.rgb(244, 114, 182), 45), linewidth=1)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SESSION BRIDGE — same event model as v1.2
+// ─────────────────────────────────────────────────────────────────────────────
+if barstate.isnew and not sentPremarket and f_reachedTime(i_premarketSnapshot)
+    sentPremarket := true
+    f_emit("PREMARKET", "", "Visual Stack online · pre-ORB snapshot", "", "", "", contextLabel, close, na, na, na, na)
+
+if orbDone and not sentOrbFormed
+    sentOrbFormed := true
+    string rangeOutcome = orbRangeOk ? "RANGE_VALID" : "RANGE_OUTSIDE_FILTER"
+    f_emit("ORB_FORMED", "", "Opening range formed", "", "", rangeOutcome, contextLabel, close, orbHigh, orbLow, orbMid, orbRange)
+
+if barstate.isnew and not sentPreopen and f_reachedTime(i_preopenSnapshot)
+    sentPreopen := true
+    f_emit("PREOPEN", "", "Pre-open snapshot · first ORB break " + f_firstBreakLabel(firstOrbBreak), "", "", f_firstBreakLabel(firstOrbBreak), contextLabel, close, orbHigh, orbLow, orbMid, orbRange)
+
+if barstate.isnew and not sentOpen and f_reachedTime(i_tradeStart)
+    sentOpen := true
+    f_emit("OPEN_SNAPSHOT", "WAIT", "Trade window opened · first ORB break " + f_firstBreakLabel(firstOrbBreak), "", "", f_firstBreakLabel(firstOrbBreak), contextLabel, close, orbHigh, orbLow, orbMid, orbRange)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SETUP + SIGNAL LOGIC — carried forward from v1.2
+// ─────────────────────────────────────────────────────────────────────────────
+var int setupDir = 0
+var int setupBar = na
+var bool retestSeen = false
+
+if newDay
+    setupDir := 0
+    setupBar := na
+    retestSeen := false
+
+canSeek = orbRangeOk and inTradeWindow and not signalToday
+
+if canSeek and setupDir == 0 and displacementOk
+    if close > orbHigh and longContextOk
+        setupDir := 1
+        setupBar := bar_index
+        retestSeen := i_retestMode == "Breakout"
+    else if close < orbLow and shortContextOk
+        setupDir := -1
+        setupBar := bar_index
+        retestSeen := i_retestMode == "Breakout"
+
+bool setupTimedOut = setupDir != 0 and not na(setupBar) and bar_index - setupBar > i_retestTimeout
+if setupTimedOut
+    int expiredDir = setupDir
+    string expiredSide = expiredDir == 1 ? "LONG" : "SHORT"
+    if barstate.isconfirmed
+        f_emit("WAIT", expiredSide, "Setup candidate expired before confirmation", "ORB " + i_retestMode + " retest", "", "SETUP_TIMEOUT", contextLabel, close, orbHigh, orbLow, orbMid, orbRange)
+    setupDir := 0
+    setupBar := na
+    retestSeen := false
+
+longRetestLevel = i_retestMode == "Midpoint" ? orbMid : orbHigh
+shortRetestLevel = i_retestMode == "Midpoint" ? orbMid : orbLow
+
+if setupDir == 1 and not retestSeen and low <= longRetestLevel
+    retestSeen := true
+if setupDir == -1 and not retestSeen and high >= shortRetestLevel
+    retestSeen := true
+
+longSig = canSeek and setupDir == 1 and retestSeen and close > orbHigh and displacementOk and longContextOk
+shortSig = canSeek and setupDir == -1 and retestSeen and close < orbLow and displacementOk and shortContextOk
+
+if barstate.isconfirmed and setupDir != 0 and not na(setupBar) and (na(sentSetupBar) or sentSetupBar != setupBar)
+    sentSetupBar := setupBar
+    string setupSide = setupDir == 1 ? "LONG" : "SHORT"
+    string setupState = retestSeen ? "RETEST_SEEN" : "AWAITING_RETEST"
+    f_emit("SETUP", setupSide, "ORB candidate · " + setupState, "ORB " + i_retestMode + " retest", "", setupState, contextLabel, close, orbHigh, orbLow, orbMid, orbRange)
+
+if longSig or shortSig
+    signalToday := true
+    if barstate.isconfirmed
+        signalDirToday := longSig ? 1 : -1
+    setupDir := 0
+
+if barstate.isnew and not sentSessionClose and f_reachedTime(i_tradeEnd)
+    sentSessionClose := true
+    string closeSide = signalDirToday == 1 ? "LONG" : signalDirToday == -1 ? "SHORT" : "WAIT"
+    string closeOutcome = signalToday ? "SIGNAL_RECORDED · FIRST_BREAK_" + f_firstBreakLabel(firstOrbBreak) : "NO_SIGNAL · FIRST_BREAK_" + f_firstBreakLabel(firstOrbBreak)
+    string closeNote = signalToday ? "Trade window closed after a recorded setup signal" : "Trade window closed with no qualifying signal"
+    f_emit("SESSION_CLOSE", closeSide, closeNote, signalToday ? "ORB " + i_retestMode + " retest" : "", "", closeOutcome, contextLabel, close, orbHigh, orbLow, orbMid, orbRange)
+
+plotshape(i_showSignals and setupDir == 1 and bar_index == setupBar, title="Long Breakout", style=shape.triangleup, location=location.belowbar, color=color.new(color.rgb(74, 222, 128), 5), size=size.tiny, text="BRK", textcolor=color.white)
+plotshape(i_showSignals and setupDir == -1 and bar_index == setupBar, title="Short Breakout", style=shape.triangledown, location=location.abovebar, color=color.new(color.rgb(248, 113, 113), 5), size=size.tiny, text="BRK", textcolor=color.white)
+plotshape(i_showSignals and longSig, title="Long Ready", style=shape.labelup, location=location.belowbar, color=color.new(color.rgb(34, 197, 94), 0), size=size.tiny, text="LONG", textcolor=color.white)
+plotshape(i_showSignals and shortSig, title="Short Ready", style=shape.labeldown, location=location.abovebar, color=color.new(color.rgb(239, 68, 68), 0), size=size.tiny, text="SHORT", textcolor=color.white)
+
+alertcondition(longSig, title="Long Setup Ready", message="ES/MES ORB LONG setup ready")
+alertcondition(shortSig, title="Short Setup Ready", message="ES/MES ORB SHORT setup ready")
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DECISION PANEL — transparent module state, not a mystery score
+// ─────────────────────────────────────────────────────────────────────────────
+var table dash = table.new(position.top_right, 2, 11, border_width=1, frame_color=color.new(color.rgb(71, 85, 105), 55), border_color=color.new(color.rgb(71, 85, 105), 70))
+if i_showDashboard and barstate.islast
+    string directionState = signalToday ? (signalDirToday == 1 ? "LONG" : "SHORT") : setupDir == 1 ? "LONG WATCH" : setupDir == -1 ? "SHORT WATCH" : "WAIT"
+    color headerBg = color.new(color.rgb(30, 64, 175), 25)
+    color cellBg = color.new(color.rgb(10, 18, 30), 12)
+    color okText = color.rgb(110, 231, 183)
+    color waitText = color.rgb(251, 191, 36)
+    color mutedText = color.rgb(148, 163, 184)
+    table.cell(dash, 0, 0, "SIGNAL BRIDGE", text_color=color.white, bgcolor=headerBg)
+    table.cell(dash, 1, 0, "v1.3", text_color=color.rgb(191, 219, 254), bgcolor=headerBg)
+    table.cell(dash, 0, 1, "ORB")
+    table.cell(dash, 1, 1, inOrbWindow ? "BUILDING" : orbDone ? "FORMED" : "WAIT", text_color=orbDone ? okText : waitText, bgcolor=cellBg)
+    table.cell(dash, 0, 2, "Range")
+    table.cell(dash, 1, 2, orbDone ? str.tostring(orbRange, "#.##") + " pts" : "—", text_color=orbRangeOk ? okText : mutedText, bgcolor=cellBg)
+    table.cell(dash, 0, 3, "Range Filter")
+    table.cell(dash, 1, 3, orbRangeOk ? "PASS" : orbDone ? "OUTSIDE" : "WAIT", text_color=orbRangeOk ? okText : waitText, bgcolor=cellBg)
+    table.cell(dash, 0, 4, "First Break")
+    table.cell(dash, 1, 4, f_firstBreakLabel(firstOrbBreak), text_color=mutedText, bgcolor=cellBg)
+    table.cell(dash, 0, 5, "Trade Window")
+    table.cell(dash, 1, 5, inTradeWindow ? "OPEN" : "CLOSED", text_color=inTradeWindow ? okText : mutedText, bgcolor=cellBg)
+    table.cell(dash, 0, 6, "Context")
+    table.cell(dash, 1, 6, str.length(contextLabel) > 0 ? contextLabel : "NOT SCORED", text_color=mutedText, bgcolor=cellBg)
+    table.cell(dash, 0, 7, "Setup")
+    table.cell(dash, 1, 7, setupDir == 1 ? "LONG" : setupDir == -1 ? "SHORT" : "NONE", text_color=setupDir != 0 ? waitText : mutedText, bgcolor=cellBg)
+    table.cell(dash, 0, 8, "Retest")
+    table.cell(dash, 1, 8, retestSeen ? "SEEN" : "PENDING", text_color=retestSeen ? okText : mutedText, bgcolor=cellBg)
+    table.cell(dash, 0, 9, "Desk State")
+    table.cell(dash, 1, 9, directionState, text_color=signalToday ? okText : waitText, bgcolor=cellBg)
+    table.cell(dash, 0, 10, "Lifecycle")
+    table.cell(dash, 1, 10, i_enableSessionBridge ? "CONNECTED" : "OFF", text_color=i_enableSessionBridge ? color.rgb(125, 211, 252) : mutedText, bgcolor=cellBg)
