@@ -52,15 +52,19 @@ jobs:
           print("member entitlement migrations OK")
           PY
 
-      - name: Verify gated member and trade-closeout surfaces
+      - name: Verify gated member, onboarding, and trade-closeout surfaces
         run: |
           grep -q 'RESPONSE_DEFERRED_CHANNEL_MESSAGE = 5' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
           grep -q 'ctx.waitUntil' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
           grep -q 'discord_interaction_log' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
+          grep -q 'name: "start"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
+          grep -q '"start"' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
+          grep -q 'buildStartGuide' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
+          grep -q 'One winner does' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
           grep -q 'name: "member-login"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
           grep -q 'name: "journal-update"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
           grep -q '"journal-update"' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
-          grep -q 'Original trade note preserved' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
+          grep -q 'Original pre-trade note preserved' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
           grep -q 'WHERE id = ?1 AND discord_author_id = ?6' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
           grep -q 'premium_role_required' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
           grep -q 'DISCORD_PREMIUM_ROLE_ID' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
