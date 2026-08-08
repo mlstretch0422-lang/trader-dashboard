@@ -1,6 +1,7 @@
 import coreWorker from "./index.js";
 import { dispatchScheduledDesk } from "./bot_scheduler.js";
 import { handleDiscordInteraction } from "./discord_interactions.js";
+import { brandJournalInteractionResponse } from "./discord_journal_brand.js";
 import { handleDiscordIntelligenceInteraction, INTELLIGENCE_COMMANDS } from "./discord_intelligence_interactions.js";
 import { handleDiscordMemberInteraction, MEMBER_COMMANDS } from "./discord_member_interactions.js";
 import { handleJournalAdminRequest } from "./journal_admin.js";
@@ -122,7 +123,8 @@ export default {
       const command = await discordCommandName(request);
       if (MEMBER_COMMANDS.has(command)) return handleDiscordMemberInteraction(request, env, ctx);
       if (INTELLIGENCE_COMMANDS.has(command)) return handleDiscordIntelligenceInteraction(request, env, ctx);
-      return handleDiscordInteraction(request, env, ctx);
+      const response = await handleDiscordInteraction(request, env, ctx);
+      return brandJournalInteractionResponse(response, command);
     }
 
     if (url.pathname === "/journal-admin" || url.pathname.startsWith("/journal-admin/")) {
