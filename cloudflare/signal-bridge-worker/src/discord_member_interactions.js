@@ -8,6 +8,7 @@ const PERMISSION_MANAGE_GUILD = 1n << 5n;
 const JOURNAL_URL = "https://mlstretch0422-lang.github.io/trader-dashboard/journal.html";
 
 export const MEMBER_COMMANDS = new Set([
+  "start",
   "journal-inbox",
   "journal-update",
   "journal-publish",
@@ -82,7 +83,7 @@ async function editOriginal(interaction, content) {
   const endpoint = `https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`;
   const response = await fetch(endpoint, {
     method: "PATCH",
-    headers: { "content-type": "application/json", "user-agent": "SignalBridgeMemberBot/2.1" },
+    headers: { "content-type": "application/json", "user-agent": "SignalBridgeMemberBot/2.2" },
     body: JSON.stringify({ content: String(content || "Signal Bridge completed the request.").slice(0, 1950), allowed_mentions: { parse: [] } }),
   });
   if (!response.ok) throw new Error(`discord_edit_${response.status}`);
@@ -161,6 +162,27 @@ async function syncEntitlement(interaction, env) {
   return access;
 }
 
+function buildStartGuide() {
+  return [
+    "👋 **SIGNAL BRIDGE | START HERE**",
+    "Signal Bridge helps you turn a trade idea into a record you can actually review instead of losing it in screenshots, chat, or memory.",
+    "",
+    "**Before the trade**",
+    "Use `/journal` and set Result to **Open**. Save what you see, the setup, where the idea came from, and a chart if you have one.",
+    "",
+    "**After the trade**",
+    "Use `/journal-update id:<ID>` to add the final result, P&L, R, and lesson. Your original pre-trade note stays preserved.",
+    "",
+    "**Already finished?**",
+    "Use `/journal` once with the chart + final result + P&L/R.",
+    "",
+    "**Need the desk?** `/brief` = session story · `/orb` = opening range · `/news` = calendar/headlines.",
+    "**Need your records?** `/journal-inbox` = recent trades · `/member-login` = private website workspace + Strategy Lab.",
+    "",
+    "Saw a setup on TikTok/Discord? Log the source in the note. One winner does **not** validate the creator or setup — the value comes from building a repeatable sample.",
+  ].join("\n");
+}
+
 async function listJournalForUser(interaction, env) {
   const userId = invokingUserId(interaction);
   if (!env.DB) throw new Error("journal_storage_not_configured");
@@ -188,7 +210,13 @@ async function listJournalForUser(interaction, env) {
      LIMIT ?${values.length}`,
   ).bind(...values).run();
   const entries = Array.isArray(result.results) ? result.results : [];
-  if (!entries.length) return `📚 **SIGNAL BRIDGE | JOURNAL INBOX**\nNo ${visibility.toLowerCase()} records are linked to your Discord account yet.`;
+  if (!entries.length) {
+    return [
+      "📚 **SIGNAL BRIDGE | JOURNAL INBOX**",
+      `No ${visibility.toLowerCase()} records are linked to your Discord account yet.`,
+      "Start with `/journal` or run `/start` for the 30-second workflow.",
+    ].join("\n");
+  }
 
   const lines = ["📚 **SIGNAL BRIDGE | JOURNAL INBOX**", `${visibility} · ${entries.length} recent record${entries.length === 1 ? "" : "s"}`];
   for (const entry of entries) {
@@ -250,7 +278,7 @@ async function updateOwnJournal(interaction, env) {
   if (pnl !== null && pnl !== undefined) lines.push(`P&L: ${pnl}`);
   if (rr !== null && rr !== undefined) lines.push(`R: ${rr}`);
   if (hasReview && review) lines.push(`Review: ${review}`);
-  lines.push("Original trade note preserved.");
+  lines.push("Original pre-trade note preserved. Run `/journal-inbox` to see the updated record.");
   return lines.join("\n");
 }
 
@@ -276,9 +304,9 @@ async function buildLogin(interaction, env) {
   }, env);
   return [
     `🔐 **SIGNAL BRIDGE | ${access.tier} ACCESS**`,
-    "This one-time link signs your Discord identity into the private Signal Bridge workspace for 24 hours.",
+    "Open your private Signal Bridge workspace: journal history, screenshots, and Strategy Lab.",
     link,
-    "The link expires in 10 minutes and can only be used once.",
+    "This one-time link expires in 10 minutes. After sign-in, the browser session lasts 24 hours.",
   ].join("\n");
 }
 
@@ -300,6 +328,7 @@ function friendlyError(error) {
 }
 
 async function perform(interaction, command, env) {
+  if (command === "start") return buildStartGuide();
   if (command === "journal-inbox") return listJournalForUser(interaction, env);
   if (command === "journal-update") return updateOwnJournal(interaction, env);
   if (command === "journal-publish") return setJournalVisibility(interaction, "PUBLISHED", env);
