@@ -8,6 +8,7 @@ on:
       - "cloudflare/signal-bridge-worker/src/entry.js"
       - "cloudflare/signal-bridge-worker/register_discord_commands.mjs"
       - "cloudflare/signal-bridge-worker/migrations/0005_member_sessions.sql"
+      - "cloudflare/signal-bridge-worker/migrations/0009_member_entitlements.sql"
       - ".github/workflows/member-journal-reliability-ci.yml"
 
 permissions:
@@ -27,7 +28,7 @@ jobs:
           node --check cloudflare/signal-bridge-worker/src/entry.js
           node --check cloudflare/signal-bridge-worker/register_discord_commands.mjs
 
-      - name: Validate member migration
+      - name: Validate member migrations
         run: |
           python - <<'PY'
           import sqlite3
@@ -40,6 +41,7 @@ jobs:
           required = {
               "member_login_tokens": {"token_hash", "expires_at", "discord_user_id", "used_at"},
               "member_sessions": {"session_hash", "expires_at", "discord_user_id", "can_manage_journal", "revoked_at"},
+              "member_entitlements": {"discord_user_id", "discord_guild_id", "tier", "status", "source", "expires_at"},
               "discord_interaction_log": {"id", "received_at", "command_name", "status", "error_code", "duration_ms"},
           }
           for table, columns in required.items():
@@ -47,17 +49,23 @@ jobs:
               missing = sorted(columns - found)
               if missing:
                   raise SystemExit(f"{table} missing columns: {missing}")
-          print("member journal migration OK")
+          print("member entitlement migrations OK")
           PY
 
-      - name: Verify reliability surfaces
+      - name: Verify gated member surfaces
         run: |
           grep -q 'RESPONSE_DEFERRED_CHANNEL_MESSAGE = 5' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
           grep -q 'ctx.waitUntil' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
           grep -q 'discord_interaction_log' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
-          grep -q 'name: "journal-login"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
+          grep -q 'name: "member-login"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
+          grep -q 'premium_role_required' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
+          grep -q 'DISCORD_PREMIUM_ROLE_ID' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
+          grep -q 'member_entitlements' cloudflare/signal-bridge-worker/src/member_app.js
           grep -q 'createMemberLoginLink' cloudflare/signal-bridge-worker/src/member_app.js
           grep -q 'HttpOnly; Secure; SameSite=Lax' cloudflare/signal-bridge-worker/src/member_app.js
+          grep -q 'url.pathname === "/member/strategy-lab"' cloudflare/signal-bridge-worker/src/member_app.js
+          grep -q 'createMemberStrategy' cloudflare/signal-bridge-worker/src/member_app.js
+          grep -q 'createMemberVersion' cloudflare/signal-bridge-worker/src/member_app.js
           grep -q 'url.pathname.startsWith("/member/")' cloudflare/signal-bridge-worker/src/entry.js
-          grep -q 'journal_table_ready' cloudflare/signal-bridge-worker/src/entry.js
-          grep -q 'member_sessions_ready' cloudflare/signal-bridge-worker/src/entry.js
+          grep -q 'member_entitlements_ready' cloudflare/signal-bridge-worker/src/entry.js
+          grep -q 'premium_access_mode' cloudflare/signal-bridge-worker/src/entry.js
