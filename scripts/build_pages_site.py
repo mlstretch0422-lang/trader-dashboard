@@ -64,12 +64,12 @@ def apply_native_shell(path: Path) -> None:
 
     # Fast-moving usability and presentation layers stay separate from the core
     # page markup so the product can evolve without destabilizing every page.
-    for stylesheet in ("beta-clarity.css", "pro-visuals.css"):
+    for stylesheet in ("beta-clarity.css", "pro-visuals.css", "product-visuals-v2.css"):
         if stylesheet not in text:
             if "</head>" not in text:
                 raise RuntimeError(f"Could not inject {stylesheet} into {path}")
             text = text.replace("</head>", f'  <link rel="stylesheet" href="{stylesheet}" />\n</head>', 1)
-    for script in ("beta-clarity.js", "pro-visuals.js"):
+    for script in ("beta-clarity.js", "pro-visuals.js", "product-visuals-v2.js"):
         if script not in text and "</body>" in text:
             text = text.replace("</body>", f'  <script src="{script}"></script>\n</body>', 1)
 
@@ -149,6 +149,12 @@ def main() -> int:
         SITE / "beta-clarity.js",
         SITE / "pro-visuals.css",
         SITE / "pro-visuals.js",
+        SITE / "product-visuals-v2.css",
+        SITE / "product-visuals-v2.js",
+        SITE / "assets" / "product" / "hero-trade-win.svg",
+        SITE / "assets" / "product" / "journal-trade-detail.svg",
+        SITE / "assets" / "product" / "session-desk.svg",
+        SITE / "assets" / "product" / "strategy-dna.svg",
         SITE / "assets" / "research" / "mes-study-01.png",
         SITE / "assets" / "research" / "mes-study-02.png",
         SITE / "assets" / "research" / "mes-study-03.png",

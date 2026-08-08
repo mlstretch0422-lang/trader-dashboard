@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" role="img" aria-labelledby="t d">
+<title id="t">Signal Bridge illustrative winning trade workspace</title><desc id="d">A clean dark futures chart with opening range, long entry, stop, target, P and L card and session context. Illustrative product visual, not a performance claim.</desc>
+<defs>
+  <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#07111d"/><stop offset="1" stop-color="#03070c"/></linearGradient>
+  <linearGradient id="orb" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#42b6ff" stop-opacity=".17"/><stop offset="1" stop-color="#42b6ff" stop-opacity=".04"/></linearGradient>
+  <filter id="glow"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<rect width="1440" height="900" rx="34" fill="url(#bg)"/>
+<rect x="26" y="26" width="1388" height="848" rx="26" fill="none" stroke="#17314a"/>
+<g font-family="Inter,Arial,sans-serif">
+  <text x="58" y="72" fill="#eef7ff" font-size="22" font-weight="800">MES · 1m · NEW YORK</text>
+  <text x="58" y="101" fill="#6e8da8" font-size="13">ORB RECLAIM · LONG · ILLUSTRATIVE MEMBER TRADE</text>
+  <g transform="translate(1100 53)"><rect width="266" height="54" rx="15" fill="#092219" stroke="#1f7d59"/><text x="18" y="22" fill="#6fe6ae" font-size="11" font-weight="800">CLOSED TRADE</text><text x="18" y="43" fill="#eafff5" font-size="19" font-weight="900">+$425.00 · +3.1R</text></g>
+
+  <g stroke="#102437" stroke-width="1">
+    <path d="M70 160H1040M70 250H1040M70 340H1040M70 430H1040M70 520H1040M70 610H1040M70 700H1040M70 790H1040"/>
+    <path d="M110 140V810M230 140V810M350 140V810M470 140V810M590 140V810M710 140V810M830 140V810M950 140V810"/>
+  </g>
+
+  <rect x="292" y="348" width="210" height="118" fill="url(#orb)" stroke="#3c9ee2" stroke-dasharray="7 6"/>
+  <text x="304" y="370" fill="#78cfff" font-size="11" font-weight="800">08:00–08:15 ORB</text>
+  <line x1="292" y1="348" x2="1024" y2="348" stroke="#5ec8ff" stroke-width="2"/><text x="1032" y="352" fill="#77d4ff" font-size="11">ORH</text>
+  <line x1="292" y1="407" x2="1024" y2="407" stroke="#5793ba" stroke-width="1.5" stroke-dasharray="5 5"/><text x="1032" y="411" fill="#7099b4" font-size="11">ORM</text>
+  <line x1="292" y1="466" x2="1024" y2="466" stroke="#46728d" stroke-width="1.5"/><text x="1032" y="470" fill="#698ba1" font-size="11">ORL</text>
+
+  <g stroke-width="4">
+    <g stroke="#ff788c" fill="#ff788c"><line x1="118" y1="458" x2="118" y2="512"/><rect x="110" y="474" width="16" height="22" rx="2"/></g>
+    <g stroke="#71e3ab" fill="#71e3ab"><line x1="150" y1="446" x2="150" y2="490"/><rect x="142" y="456" width="16" height="25" rx="2"/></g>
+    <g stroke="#ff788c" fill="#ff788c"><line x1="182" y1="438" x2="182" y2="482"/><rect x="174" y="451" width="16" height="20" rx="2"/></g>
+    <g stroke="#71e3ab" fill="#71e3ab"><line x1="214" y1="421" x2="214" y2="472"/><rect x="206" y="432" width="16" height="29" rx="2"/></g>
+    <g stroke="#71e3ab" fill="#71e3ab"><line x1="246" y1="394" x2="246" y2="451"/><rect x="238" y="410" width="16" height="27" rx="2"/></g>
+    <g stroke="#ff788c" fill="#ff788c"><line x1="278" y1="384" x2="278" y2="438"/><rect x="270" y="399" width="16" height="25" rx="2"/></g>
+    <g stroke="#71e3ab" fill="#71e3ab"><line x1="310" y1="365" x2="310" y2="423"/><rect x="302" y="379" width="16" height="28" rx="2"/></g>
+    <g stroke="#71e3ab" fill="#71e3ab"><line x1="342" y1="340" x2="342" y2="404"/><rect x="334" y="356" width="16" height="30" rx="2"/></g>
+    <g stroke="#ff788c" fill="#ff788c"><line x1="374" y1="334" x2="374" y2="388"/><rect x="366" y="350" width="16" height="25" rx="2"/></g>
+    <g stroke="#ff788c" fill="#ff788c"><line x1="406" y1="351" x2="406" y2="418"/><rect x="398" y="364" width="16" height="37" rx="2"/></g>
+    <g stroke="#ff788c" fill="#ff788c"><line x1="438" y1="384" x2="438" y2="441"/><rect x="430" y="398" width="16" height="28" rx="2"/></g>
+    <g stroke="#71e3ab" fill="#71e3ab"><line x1="470" y1="392" x2="470" y2="438"/><rect x="462" y="403" width="16" height="23" rx="2"/></g>
+    <g stroke="#71e3ab" fill="#71e3ab"><line x1="502" y1="364" x2="502" y2="425"/><rect x="494" y="381" width="16" height="29" rx="2"/></g>
+    <g stroke="#71e3ab" fill="#71e3ab"><line x1="534" y1="332" x2="534" y2="397"/><rect x="526" y="349" width="16" height="31" rx="2"/></g>
+    <g stroke="#71e3ab" fill="#71e3ab"><line x1="566" y1="301" x2="566" y2="363"/><rect x="558" y="319" width="16" height="29" rx="2"/></g>
+    <g stroke="#ff788c" fill="#ff788c"><line x1="598" y1="292" x2="598" y2="346"/><rect x="590" y="307" width="16" height="24" rx="2"/></g>
+    <g stroke="#71e3ab" fill="#71e3ab"><line x1="630" y1="266" x2="630" y2="331"/><rect x="622" y="282" width="16" height="32" rx="2"/></g>
+    <g stroke="#71e3ab" fill="#71e3ab"><line x1="662" y1="238" x2="662" y2="301"/><rect x="654" y="253" width="16" height="32" rx="2"/></g>
+    <g stroke="#71e3ab" fill="#71e3ab"><line x1="694" y1="206" x2="694" y2="274"/><rect x="686" y="223" width="16" height="33" rx="2"/></g>
+    <g stroke="#ff788c" fill="#ff788c"><line x1="726" y1="198" x2="726" y2="249"/><rect x="718" y="213" width="16" height="22" rx="2"/></g>
+    <g stroke="#71e3ab" fill="#71e3ab"><line x1="758" y1="171" x2="758" y2="236"/><rect x="750" y="187" width="16" height="33" rx="2"/></g>
+    <g stroke="#71e3ab" fill="#71e3ab"><line x1="790" y1="146" x2="790" y2="203"/><rect x="782" y="162" width="16" height="28" rx="2"/></g>
+    <g stroke="#ff788c" fill="#ff788c"><line x1="822" y1="151" x2="822" y2="209"/><rect x="814" y="165" width="16" height="27" rx="2"/></g>
+    <g stroke="#71e3ab" fill="#71e3ab"><line x1="854" y1="132" x2="854" y2="186"/><rect x="846" y="147" width="16" height="25" rx="2"/></g>
+    <g stroke="#71e3ab" fill="#71e3ab"><line x1="886" y1="114" x2="886" y2="166"/><rect x="878" y="128" width="16" height="25" rx="2"/></g>
+  </g>
+
+  <line x1="492" y1="397" x2="1030" y2="397" stroke="#5de1aa" stroke-width="2"/><text x="905" y="387" fill="#71e8b4" font-size="11" font-weight="800">ENTRY · RECLAIM</text>
+  <line x1="492" y1="463" x2="1030" y2="463" stroke="#ff697f" stroke-width="2"/><text x="932" y="453" fill="#ff8797" font-size="11" font-weight="800">STOP</text>
+  <line x1="492" y1="205" x2="1030" y2="205" stroke="#8e7dff" stroke-width="2"/><text x="913" y="195" fill="#b3a8ff" font-size="11" font-weight="800">TARGET · 3R+</text>
+  <circle cx="502" cy="397" r="8" fill="#5de1aa" filter="url(#glow)"/><text x="514" y="386" fill="#caffea" font-size="12" font-weight="800">LONG</text>
+
+  <g transform="translate(1092 150)">
+    <rect width="276" height="384" rx="22" fill="#08131f" stroke="#1a3b58"/>
+    <text x="20" y="35" fill="#79a9c8" font-size="11" font-weight="800">SESSION CONTEXT</text>
+    <text x="20" y="76" fill="#eff8ff" font-size="28" font-weight="900">LONG</text>
+    <text x="20" y="100" fill="#5f7c93" font-size="11">ORB sweep → reclaim → expansion</text>
+    <g transform="translate(20 130)" font-size="11">
+      <text y="0" fill="#657f94">BIAS</text><text x="180" y="0" fill="#b8e0ff" text-anchor="end" font-weight="800">BULLISH</text>
+      <text y="42" fill="#657f94">VWAP</text><text x="180" y="42" fill="#71e3ab" text-anchor="end" font-weight="800">ABOVE</text>
+      <text y="84" fill="#657f94">ORB</text><text x="180" y="84" fill="#c3d9e9" text-anchor="end" font-weight="800">RECLAIMED</text>
+      <text y="126" fill="#657f94">RISK</text><text x="180" y="126" fill="#ff9aa9" text-anchor="end" font-weight="800">1.0R</text>
+      <text y="168" fill="#657f94">RESULT</text><text x="180" y="168" fill="#71e3ab" text-anchor="end" font-weight="800">+3.1R</text>
+    </g>
+    <rect x="20" y="326" width="236" height="38" rx="11" fill="#0b251b" stroke="#1e7555"/><text x="138" y="350" fill="#7af0ba" font-size="11" font-weight="900" text-anchor="middle">TRADE CLOSED · TARGET HIT</text>
+  </g>
+
+  <text x="72" y="846" fill="#4d687d" font-size="10">Signal Bridge product mockup · illustrative trade example · not a historical performance record</text>
+</g>
+</svg>
