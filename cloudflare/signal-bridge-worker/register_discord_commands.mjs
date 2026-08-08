@@ -182,27 +182,46 @@ const commands = [
 ];
 
 const endpoint = `https://discord.com/api/v10/applications/${applicationId}/guilds/${guildId}/commands`;
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-for (const command of commands) {
-  const response = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      authorization: `Bot ${token}`,
-      "content-type": "application/json",
-    },
-    body: JSON.stringify(command),
-  });
+async function bulkOverwriteGuildCommands(maxAttempts = 4) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const response = await fetch(endpoint, {
+      method: "PUT",
+      headers: {
+        authorization: `Bot ${token}`,
+        "content-type": "application/json",
+        "user-agent": "SignalBridgeCommandRegistrar/2.0",
+      },
+      body: JSON.stringify(commands),
+    });
 
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    console.error(`Failed to register ${command.name}: HTTP ${response.status}`);
+    const payload = await response.json().catch(() => ({}));
+    if (response.ok) {
+      if (!Array.isArray(payload)) throw new Error("Discord returned an unexpected command payload.");
+      return payload;
+    }
+
+    if (response.status === 429 && attempt < maxAttempts) {
+      const retrySeconds = Number(payload?.retry_after ?? response.headers.get("retry-after") ?? 1);
+      const waitMs = Math.max(1000, Math.ceil((Number.isFinite(retrySeconds) ? retrySeconds : 1) * 1000) + 250);
+      console.warn(`Discord rate limited command sync. Retrying in ${waitMs} ms (${attempt}/${maxAttempts}).`);
+      await sleep(waitMs);
+      continue;
+    }
+
+    console.error(`Failed to bulk-register Signal Bridge commands: HTTP ${response.status}`);
     console.error(JSON.stringify(payload, null, 2));
     process.exitCode = 1;
-    continue;
+    return null;
   }
-  console.log(`Registered ${command.name} (${payload.id || "ok"})`);
+  return null;
 }
 
-if (!process.exitCode) {
-  console.log("Signal Bridge Discord commands are registered for this server.");
+const registered = await bulkOverwriteGuildCommands();
+
+if (registered) {
+  const names = registered.map((command) => command.name).sort((a, b) => a.localeCompare(b));
+  console.log(`Signal Bridge Discord command set synced (${registered.length} commands).`);
+  for (const name of names) console.log(`  ✓ ${name}`);
 }

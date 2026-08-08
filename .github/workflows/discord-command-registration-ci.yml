@@ -1,0 +1,28 @@
+name: Discord Command Registration Safety Checks
+
+on:
+  pull_request:
+    paths:
+      - "cloudflare/signal-bridge-worker/register_discord_commands.mjs"
+      - ".github/workflows/discord-command-registration-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-discord-command-registration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Check registrar syntax
+        run: node --check cloudflare/signal-bridge-worker/register_discord_commands.mjs
+
+      - name: Verify bulk overwrite and retry behavior
+        run: |
+          grep -q 'method: "PUT"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
+          grep -q 'JSON.stringify(commands)' cloudflare/signal-bridge-worker/register_discord_commands.mjs
+          grep -q 'response.status === 429' cloudflare/signal-bridge-worker/register_discord_commands.mjs
+          grep -q 'retry_after' cloudflare/signal-bridge-worker/register_discord_commands.mjs
+          ! grep -q 'for (const command of commands)' cloudflare/signal-bridge-worker/register_discord_commands.mjs
