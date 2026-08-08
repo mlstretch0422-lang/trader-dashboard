@@ -21,7 +21,7 @@ jobs:
             -o /tmp/signal-bridge-health.json
           cat /tmp/signal-bridge-health.json
 
-      - name: Verify previous deploy and migrations are live
+      - name: Verify latest member tools are actually deployed
         run: |
           python - <<'PY'
           import json
@@ -34,13 +34,15 @@ jobs:
               'member_sessions_ready',
               'member_entitlements_ready',
               'strategy_dna_ready',
+              'member_live_desk_ready',
+              'member_indicator_workspace_ready',
           ]
           if not data.get('ok'):
               raise SystemExit(f"hosted Worker health is not OK: {data}")
-          if data.get('worker_release') != 'premium-entitlements-v1':
-              raise SystemExit(f"unexpected hosted Worker release: {data.get('worker_release')}")
+          if data.get('worker_release') != 'premium-member-tools-v1':
+              raise SystemExit(f"latest Worker code is not deployed yet: {data.get('worker_release')}")
           missing = [key for key in required_true if not data.get(key)]
           if missing:
-              raise SystemExit(f"hosted Worker migrations/features not ready: {missing}")
-          print('Hosted Signal Bridge premium/Strategy-DNA deployment verified.')
+              raise SystemExit(f"hosted Worker member tools not ready: {missing}")
+          print('Hosted Signal Bridge member tools deployment verified.')
           PY
