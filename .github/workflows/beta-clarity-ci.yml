@@ -5,6 +5,7 @@ on:
     paths:
       - "site/beta-clarity.css"
       - "site/beta-clarity.js"
+      - "site/strategies.html"
       - "scripts/build_pages_site.py"
       - "cloudflare/signal-bridge-worker/src/discord_member_interactions.js"
       - "cloudflare/signal-bridge-worker/register_discord_commands.mjs"
@@ -37,19 +38,23 @@ jobs:
           grep -q 'beta-clarity.css' _site/index.html
           grep -q 'beta-clarity.js' _site/index.html
           grep -q 'beta-clarity.css' _site/journal.html
-          grep -q 'See the setup. Save the trade. Track the result.' site/beta-clarity.js
+          grep -q 'See the setup. Save the trade. Learn from the result.' site/beta-clarity.js
           grep -q 'What do I actually do?' site/beta-clarity.js
           grep -q 'One winner does not validate' site/beta-clarity.js
-          grep -q 'Tradezella-Summary-June-26-2026.png' site/beta-clarity.js
-          grep -q 'mes-study-02.png' site/beta-clarity.js
+          grep -q "const memberUrl = 'access.html'" site/beta-clarity.js
           grep -q '/journal-update' site/beta-clarity.js
+          grep -q 'Open Member Strategy Lab' site/strategies.html
+          grep -q 'access.html' site/strategies.html
+          ! grep -q 'Tradezella-Summary-June-26-2026.png' site/beta-clarity.js
+          ! grep -q 'mes-study-02.png' site/beta-clarity.js
           grep -q 'name: "start"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
           grep -q 'name: "journal-update"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
           grep -q 'Original pre-trade note preserved' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
           ! grep -Eiq '\bAI\b|artificial intelligence' site/beta-clarity.js site/beta-clarity.css
 
-      - name: Verify real research assets exist
+      - name: Verify research stays available in the evidence archive
         run: |
           test -s _site/assets/research/mes-study-01.png
           test -s _site/assets/research/mes-study-02.png
           test -s _site/assets/research/Tradezella-Summary-June-26-2026.png
+          test -s _site/evidence.html
