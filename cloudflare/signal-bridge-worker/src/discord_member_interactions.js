@@ -7,7 +7,13 @@ const PERMISSION_ADMINISTRATOR = 1n << 3n;
 const PERMISSION_MANAGE_GUILD = 1n << 5n;
 const JOURNAL_URL = "https://mlstretch0422-lang.github.io/trader-dashboard/journal.html";
 
-export const MEMBER_COMMANDS = new Set(["journal-inbox", "journal-publish", "journal-private", "journal-login"]);
+export const MEMBER_COMMANDS = new Set([
+  "journal-inbox",
+  "journal-publish",
+  "journal-private",
+  "journal-login",
+  "member-login",
+]);
 
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -71,7 +77,7 @@ async function editOriginal(interaction, content) {
   const endpoint = `https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`;
   const response = await fetch(endpoint, {
     method: "PATCH",
-    headers: { "content-type": "application/json", "user-agent": "SignalBridgeMemberBot/1.0" },
+    headers: { "content-type": "application/json", "user-agent": "SignalBridgeMemberBot/2.0" },
     body: JSON.stringify({ content: String(content || "Signal Bridge completed the request.").slice(0, 1950), allowed_mentions: { parse: [] } }),
   });
   if (!response.ok) throw new Error(`discord_edit_${response.status}`);
@@ -105,6 +111,49 @@ async function logFinish(log, status, errorCode, env) {
   } catch {
     // Diagnostics must never break the user command.
   }
+}
+
+function resolveEntitlement(interaction, env) {
+  if (canManage(interaction)) return { tier: "ADMIN", source: "DISCORD_MANAGER" };
+  const premiumRoleId = compact(env.DISCORD_PREMIUM_ROLE_ID, 64);
+  if (!premiumRoleId) {
+    // Friends/family beta mode: every member of the configured guild can enter.
+    // Set DISCORD_PREMIUM_ROLE_ID before a paid launch to switch to role gating.
+    return { tier: "BETA", source: "DISCORD_BETA" };
+  }
+  const roles = Array.isArray(interaction?.member?.roles) ? interaction.member.roles.map(String) : [];
+  if (roles.includes(premiumRoleId)) return { tier: "PREMIUM", source: "DISCORD_PREMIUM_ROLE" };
+  throw new Error("premium_role_required");
+}
+
+async function syncEntitlement(interaction, env) {
+  if (!env.DB) throw new Error("member_storage_not_configured");
+  const userId = invokingUserId(interaction);
+  if (!userId) throw new Error("discord_user_missing");
+  const access = resolveEntitlement(interaction, env);
+  const now = new Date().toISOString();
+  await env.DB.prepare(
+    `INSERT INTO member_entitlements (
+       discord_user_id, discord_guild_id, tier, status, source,
+       granted_at, updated_at, expires_at, metadata_json
+     ) VALUES (?1, ?2, ?3, 'ACTIVE', ?4, ?5, ?5, NULL, ?6)
+     ON CONFLICT(discord_user_id) DO UPDATE SET
+       discord_guild_id = excluded.discord_guild_id,
+       tier = excluded.tier,
+       status = 'ACTIVE',
+       source = excluded.source,
+       updated_at = excluded.updated_at,
+       expires_at = NULL,
+       metadata_json = excluded.metadata_json`,
+  ).bind(
+    userId,
+    interaction.guild_id || null,
+    access.tier,
+    access.source,
+    now,
+    JSON.stringify({ premium_role_configured: Boolean(env.DISCORD_PREMIUM_ROLE_ID) }),
+  ).run();
+  return access;
 }
 
 async function listJournalForUser(interaction, env) {
@@ -145,7 +194,7 @@ async function listJournalForUser(interaction, env) {
     lines.push(compact(entry.summary || entry.raw_text, 115));
     if (entry.image_url) lines.push(`Chart: ${entry.image_url}`);
   }
-  lines.push("", "Use `/journal-login` for the private visual workspace.");
+  lines.push("", "Use `/member-login` for the private Signal Bridge workspace.");
   return lines.join("\n");
 }
 
@@ -177,14 +226,15 @@ async function setJournalVisibility(interaction, visibility, env) {
 }
 
 async function buildLogin(interaction, env) {
+  const access = await syncEntitlement(interaction, env);
   const link = await createMemberLoginLink({
     userId: invokingUserId(interaction),
     guildId: interaction.guild_id || null,
     canManageJournal: canManage(interaction),
   }, env);
   return [
-    "🔐 **SIGNAL BRIDGE | PRIVATE JOURNAL**",
-    "This one-time link signs your Discord identity into your private Signal Bridge journal for 24 hours.",
+    `🔐 **SIGNAL BRIDGE | ${access.tier} ACCESS**`,
+    "This one-time link signs your Discord identity into the private Signal Bridge workspace for 24 hours.",
     link,
     "The link expires in 10 minutes and can only be used once.",
   ].join("\n");
@@ -200,6 +250,7 @@ function friendlyError(error) {
     journal_id_ambiguous: "That journal ID prefix matches more than one record. Use more of the ID.",
     manager_permission_required: "Publishing controls are limited to server managers during beta.",
     member_storage_not_configured: "Private member storage is not ready yet.",
+    premium_role_required: "Your Discord account does not currently have the Signal Bridge Premium role.",
   };
   return { code, message: messages[code] || "Signal Bridge hit a backend error on that command. The failure was logged for review." };
 }
@@ -208,7 +259,7 @@ async function perform(interaction, command, env) {
   if (command === "journal-inbox") return listJournalForUser(interaction, env);
   if (command === "journal-publish") return setJournalVisibility(interaction, "PUBLISHED", env);
   if (command === "journal-private") return setJournalVisibility(interaction, "PRIVATE", env);
-  if (command === "journal-login") return buildLogin(interaction, env);
+  if (command === "journal-login" || command === "member-login") return buildLogin(interaction, env);
   throw new Error("unknown_member_command");
 }
 
