@@ -6,6 +6,7 @@ import { handleDiscordMemberInteraction, MEMBER_COMMANDS } from "./discord_membe
 import { handleJournalAdminRequest } from "./journal_admin.js";
 import { getMarketIntelligenceResponse, refreshMarketIntelligence } from "./market_intelligence.js";
 import { handleMemberRequest } from "./member_app.js";
+import { handleMemberToolsRequest } from "./member_tools.js";
 import {
   getSessionSummary,
   handleTestSessionEvent,
@@ -81,7 +82,7 @@ async function extendHealth(response, env) {
     ]);
     return new Response(JSON.stringify({
       ...data,
-      worker_release: "premium-entitlements-v1",
+      worker_release: "premium-member-tools-v1",
       discord_capture_configured: Boolean(
         env.DISCORD_PUBLIC_KEY &&
         env.DISCORD_APPLICATION_ID &&
@@ -102,6 +103,8 @@ async function extendHealth(response, env) {
       scheduled_desk_ready: botDispatchTable && Boolean(env.DISCORD_INTELLIGENCE_WEBHOOK_URL || env.DISCORD_WEBHOOK_URL),
       scheduled_desk_storage_ready: botDispatchTable,
       strategy_dna_ready: strategyProfiles && strategyVersions && strategyObservations,
+      member_live_desk_ready: memberSessions && memberEntitlements && sessionTable,
+      member_indicator_workspace_ready: memberSessions && memberEntitlements && strategyProfiles && strategyVersions,
     }), {
       status: response.status,
       headers: response.headers,
@@ -127,6 +130,8 @@ export default {
     }
 
     if (url.pathname === "/member" || url.pathname.startsWith("/member/")) {
+      const memberToolsResponse = await handleMemberToolsRequest(request, env);
+      if (memberToolsResponse) return memberToolsResponse;
       return handleMemberRequest(request, env);
     }
 
