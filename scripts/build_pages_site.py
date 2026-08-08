@@ -62,6 +62,15 @@ def apply_native_shell(path: Path) -> None:
             raise RuntimeError(f"Could not inject polish.css into {path}")
         text = text.replace(marker, '  <link rel="stylesheet" href="polish.css" />\n</head>', 1)
 
+    # Trader-first beta clarity layer. Kept separate from the core visual system so
+    # usability experiments can move quickly without destabilizing the site shell.
+    if "beta-clarity.css" not in text:
+        if "</head>" not in text:
+            raise RuntimeError(f"Could not inject beta-clarity.css into {path}")
+        text = text.replace("</head>", '  <link rel="stylesheet" href="beta-clarity.css" />\n</head>', 1)
+    if "beta-clarity.js" not in text and "</body>" in text:
+        text = text.replace("</body>", '  <script src="beta-clarity.js"></script>\n</body>', 1)
+
     links = []
     for href, label in NAV_ITEMS:
         if href == "mason.html":
@@ -135,6 +144,8 @@ def main() -> int:
         SITE / "indicators.html",
         SITE / "research.css",
         SITE / "polish.css",
+        SITE / "beta-clarity.css",
+        SITE / "beta-clarity.js",
         SITE / "assets" / "research" / "mes-study-01.png",
         SITE / "assets" / "research" / "mes-study-02.png",
         SITE / "assets" / "research" / "mes-study-03.png",
