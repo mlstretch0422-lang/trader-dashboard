@@ -21,6 +21,7 @@ jobs:
       - name: Syntax checks
         run: |
           node --check site/launch-readiness.js
+          node --check site/product-visuals-v2.js
           node --check cloudflare/signal-bridge-worker/sync_discord_brand.mjs
           python -m py_compile scripts/build_pages_site.py
 
@@ -34,7 +35,9 @@ jobs:
           grep -q 'href="access.html">Member</a>' _site/index.html
           grep -q 'Run <code>/member-login</code>' _site/access.html
           grep -q 'Open Signal Bridge Discord' _site/access.html
-          ! grep -q 'href="https://signal-bridge-webhook.airy-iris.workers.dev/member">Member</a>' _site/index.html
+          grep -q 'Already signed in? Open workspace' _site/access.html
+          grep -q 'signal-bridge-webhook.airy-iris.workers.dev/member' _site/access.html
+          grep -q "file === 'access.html'" site/launch-readiness.js
 
       - name: Verify social sharing metadata
         run: |
@@ -44,11 +47,15 @@ jobs:
           grep -q 'name="twitter:card" content="summary_large_image"' _site/index.html
           grep -q 'rel="canonical"' _site/index.html
 
-      - name: Guard homepage cleanup
+      - name: Guard homepage cleanup and cache busting
         run: |
-          grep -q "moneyStrip?.closest('section')?.remove()" site/launch-readiness.js
+          grep -q 'removeHomeHistoricalPerformance' site/product-visuals-v2.js
+          grep -q "sectionEl.remove()" site/product-visuals-v2.js
           grep -q 'One workspace for the full trade loop' site/launch-readiness.js
           grep -q 'Turn a setup into rules you can test.' site/launch-readiness.js
+          grep -q 'asset_version' scripts/build_pages_site.py
+          grep -Eq 'product-visuals-v2\.js\?v=[0-9a-f]{10}' _site/index.html
+          grep -Eq 'launch-readiness\.js\?v=[0-9a-f]{10}' _site/index.html
 
       - name: Guard Discord brand sync safety
         run: |
