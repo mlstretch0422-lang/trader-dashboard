@@ -43,8 +43,9 @@ jobs:
           grep -q 'Tradezella-Summary-June-26-2026.png' site/beta-clarity.js
           grep -q 'mes-study-02.png' site/beta-clarity.js
           grep -q '/journal-update' site/beta-clarity.js
+          grep -q 'name: "start"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
           grep -q 'name: "journal-update"' cloudflare/signal-bridge-worker/register_discord_commands.mjs
-          grep -q 'Original trade note preserved' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
+          grep -q 'Original pre-trade note preserved' cloudflare/signal-bridge-worker/src/discord_member_interactions.js
           ! grep -Eiq '\bAI\b|artificial intelligence' site/beta-clarity.js site/beta-clarity.css
 
       - name: Verify real research assets exist
